@@ -156,7 +156,7 @@ const NORMAL={
  bfl:'Líquido de frenos: nivel correcto',psf:'Líquido de dirección: nivel correcto',batt:'Batería: 12,6 V parado · 14,1 V en marcha',
  belt:'Correa: en buen estado',filter:'Filtro de aire: limpio',plug:'Bujía: color marrón claro, en buen estado',hose:'Manguitos: sin grietas',
  smell:'Olor: nada raro',sensor:'Sensor ABS delantero: cable entero',pads:'Frenos delanteros: pastillas de 9 mm, discos lisos',
- shock:'Amortiguadores: secos',tie:'Rueda delantera: sin juego',boot:'Fuelles de la transmisión: enteros',exhaust:'Tubo de escape: entero',
+ shock:'Amortiguador trasero: seco',spring:'Muelle delantero: entero',shockF:'Amortiguador delantero: seco',bieleta:'Bieleta de la estabilizadora: sin holgura',rotinf:'Rótula inferior: sin juego',road1:'En carretera por baches: firme y sin ruidos',road2:'En carretera a 100 km/h: va recto y sin vibraciones',tie:'Rueda delantera: sin juego',boot:'Fuelles de la transmisión: enteros',exhaust:'Tubo de escape: entero',
  floor:'Suelo: limpio, sin gotas'};
 const GROUPS=[['frenos','Frenos'],['motor','Motor'],['elec','Electricidad'],['frio','Refrigeración'],['susp','Suspensión y dirección'],['escape','Escape'],['seg','ABS y airbag'],['ruedas','Ruedas, luces y fusibles']];
 const FAULTS={
@@ -174,13 +174,17 @@ const FAULTS={
  arranque:{g:'elec',n:'Motor de arranque averiado',says:['Le cuesta arrancar','No arranca a la primera'],c:{start:'Arranque: solo suena «clic, clic»; el motor no gira'},fx:{click:1}},
  lambda:{g:'elec',n:'Sonda lambda averiada',says:['Tiene una luz encendida','Gasta mucha gasolina'],c:{dash:'Cuadro: testigo de motor encendido'},dtc:[['motor','P0133','Sonda lambda B1S1: respuesta lenta']],fx:{light:'engine'}},
  manguito:{g:'frio',n:'Manguito de refrigerante con fuga',says:['Se calienta','Huele raro'],c:{cool:'Refrigerante: por debajo del MIN',hose:'Manguito inferior: agrietado y húmedo',floor:'Suelo: gotas verdes bajo el radiador',smell:'Olor: dulzón, a anticongelante',dash:'Cuadro: testigo de temperatura encendido'},dtc:[['motor','P0217','Temperatura del motor excesiva']],fx:{drip:'#3fcf8e',steam:1,light:'temp',coolLow:1}},
- amortiguador:{g:'susp',n:'Amortiguador trasero gastado',says:['Va raro en las curvas','Bota mucho'],c:{push:'Al empujar atrás: rebota cuatro veces',shock:'Amortiguador trasero: rezuma aceite'},fx:{bounce:1}},
+ amortiguador:{g:'susp',n:'Amortiguador trasero gastado',says:['Va raro en las curvas','Bota mucho'],c:{push:'Al empujar atrás: rebota cuatro veces',shock:'Amortiguador trasero: rezuma aceite',road1:'En carretera por baches: el coche flota y rebota después de cada bache'},fx:{bounce:1}},
  rotula:{g:'susp',n:'Rótula de dirección con holgura',says:['Hace un ruido raro','Va raro'],c:{wheel:'Al girar el volante: golpe seco («clonc») delante',tie:'Rueda delantera: tiene juego al moverla'},fx:{clonc:1}},
  homocinetica:{g:'susp',n:'Junta homocinética dañada',says:['Hace un ruido raro al girar'],c:{wheel:'Al girar en marcha: «clac-clac-clac» rápido',boot:'Fuelle de la transmisión: roto, con grasa salpicada'},fx:{clack:1}},
  bomba:{g:'susp',n:'Bomba de dirección con fuga',says:['Hace un ruido raro','La dirección va dura'],c:{wheel:'Al girar el volante: gemido fuerte y dirección dura',psf:'Líquido de dirección: por debajo del MIN',floor:'Suelo: gotas rojas bajo la dirección'},fx:{whine:1,drip:'#c3302a'}},
  escape:{g:'escape',n:'Tubo de escape roto',says:['Hace mucho ruido','Huele raro'],c:{gas:'Al acelerar: ruido muy fuerte, como un tractor',exhaust:'Tubo de escape: agujereado por el óxido',smell:'Olor: a gases de escape'},fx:{loud:1}},
- pinchazo:{g:'ruedas',n:'Pinchazo lento',says:['Va raro','Revisión antes de la ITV'],c:{tyre:'Neumático delantero: 1,1 bar (bien: 2,3 bar) y un clavo clavado'},fx:{flat:1}},
- alineacion:{g:'ruedas',n:'Dirección desalineada',says:['Va raro','Revisión antes de la ITV'],c:{tyre:'Neumático delantero: gastado solo por el lado de dentro'},fx:{}},
+ pinchazo:{g:'ruedas',n:'Pinchazo lento',says:['Va raro','Pierde aire una rueda'],c:{road2:'En carretera a 100 km/h: el coche tira un poco hacia un lado'},wheel:'Una rueda con 1,8 bar y, en la cubeta de agua, burbujas junto a un clavo',fx:{}},
+ alineacion:{g:'ruedas',n:'Dirección desalineada',says:['Va raro','Revisión antes de la ITV'],c:{road2:'En carretera a 100 km/h: el coche tira hacia la derecha'},wheel:'Neumáticos delanteros gastados solo por el lado de dentro',fx:{}},
+ gastado:{g:'ruedas',n:'Neumáticos delanteros gastados',says:['Revisión antes de la ITV','Patina con lluvia'],c:{road2:'En carretera a 100 km/h: más ruido de rodadura de lo normal'},wheel:'Dibujo de 1 mm en las ruedas delanteras (mínimo legal 1,6 mm)',fx:{}},
+ llanta:{g:'ruedas',n:'Llanta doblada',says:['Le tiembla el volante','Va raro'],c:{road2:'En carretera a 100 km/h: el volante vibra a partir de 90 km/h'},wheel:'Llanta delantera con un golpe en el borde, doblada',fx:{wobble:1}},
+ bieleta:{g:'susp',n:'Bieleta de la estabilizadora rota',says:['Hace un ruido raro en los baches','Hace un ruido raro'],c:{road1:'En carretera por baches: golpeteo metálico (tac-tac) delante',bieleta:'Bieleta de la estabilizadora: rótula con holgura y guardapolvo roto'},fx:{tacs:1}},
+ muelle:{g:'susp',n:'Muelle de suspensión roto',says:['Hace un ruido raro en los baches','Va raro'],c:{road1:'En carretera por baches: golpe seco y el coche va algo ladeado',spring:'Muelle delantero: una espira partida'},fx:{slam:1}},
  faro:{g:'ruedas',n:'Bombilla de cruce fundida',says:['Revisión antes de la ITV','No ve bien de noche'],c:{},lamp:'Prueba de luces: el cruce izquierdo no enciende',dtc:[['bcm','B1A20','Lámpara de cruce izquierda: circuito abierto']],fx:{deadlight:1}},
  intermitente:{g:'ruedas',n:'Bombilla de intermitente fundida',says:['Revisión antes de la ITV','El intermitente suena raro'],c:{},lamp:'Prueba de luces: el intermitente izquierdo parpadea el doble de rápido y el de atrás no enciende',dtc:[['bcm','B1A10','Intermitente trasero izquierdo: circuito abierto']],fx:{}},
  luzfreno:{g:'ruedas',n:'Bombilla de freno fundida',says:['Revisión antes de la ITV'],c:{},lamp:'Prueba de luces: solo falla la luz de freno izquierda (si fallan las dos, suele ser el fusible)',fx:{}},
@@ -196,7 +200,8 @@ function rollCase(n){
   if(Math.random()<p2){const g=FAULTS[f[0]].g;const pool=FKEYS.filter(k=>FAULTS[k].g!==g);f.push(pick(pool))}
   const water=!f.some(k=>FAULTS[k].fx.drip)&&Math.random()<.4;
   let fuse=null;if(f.includes('fusible'))fuse=f.includes('luzfreno')?'F7':pick(['F7','F5']);
-  return {faults:f,water,fuse,says:pick(FAULTS[f[0]].says)};
+  const flat=f.includes('pinchazo')?pick(['DI','DD','TI','TD']):null,bent=f.includes('llanta')?pick(['DI','DD']):null;
+  return {faults:f,water,fuse,flat,bent,says:pick(FAULTS[f[0]].says)};
 }
 function fx(name){return G.R.car.faults.map(k=>FAULTS[k].fx[name]).find(v=>v)}
 function clue(t){
@@ -241,8 +246,8 @@ function nextCase(){
   G.R={car,step:0,t:0,time:0,notes:[],last:null,safe:{k4:null,k5:null},
     drive:{y:900,x:450+rand(-55,55),v:0},
     eng:{on:false,crank:0,rpm:0,run:0,fails:0,miss:0},
-    insp:{gas:0,brake:0,wheel:0,ang:0,clonc:0,bounce:null,hood:false,chk:{},dash:0,lights:0,smoke:0,brakeDip:0,scan:null,lamps:null,fuses:null},
-    lift:{h:0,checked:false,locked:false,warned:false},under:{chk:{}},hl:null};
+    insp:{gas:0,brake:0,wheel:0,ang:0,clonc:0,bounce:null,hood:false,chk:{},dash:0,lights:0,smoke:0,brakeDip:0,scan:null,lamps:null,fuses:null,anim:null,road:0},
+    lift:{h:0,checked:false,locked:false,warned:false},under:{chk:{}},wv:null,hl:null};
   G.parts=[];allTonesOff();
   setMsg(G.n===1?'Primer caso. El coche entra solo al elevador. Cuando pare, toca la <b>P</b> del freno de mano.':`Caso ${G.n}. Llega un ${car.model}. Toca la <b>P</b> cuando pare.`);
 }
@@ -252,9 +257,9 @@ function note(id){const R=G.R;if(R.notes.some(n=>n.id===id))return false;const t
   if(G.n===1&&R.notes.length===5&&R.step===1)setMsg('Bien, ya tienes 5 pistas. Sigue probando o toca <b>Levantar</b> para mirar por debajo.');return true}
 function next(){const R=G.R;R.step++;R.t=0;allTonesOff();R.eng.on=false;R.eng.rpm=0;stepEnter()}
 function stepEnter(){const R=G.R;
-  if(R.step===1)setMsg(`El cliente dice: «${R.car.says}». <b>Investiga.</b> Gira la <b>llave</b> para arrancar, escucha, pisa el <b>acelerador</b> y el <b>freno</b>, gira el <b>volante</b>, mira el <b>cuadro</b>, las <b>luces</b> y el <b>escape</b>, empuja el coche, abre el <b>capó</b> y conecta el <b>escáner</b>…`);
+  if(R.step===1)setMsg(`El cliente dice: «${R.car.says}». <b>Investiga.</b> Gira la <b>llave</b> para arrancar, escucha, pisa el <b>acelerador</b> y el <b>freno</b>, gira el <b>volante</b>, sal a la <b>carretera</b>, mira el <b>cuadro</b>, las <b>luces</b>, las <b>ruedas</b>, el <b>escape</b> y el <b>charco</b>, empuja el coche, abre el <b>capó</b> y conecta el <b>escáner</b>…`);
   if(R.step===2)setMsg('En la botonera, <b>mantén pulsado ▲</b> hasta <b>20 cm</b> y suelta. Luego <b>toca un brazo</b> para comprobar que apoya bien.');
-  if(R.step===3)setMsg('Mira por debajo: <b>rueda</b>, <b>sensor ABS</b>, <b>amortiguador</b>, <b>escape</b>, <b>dirección</b>, <b>transmisión</b> y <b>suelo</b>. Cuando lo tengas claro, toca el <b>informe</b>.');
+  if(R.step===3)setMsg('Mira por debajo: toca la <b>rueda</b> para ver el despiece de la suspensión, el <b>amortiguador</b> trasero, el <b>escape</b> y el <b>goteo</b> al suelo. Cuando lo tengas claro, toca el <b>informe</b>.');
 }
 
 /* ================= PRUEBAS ================= */
@@ -268,7 +273,7 @@ function objTap(id){
   if(id==='close'){s.hood=false;sfx.click();return}
   if(id==='push'){if(!s.bounce){s.bounce={t:0};beep(120,.1,'triangle',.15)}return}
   if(id==='tail'){if(needEngine())return;s.smoke=3;setMsg('Miras el escape con el motor en marcha. Pisa el <b>acelerador</b> para ver mejor el humo.');setTimeout(()=>{if(G.R===R)note('smoke')},1300);return}
-  if(id==='tyre'){note('tyre');return}
+  if(id==='tyre'||id==='wheelview'){R.wv={w:'DI',phase:'view',bolts:{},rot:0,chk:{}};sfx.click();setMsg(R.step===3?'Despiece de la rueda y la suspensión. Elige la rueda arriba y toca cada pieza para revisarla.':'Elige la rueda arriba. Mide la presión, mira el dibujo y la llanta. Si sospechas un pinchazo, quita los tornillos y prueba la rueda en la cubeta de agua.');return}
   if(id==='lamps'){s.lamps={fn:null,t:0};sfx.click();setMsg('Prueba de luces. Toca cada interruptor y mira delante y detrás.');return}
   if(id==='lampsclose'){s.lamps=null;tone('wipe',false);sfx.click();return}
   if(id.startsWith('lamp-')){const k=id.slice(5);s.lamps.fn=k;s.lamps.t=2.6;s.lamps.tick=0;sfx.click();setTimeout(()=>{if(G.R===R&&s.lamps&&s.lamps.fn===k)noteT('lamp-'+k,LAMPTXT[k](lampState()))},1400);return}
@@ -283,9 +288,16 @@ function objTap(id){
   if(id.startsWith('fuse-')){const k=id.slice(5),fz=FUSES.find(f=>f[0]===k);s.fuses.chk[k]=1;beep(600,.05,'square',.05);noteT('fuse'+k,`Fusible ${k} · ${fz[1]} ${fz[2]} A: ${R.car.fuse===k?'fundido':'bien'}`);return}
   if(id==='lift'){if(R.notes.length<4&&!R.warnLift){R.warnLift=true;sfx.bad();setMsg('Llevas pocas pruebas. Un buen técnico revisa antes de levantar. Toca <b>Levantar</b> otra vez si quieres seguir.');return}next();return}
   if(id==='report'){openReport();return}
-  if(id==='batt'){note('batt');s.chk.batt=1;return}
-  if(['oil','cool','bfl','psf','belt','filter','plug','hose','smell'].includes(id)){s.chk[id]=1;note(id);return}
-  if(['pads','shock','tie','boot','exhaust','floor','sensor'].includes(id)){R.under.chk[id]=1;note(id)}
+  if(id==='animclose'){if(s.anim&&s.anim.t>.8)s.anim=null;return}
+  if(['batt','oil','cool','bfl','psf','belt','filter','plug','hose','smell'].includes(id)){s.chk[id]=1;s.anim={id,t:0};beep(id==='filter'?300:500,.08,'triangle',.08);return}
+  if(id==='wvclose'){R.wv=null;sfx.click();return}
+  if(id.startsWith('wsel-')){R.wv.w=id.slice(5);sfx.click();return}
+  if(id.startsWith('wv-')){const k=id.slice(3),v=R.wv,ck=v.chk[v.w]||(v.chk[v.w]={});
+    if(k==='nuts'){v.phase='bolts';v.bolts={};sfx.click();setMsg('Quita los 5 tornillos de la rueda '+WNAME[v.w]+'.');return}
+    if(['tyreP','tread','rim','pads'].includes(k)){ck[k]=1;noteT('w-'+k+'-'+v.w,wheelNote(k,v.w));return}
+    R.under.chk[k]=1;note(k);return}
+  if(id.startsWith('bolt-')){const v=R.wv;v.bolts[+id.slice(5)]=1;sfx.ratchet&&0;beep(1800,.02,'square',.05);beep(300,.05,'square',.04);if(Object.keys(v.bolts).length>=5){v.phase='tank';v.rot=0;setMsg('Rueda fuera y en la cubeta. <b>Mantén pulsada la rueda</b> para girarla y mira si salen burbujas.')}return}
+  if(['shock','exhaust','floor'].includes(id)){R.under.chk[id]=1;note(id)}
 }
 function update(dt){
   const R=G.R;R.t+=dt;if(R.step<4)R.time+=dt;const act=takeAct();
@@ -308,7 +320,7 @@ function update(dt){
     const gas=hold==='gas'&&e.on,brk=hold==='brake',wh=hold==='wheel';
     if(hold==='gas'&&!e.on&&e.crank<=0&&!R.warnGas){R.warnGas=1;needEngine()}
     if(hold!=='gas')R.warnGas=0;
-    const target=e.on?(gas?(fx('slow')?3200:5200):820):0;
+    const target=e.on?(gas?(fx('slow')?3200:5200):hold==='road'?2600:820):0;
     e.rpm+=(target-e.rpm)*Math.min(1,dt*(gas?(fx('slow')?.8:1.7):2.4));
     if(e.on){e.run+=dt;
       let vol=.05,f=34+e.rpm*.03;
@@ -332,6 +344,15 @@ function update(dt){
       if(s.wheel>1.5)note('wheel')}
     else{s.ang*=Math.pow(.02,dt);tone('wh',false)}
     if(s.bounce){s.bounce.t+=dt;if(s.bounce.t>2.3){note('push');s.bounce=null}}
+    if(s.anim){s.anim.t+=dt;if(s.anim.t>=.75&&!s.anim.noted){s.anim.noted=1;note(s.anim.id);beep(900,.05,'sine',.05)}}
+    const rd=hold==='road';
+    if(rd&&!e.on&&!R.warnRoad){R.warnRoad=1;needEngine()}if(!rd)R.warnRoad=0;
+    if(rd&&e.on){s.road+=dt;noise('rd',true,520,.06);const ph=s.road<1.8?1:2;
+      if(ph===1){s.bump=(s.bump||0)-dt;if(s.bump<=0){s.bump=rand(.28,.45);G.shake=Math.max(G.shake,.06);beep(70,.08,'triangle',.08);
+        if(fx('tacs'))[0,90].forEach(d=>setTimeout(()=>beep(1500,.025,'square',.09),d));if(fx('slam'))beep(80,.22,'triangle',.3);if(fx('bounce'))s.bounce=s.bounce||{t:0}}
+        if(s.road>1.5)note('road1')}
+      else{if(fx('wobble')){G.shake=Math.max(G.shake,.1);tone('vib',true,48,.06,'square')}if(s.road>3.4){note('road2');tone('vib',false)}}}
+    else{noise('rd',false);tone('vib',false);if(!rd)s.road=0}
     s.dash=Math.max(0,s.dash-dt);s.lights=Math.max(0,s.lights-dt);s.smoke=Math.max(0,s.smoke-dt);
     if(s.scan){const before=s.scan.t;s.scan.t+=dt;if(s.scan.phase==='connect'&&s.scan.t>1.4){s.scan.phase='tree';sfx.ok()}
       for(let i=0;i<SYS.length;i++){const at=1.4+i*.25;if(before<at&&s.scan.t>=at)beep(dtcs(SYS[i][0]).length?330:880,.05,'square',.04)}
@@ -355,7 +376,9 @@ function update(dt){
       }}
   }
   // partículas
-  G.parts=G.parts.filter(p=>(p.life-=dt)>0);G.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy-=12*dt;p.r+=18*dt});
+  if(R.wv&&R.wv.phase==='tank'){const v=R.wv;v.hold=hold==='spin';if(v.hold){v.rot+=dt*1.3;noise('water',true,1200,.03)}else noise('water',false);
+    if(v.rot>=Math.PI*2&&!v.done){v.done=1;noise('water',false);(v.chk[v.w]||(v.chk[v.w]={})).tank=1;noteT('w-tank-'+v.w,wheelNote('tank',v.w));setTimeout(()=>{if(G.R===R&&R.wv){R.wv.phase='view';R.wv.done=0;R.wv.rot=0;setMsg('Rueda montada otra vez. Prueba otra rueda o sigue investigando.')}},1200)}}
+  G.parts=G.parts.filter(p=>(p.life-=dt)>0&&!(p.bubble&&p.y<p.bubble));G.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy-=12*dt;p.r+=18*dt});
 }
 
 /* ================= ESCÁNER, LUCES Y FUSIBLES ================= */
@@ -476,7 +499,7 @@ function signReport(){
   const stars=allOk&&safeOk&&R.time<200?3:allOk?2:(missed.length+extra.length)<=1&&right.length?1:0;
   G.score+=pts;G.stars.push(stars);if(allOk)G.ok++;
   if(allOk)sfx.coin();else sfx.bad();
-  const keyClues=k=>{const F=FAULTS[k],L=Object.values(F.c);(F.dtc||[]).forEach(([sy,c,d])=>L.push('Escáner · '+SYSN[sy]+': '+c+' '+d));if(F.lamp)L.push(F.lamp);
+  const keyClues=k=>{const F=FAULTS[k],L=Object.values(F.c);(F.dtc||[]).forEach(([sy,c,d])=>L.push('Escáner · '+SYSN[sy]+': '+c+' '+d));if(F.lamp)L.push(F.lamp);if(F.wheel)L.push(k==='pinchazo'?'Rueda '+WNAME[R.car.flat]+': 1,8 bar y burbujas junto a un clavo en la cubeta de agua':k==='llanta'?'Llanta '+WNAME[R.car.bent]+': golpe en el borde, doblada':F.wheel);
     if(k==='fusible')L.push(R.car.fuse==='F5'?'Prueba de luces: no enciende ninguna luz de freno':'Prueba de luces: el limpiaparabrisas no se mueve','Caja de fusibles: '+R.car.fuse+' fundido (filamento roto)');
     if(k==='alternador'||k==='junta'||k==='manguito'||k==='lambda')L.push('Datos en vivo del escáner: '+(k==='alternador'?'tensión 11,8 V':k==='lambda'?'sonda lambda casi fija y ajuste de combustible +14 %':'refrigerante por encima de 105 °C'));
     return L.map(t=>`<li>${esc(t)}</li>`).join('')};
@@ -617,7 +640,6 @@ function drawGround(){
   // tubo de escape
   ctx.fillStyle='#5c6268';rr(150,532+off,30,9,3);ctx.fill();
   // neumático pinchado
-  if(fx('flat')){ctx.fillStyle='#121416';ctx.beginPath();ctx.ellipse(591,ground-6,62,12,0,0,7);ctx.fill()}
   ctx.restore();
   // pistas visuales de los objetos
   if(!s.hood){const p=.45+.45*Math.sin(T*5);ctx.strokeStyle=`rgba(242,179,61,${p})`;ctx.lineWidth=2;ctx.setLineDash([6,6]);
@@ -645,17 +667,24 @@ function drawGround(){
   drawLights(468,630,s.dash>0||e.on);
   txt('CUADRO',451,700,s.dash>0?C.amber:C.muted,12,DISP,'center');
   // escáner
-  ctx.strokeStyle='#0d0f11';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(585,612);ctx.quadraticCurveTo(565,575,520,520);ctx.stroke();
-  ctx.fillStyle='#14191d';rr(540,616,92,62,8);ctx.fill();ctx.strokeStyle=C.line;ctx.stroke();ctx.fillStyle='#14231c';rr(550,624,72,34,4);ctx.fill();
-  txt(R.notes.some(n=>n.id==='scan')?'LEÍDO':'OBD',586,641,'#7fe0a4',13,MONO,'center');txt('ESCÁNER',586,700,C.muted,12,DISP,'center');
+  ctx.strokeStyle='#0d0f11';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(552,612);ctx.quadraticCurveTo(540,575,520,520);ctx.stroke();
+  ctx.fillStyle='#14191d';rr(512,616,80,62,8);ctx.fill();ctx.strokeStyle=C.line;ctx.stroke();ctx.fillStyle='#14231c';rr(520,624,64,34,4);ctx.fill();
+  ctx.fillStyle=hold==='road'?'#3a4650':'#14191d';rr(604,616,84,62,8);ctx.fill();ctx.strokeStyle=hold==='road'?C.amber:C.line;ctx.stroke();ctx.fillStyle='#2b3035';ctx.beginPath();ctx.moveTo(630,672);ctx.lineTo(662,672);ctx.lineTo(650,624);ctx.lineTo(642,624);ctx.closePath();ctx.fill();ctx.strokeStyle='#e8edf0';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.lineDashOffset=hold==='road'?-T*40:0;ctx.beginPath();ctx.moveTo(646,670);ctx.lineTo(646,626);ctx.stroke();ctx.setLineDash([]);ctx.lineDashOffset=0;txt('CARRETERA',646,700,hold==='road'?C.amber:C.muted,12,DISP,'center');
+  txt(R.notes.some(n=>n.id==='scan')?'LEÍDO':'OBD',552,641,'#7fe0a4',13,MONO,'center');txt('ESCÁNER',552,700,C.muted,12,DISP,'center');
   // levantar
-  ctx.fillStyle='rgba(242,179,61,.12)';rr(690,612,180,84,10);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
-  txt('LEVANTAR  ▶',780,644,C.amber,22,DISP,'center');txt('para mirar por debajo',780,672,C.muted,12,BODY,'center');
+  ctx.fillStyle='rgba(242,179,61,.12)';rr(702,612,168,84,10);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
+  txt('LEVANTAR  ▶',786,644,C.amber,22,DISP,'center');txt('para mirar por debajo',786,672,C.muted,12,BODY,'center');
   if(hold==='brake')txt('Prueba en marcha: frenando…',450,330,C.fg,18,BODY,'center');
   if(hold==='wheel'&&fx('clack'))txt('Prueba en marcha: girando…',450,330,C.fg,18,BODY,'center');
   if(e.crank>0)txt(fx('click')?'Clic… clic…':'Arrancando…',450,330,C.fg,20,BODY,'center');
+  const lk=leakInfo();if(lk){ctx.globalAlpha=.85;ctx.fillStyle=lk.col;ctx.beginPath();ctx.ellipse(lk.gx,ground+12,58,7,0,0,7);ctx.fill();ctx.globalAlpha=1;
+    if(!s.hood&&!R.notes.some(n=>n.id==='floor')){ctx.strokeStyle=`rgba(242,179,61,${.45+.45*Math.sin(T*5)})`;ctx.lineWidth=2;ctx.setLineDash([6,6]);rr(lk.gx-66,ground+2,132,22,8);ctx.stroke();ctx.setLineDash([]);txt('CHARCO',lk.gx,ground-6,C.amber,13,DISP,'center')}}
+  if(hold==='road'&&e.on){ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=4;for(let i=0;i<8;i++){const x=((i*130-T*900)%1040+1040)%1040-70;ctx.beginPath();ctx.moveTo(x,ground+16);ctx.lineTo(x+50,ground+16);ctx.stroke()}
+    txt(s.road<1.8?'Prueba en carretera: por baches…':'Prueba en carretera: a 100 km/h…',450,330,C.fg,20,BODY,'center')}
   drawParts();
   if(s.hood)drawHood();
+  if(s.anim)drawAnim();
+  if(R.wv)drawWheelView();
   if(s.fuses)drawFuses();
   if(s.scan)drawScanner();
   if(s.lamps)drawLamps();
@@ -680,70 +709,233 @@ function drawDashBig(){const R=G.R,L=activeLights(),a=Math.min(1,R.insp.dash);ct
     txt({engine:'Motor',batt:'Batería',oil:'Aceite',temp:'Temp.',brake:'Freno',abs:'ABS',srs:'Airbag'}[k],x,296,on?C.fg:C.muted,13,BODY,'center')});
   txt(L.size?'Testigos encendidos':'Ningún testigo encendido',450,322,L.size?C.amber:C.ok,15,BODY,'center');ctx.globalAlpha=1}
 function drawParts(){G.parts.forEach(p=>{ctx.globalAlpha=p.a*(p.life/p.max);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill()});ctx.globalAlpha=1}
-const HOOD={close:[650,38,180,34],batt:[100,92,150,96],bfl:[290,72,92,70],psf:[420,72,80,70],cool:[100,300,124,166],oil:[650,170,56,56],filter:[262,300,120,92],plug:[440,214,60,60],hose:[250,452,170,42],fusebox:[440,368,150,66],belt:[640,300,180,210],smell:[764,92,70,70]};
+const HOOD={close:[650,36,180,34],filter:[92,126,170,104],batt:[690,124,136,96],cool:[716,252,90,118],plug:[330,224,240,46],oil:[280,326,44,44],belt:[604,176,80,170],hose:[140,262,150,50],bfl:[104,418,90,64],psf:[222,418,64,64],smell:[470,430,64,64],fusebox:[690,404,140,70]};
+function metal(x0,y0,x1,y1,a,b){const g=ctx.createLinearGradient(x0,y0,x1,y1);g.addColorStop(0,a);g.addColorStop(.5,b);g.addColorStop(1,a);return g}
 function drawHood(){
-  const R=G.R,chk=R.insp.chk,e=R.eng;
-  ctx.fillStyle='rgba(8,10,12,.6)';ctx.fillRect(0,0,900,588);
-  ctx.fillStyle='#161b1f';rr(66,30,778,544,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
-  txt('VANO MOTOR',86,52,C.muted,15);
-  let [x,y,w,h]=HOOD.close;ctx.fillStyle=C.panel2;rr(x,y,w,h,8);ctx.fill();ctx.strokeStyle=C.line;ctx.stroke();txt('CERRAR CAPÓ  ✕',x+w/2,y+h/2+1,C.fg,16,DISP,'center');
+  const R=G.R,chk=R.insp.chk,e=R.eng,f=R.car.faults,has=k=>f.includes(k);
+  ctx.fillStyle='rgba(8,10,12,.62)';ctx.fillRect(0,0,900,588);
+  // carrocería del vano
+  ctx.fillStyle=shade(R.car.color,-.35);rr(62,26,786,552,22);ctx.fill();
+  ctx.fillStyle='#14181b';rr(76,66,758,500,16);ctx.fill();
+  txt('VANO MOTOR · morro arriba',86,47,'rgba(255,255,255,.75)',15);
+  let [x,y,w,h]=HOOD.close;ctx.fillStyle='rgba(0,0,0,.45)';rr(x,y,w,h,8);ctx.fill();txt('CERRAR CAPÓ  ✕',x+w/2,y+h/2+1,C.fg,16,DISP,'center');
+  // radiador con aletas
+  ctx.fillStyle='#2b3035';rr(112,74,690,36,6);ctx.fill();ctx.strokeStyle='#3d444a';ctx.lineWidth=1;for(let i=118;i<798;i+=5){ctx.beginPath();ctx.moveTo(i,78);ctx.lineTo(i,106);ctx.stroke()}
+  ctx.fillStyle='#1f2326';rr(380,70,140,12,4);ctx.fill();txt('RADIADOR',450,92,'#7d868c',11,DISP,'center');
+  // torretas
+  [[330,470],[610,470]].forEach(([px,py])=>{const g=ctx.createRadialGradient(px-8,py-8,4,px,py,34);g.addColorStop(0,'#59626a');g.addColorStop(1,'#2a3035');ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,py,32,0,7);ctx.fill();ctx.fillStyle='#8a939a';for(let k=0;k<3;k++){const a=k*2.09+.5;ctx.beginPath();ctx.arc(px+Math.cos(a)*20,py+Math.sin(a)*20,4,0,7);ctx.fill()}ctx.fillStyle='#1b1f22';ctx.beginPath();ctx.arc(px,py,10,0,7);ctx.fill()});
+  // mampara
+  ctx.fillStyle='#0d1012';rr(76,508,758,58,[0,0,16,16].length?14:14);ctx.fill();ctx.strokeStyle='#22282c';ctx.lineWidth=2;for(let i=90;i<830;i+=14){ctx.beginPath();ctx.moveTo(i,512);ctx.lineTo(i+6,560);ctx.stroke()}
+  // mazo de cables
+  ctx.strokeStyle='#0a0b0c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(690,180);ctx.bezierCurveTo(620,150,560,140,520,210);ctx.moveTo(330,224);ctx.bezierCurveTo(300,200,280,180,260,150);ctx.moveTo(700,440);ctx.bezierCurveTo(640,430,620,380,600,330);ctx.stroke();
+  // motor
   const sh=e.on?Math.sin(T*60)*(1+e.rpm/2600)*(fx('misfire')&&e.miss<.15?3:1):0;
-  ctx.fillStyle='#4a5359';rr(400,140+sh,210,200,14);ctx.fill();ctx.fillStyle='#5d676e';rr(412,150+sh,186,46,10);ctx.fill();
-  for(let i=0;i<4;i++){ctx.fillStyle='#2c3338';ctx.beginPath();ctx.arc(445+i*42,173+sh,8,0,7);ctx.fill()}
-  txt('MOTOR',505,300+sh,'#a7b0b6',22,DISP,'center');
-  // batería y multímetro
-  [x,y,w,h]=HOOD.batt;ctx.fillStyle='#1d1f21';rr(x,y,w,h,8);ctx.fill();ctx.fillStyle='#c8261d';rr(x+18,y-10,22,14,3);ctx.fill();ctx.fillStyle='#222';rr(x+w-40,y-10,22,14,3);ctx.fill();
-  txt('BATERÍA',x+w/2,y+h/2,'#9aa3aa',17,DISP,'center');
-  if(chk.batt){ctx.fillStyle='#0e1a14';rr(x,y+h+8,w,40,6);ctx.fill();const alt=G.R.car.faults.includes('alternador'),v=fx('slowcrank')?(e.on?'14,1':'11,9'):alt?(e.on?'11,8':'12,5'):(e.on?'14,1':'12,6');txt(v+' V'+(e.on?' en marcha':' parado'),x+w/2,y+h+28,'#8ff0b4',15,MONO,'center')}
-  // depósitos
-  const tank=(k,low,col,label,extra)=>{const [x,y,w,h]=HOOD[k];ctx.fillStyle='rgba(235,240,245,.16)';rr(x,y,w,h,10);ctx.fill();ctx.strokeStyle='rgba(235,240,245,.5)';ctx.lineWidth=2;ctx.stroke();
+  ctx.save();ctx.translate(0,sh);
+  ctx.fillStyle='#262b2f';rr(286,160,330,236,22);ctx.fill();
+  ctx.fillStyle=metal(300,170,300,330,'#3e464c','#6f7a82');rr(300,170,300,160,18);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=2;for(let i=0;i<6;i++){ctx.beginPath();ctx.moveTo(318,186+i*24);ctx.lineTo(582,186+i*24);ctx.stroke()}
+  ctx.fillStyle='#1a1d20';rr(330,224,240,46,10);ctx.fill();
+  for(let i=0;i<4;i++){const cx=360+i*60;ctx.fillStyle='#0d0f10';rr(cx-18,230,36,34,6);ctx.fill();ctx.fillStyle='#c8261d';rr(cx-7,232,14,8,2);ctx.fill();ctx.fillStyle='#2a2f33';ctx.beginPath();ctx.arc(cx,252,8,0,7);ctx.fill()}
+  txt('BOBINAS · BUJÍAS',450,214,'#c9d1d6',12,DISP,'center');
+  // tapón de aceite
+  ctx.fillStyle='#0f1112';ctx.beginPath();ctx.arc(560,192,15,0,7);ctx.fill();ctx.fillStyle='#e9c12a';ctx.beginPath();ctx.moveTo(552,195);ctx.lineTo(556,189);ctx.lineTo(566,189);ctx.lineTo(569,186);ctx.lineTo(569,189);ctx.lineTo(565,196);ctx.closePath();ctx.fill();
+  // colector y admisión
+  ctx.fillStyle=metal(300,336,300,392,'#2f353a','#4b545b');rr(310,336,280,52,14);ctx.fill();
+  for(let i=0;i<4;i++){ctx.fillStyle='#384047';rr(338+i*60,318,24,26,6);ctx.fill()}
+  ctx.fillStyle='#596269';ctx.beginPath();ctx.arc(310,362,20,0,7);ctx.fill();ctx.fillStyle='#1b1f22';ctx.beginPath();ctx.arc(310,362,11,0,7);ctx.fill();
+  ctx.restore();
+  // manguito de admisión corrugado
+  ctx.strokeStyle='#15181a';ctx.lineWidth=26;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(262,180);ctx.bezierCurveTo(300,230,250,320,300,360);ctx.stroke();
+  ctx.strokeStyle='#252a2e';ctx.lineWidth=2;for(let t=0;t<1;t+=.08){const bx=(1-t)**3*262+3*(1-t)**2*t*300+3*(1-t)*t*t*250+t**3*300,by=(1-t)**3*180+3*(1-t)**2*t*230+3*(1-t)*t*t*320+t**3*360;ctx.beginPath();ctx.arc(bx,by,12,0,7);ctx.stroke()}ctx.lineCap='butt';
+  // caja del filtro de aire
+  [x,y,w,h]=HOOD.filter;ctx.fillStyle=metal(x,y,x,y+h,'#1d2124','#353b40');rr(x,y,w,h,14);ctx.fill();ctx.fillStyle='#0f1214';[[x+10,y+30],[x+w-18,y+30],[x+10,y+h-38],[x+w-18,y+h-38]].forEach(([a,b])=>{rr(a,b,8,16,2);ctx.fill()});
+  if(chk.filter){const dirty=fx('slow');ctx.fillStyle=dirty?'#2a2520':'#e8dcc0';rr(x+22,y+14,w-44,h-28,6);ctx.fill();ctx.strokeStyle=dirty?'#141110':'#c9b996';ctx.lineWidth=2;for(let i=0;i<12;i++){ctx.beginPath();ctx.moveTo(x+28+i*10,y+18);ctx.lineTo(x+28+i*10,y+h-18);ctx.stroke()}}
+  else txt('FILTRO DE AIRE',x+w/2,y+h/2,'#9aa3aa',14,DISP,'center');
+  // manguito del radiador
+  [x,y,w,h]=HOOD.hose;ctx.strokeStyle='#121416';ctx.lineWidth=18;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(200,106);ctx.bezierCurveTo(150,200,200,280,292,296);ctx.stroke();ctx.lineCap='butt';
+  ctx.fillStyle='#8a939a';[[196,118],[284,292]].forEach(([a,b])=>{rr(a-12,b-4,24,8,3);ctx.fill()});
+  if(chk.hose&&has('manguito')){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(176+i*12,236+i*14);ctx.lineTo(186+i*12,242+i*14);ctx.stroke()}ctx.fillStyle='#3fcf8e';ctx.beginPath();ctx.arc(196,270+((T*40)%30),3,0,7);ctx.fill()}
+  txt('MANGUITO',x+w/2+20,y+h+4,'#9aa3aa',12,DISP,'center');
+  // batería
+  [x,y,w,h]=HOOD.batt;ctx.fillStyle=metal(x,y,x+w,y,'#121416','#2b2f33');rr(x,y,w,h,8);ctx.fill();ctx.fillStyle='#3a3f44';rr(x+6,y+h/2-6,w-12,12,3);ctx.fill();
+  ctx.fillStyle='#c8261d';rr(x+12,y+8,26,20,4);ctx.fill();txt('+',x+25,y+18,'#fff',16,BODY,'center');ctx.fillStyle='#1a1a1a';rr(x+w-38,y+8,26,20,4);ctx.fill();txt('−',x+w-25,y+18,'#ddd',16,BODY,'center');
+  txt('BATERÍA 12 V',x+w/2,y+h-14,'#9aa3aa',12,DISP,'center');
+  ctx.strokeStyle='#c8261d';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+25,y+8);ctx.quadraticCurveTo(x-10,y-20,x-40,y+40);ctx.stroke();
+  if(chk.batt){ctx.fillStyle='#0e1a14';rr(x-4,y+h+4,w+8,26,5);ctx.fill();const alt=has('alternador'),v=fx('slowcrank')?(e.on?'14,1':'11,9'):alt?(e.on?'11,8':'12,5'):(e.on?'14,1':'12,6');txt(v+' V '+(e.on?'en marcha':'parado'),x+w/2,y+h+17,'#8ff0b4',13,MONO,'center')}
+  // depósitos translúcidos
+  const tank=(k,low,col,label,cap,bub)=>{const [x,y,w,h]=HOOD[k];const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'rgba(230,236,240,.22)');g.addColorStop(.5,'rgba(230,236,240,.08)');g.addColorStop(1,'rgba(230,236,240,.22)');ctx.fillStyle=g;rr(x,y,w,h,12);ctx.fill();ctx.strokeStyle='rgba(235,240,245,.45)';ctx.lineWidth=2;ctx.stroke();
     const Y=v=>y+h-v*h;
-    if(chk[k]){ctx.save();rr(x,y,w,h,10);ctx.clip();ctx.fillStyle=col;ctx.globalAlpha=.8;ctx.fillRect(x,Y(low?.3:.68),w,h);ctx.restore();ctx.globalAlpha=1;
-      if(extra==='bubbles'){for(let i=0;i<4;i++){ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x+20+i*24,Y(.3)+8-((T*30+i*13)%40),4,0,7);ctx.stroke()}}}
-    [['MAX',.8],['MIN',.45]].forEach(([l,v])=>{ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+w-20,Y(v));ctx.lineTo(x+w,Y(v));ctx.stroke();txt(l,x+w-24,Y(v),'rgba(255,255,255,.75)',10,MONO,'right')});
-    txt(label,x+w/2,y+h+15,'#9aa3aa',13,DISP,'center')};
-  tank('bfl',fx('sink'),'#e3c468','LÍQ. FRENOS');tank('psf',G.R.car.faults.includes('bomba'),'#c3302a','LÍQ. DIRECCIÓN');
-  tank('cool',fx('coolLow'),'#3fcf8e','REFRIGERANTE',G.R.car.faults.includes('junta')?'bubbles':'');
-  // filtro de aire
-  [x,y,w,h]=HOOD.filter;ctx.fillStyle='#262c30';rr(x,y,w,h,10);ctx.fill();
-  if(chk.filter){const dirty=fx('slow');ctx.fillStyle=dirty?'#2a2520':'#e8dcc0';rr(x+10,y+10,w-20,h-20,4);ctx.fill();ctx.strokeStyle=dirty?'#141110':'#c9b996';for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(x+18+i*11,y+12);ctx.lineTo(x+18+i*11,y+h-12);ctx.stroke()}}
-  txt('FILTRO DE AIRE',x+w/2,y+h+15,'#9aa3aa',13,DISP,'center');
-  // bujía
-  [x,y,w,h]=HOOD.plug;ctx.fillStyle='#2c3338';ctx.beginPath();ctx.arc(x+w/2,y+h/2,18,0,7);ctx.fill();ctx.fillStyle='#e7e7e7';rr(x+w/2-6,y+h/2-24,12,22,3);ctx.fill();
-  txt('BUJÍA',x+w/2,y+h+10,'#9aa3aa',13,DISP,'center');
-  if(chk.plug){const pc=G.R.car.faults.includes('bujias')?'#111':G.R.car.faults.includes('segmentos')?'#3b2a10':'#a5774b';ctx.fillStyle='#d9d9d9';rr(x+w+8,y-6,18,54,4);ctx.fill();ctx.fillStyle=pc;rr(x+w+8,y+36,18,14,3);ctx.fill()}
-  // manguitos
-  [x,y,w,h]=HOOD.hose;ctx.strokeStyle='#1d1f21';ctx.lineWidth=16;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x+6,y+h/2);ctx.quadraticCurveTo(x+w/2,y+h,x+w-6,y+h/2);ctx.stroke();ctx.lineCap='butt';
-  if(chk.hose&&G.R.car.faults.includes('manguito')){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x+60+i*16,y+h/2+2);ctx.lineTo(x+66+i*16,y+h/2+10);ctx.stroke()}ctx.fillStyle='#3fcf8e';ctx.beginPath();ctx.arc(x+84,y+h-2+((T*40)%20),3,0,7);ctx.fill()}
-  txt('MANGUITOS',x+w/2,y-6,'#9aa3aa',13,DISP,'center');
-  // varilla
-  [x,y,w,h]=HOOD.oil;ctx.strokeStyle='#e9c12a';ctx.lineWidth=7;ctx.beginPath();ctx.arc(x+w/2,y+h/2,14,0,7);ctx.stroke();ctx.fillStyle='#3a4146';ctx.fillRect(x+w/2-3,y+h/2+14,6,50);
-  txt('VARILLA DEL ACEITE',x+w/2,y-10,'#9aa3aa',13,DISP,'center');
-  if(chk.oil){const dx=100,dy=530,dw=560;ctx.fillStyle='#c9ccce';rr(dx,dy,dw,12,6);ctx.fill();
-    const lv=fx('oilLow')||.62,milky=fx('milky');ctx.fillStyle=milky?'#b89a72':'rgba(160,120,30,.9)';rr(dx,dy,dw*lv,12,6);ctx.fill();
-    [['MIN',.35],['MAX',.75]].forEach(([l,v])=>{ctx.fillStyle='#222';ctx.fillRect(dx+dw*v-1,dy-6,3,24);txt(l,dx+dw*v,dy-14,'#e8edf0',11,MONO,'center')})}
-  // correa
-  const P=[[680,340,32],[790,400,22],[700,470,28]],rot=e.on?T*e.rpm/40:0;
-  ctx.strokeStyle='#15181a';ctx.lineWidth=11;ctx.beginPath();ctx.moveTo(P[0][0]+P[0][2],P[0][1]);ctx.lineTo(P[1][0]+P[1][2],P[1][1]);ctx.lineTo(P[2][0]+P[2][2],P[2][1]);ctx.moveTo(P[0][0]-P[0][2],P[0][1]);ctx.lineTo(P[2][0]-P[2][2],P[2][1]);ctx.stroke();
-  P.forEach(([px,py,r],i)=>{ctx.fillStyle='#7d878e';ctx.beginPath();ctx.arc(px,py,r,0,7);ctx.fill();ctx.strokeStyle='#4a5258';ctx.lineWidth=3;for(let k=0;k<3;k++){const a=rot+k*2.1+i;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+Math.cos(a)*r*.85,py+Math.sin(a)*r*.85);ctx.stroke()}});
-  if(chk.belt&&fx('squeal')){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;for(let i=0;i<5;i++){const t=i/4,bx=P[0][0]+P[0][2]+(P[1][0]+P[1][2]-P[0][0]-P[0][2])*t,by=P[0][1]+(P[1][1]-P[0][1])*t;ctx.beginPath();ctx.moveTo(bx-6,by-4);ctx.lineTo(bx+5,by+5);ctx.stroke()}}
-  txt('CORREA',740,290,'#9aa3aa',13,DISP,'center');
+    if(chk[k]){ctx.save();rr(x,y,w,h,12);ctx.clip();ctx.fillStyle=col;ctx.globalAlpha=.75;ctx.fillRect(x,Y(low?.3:.68),w,h);ctx.restore();ctx.globalAlpha=1;
+      if(bub)for(let i=0;i<4;i++){ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x+16+i*18,Y(.3)+6-((T*30+i*13)%30),3.5,0,7);ctx.stroke()}}
+    [['MAX',.8],['MIN',.45]].forEach(([l,v])=>{ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x+w-16,Y(v));ctx.lineTo(x+w,Y(v));ctx.stroke();txt(l,x+w-19,Y(v),'rgba(255,255,255,.75)',9,MONO,'right')});
+    ctx.fillStyle=cap;ctx.beginPath();ctx.arc(x+w/2,y+4,12,0,7);ctx.fill();txt(label,x+w/2,y+h+12,'#9aa3aa',12,DISP,'center')};
+  tank('cool',fx('coolLow'),'#3fcf8e','REFRIGERANTE','#2f6fd0',has('junta'));
+  tank('bfl',fx('sink'),'#e3c468','LÍQ. FRENOS','#e9c12a');
+  tank('psf',has('bomba'),'#c3302a','DIRECCIÓN','#1a1a1a');
+  // varilla del aceite
+  [x,y,w,h]=HOOD.oil;ctx.strokeStyle='#e9c12a';ctx.lineWidth=6;ctx.beginPath();ctx.arc(x+w/2,y+h/2,12,0,7);ctx.stroke();txt('VARILLA',x+w/2,y+h+10,'#9aa3aa',11,DISP,'center');
+  // poleas y correa
+  const P=[[640,214,17],[668,262,10],[636,314,27]],rot=e.on?T*e.rpm/40:0;
+  ctx.strokeStyle='#0c0d0e';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(P[0][0]+P[0][2],P[0][1]);ctx.lineTo(P[1][0]+P[1][2],P[1][1]);ctx.lineTo(P[2][0]+P[2][2],P[2][1]);ctx.moveTo(P[0][0]-P[0][2],P[0][1]);ctx.lineTo(P[2][0]-P[2][2],P[2][1]);ctx.stroke();
+  P.forEach(([px,py,r],i)=>{const g=ctx.createRadialGradient(px-r*.3,py-r*.3,1,px,py,r);g.addColorStop(0,'#b7c0c6');g.addColorStop(1,'#59626a');ctx.fillStyle=g;ctx.beginPath();ctx.arc(px,py,r,0,7);ctx.fill();ctx.strokeStyle='#3a4248';ctx.lineWidth=2.5;for(let k=0;k<3;k++){const a=rot+k*2.1+i;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px+Math.cos(a)*r*.8,py+Math.sin(a)*r*.8);ctx.stroke()}});
+  ctx.fillStyle='#4a5258';rr(612,196,34,36,6);ctx.globalAlpha=.25;ctx.fill();ctx.globalAlpha=1;
+  if(chk.belt&&fx('squeal')){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;for(let i=0;i<5;i++){const t=i/4,bx=P[0][0]+P[0][2]+(P[2][0]+P[2][2]-P[0][0]-P[0][2])*t,by=P[0][1]+(P[2][1]-P[0][1])*t;ctx.beginPath();ctx.moveTo(bx-5,by-3);ctx.lineTo(bx+5,by+4);ctx.stroke()}}
+  txt('CORREA',644,360,'#9aa3aa',12,DISP,'center');txt('alternador',600,206,'#7d868c',10,BODY,'right');
+  // caja de fusibles
+  [x,y,w,h]=HOOD.fusebox;ctx.fillStyle=metal(x,y,x,y+h,'#0e1113','#23282c');rr(x,y,w,h,8);ctx.fill();for(let i=0;i<6;i++){ctx.fillStyle=Object.values(FCOL)[i%4];rr(x+12+i*21,y+16,13,20,3);ctx.fill()}
+  txt('CAJA DE FUSIBLES',x+w/2,y+h-12,'#9aa3aa',12,DISP,'center');
   // oler
-  [x,y,w,h]=HOOD.smell;ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(x+w/2,y+h/2,w/2,0,7);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
-  ctx.strokeStyle=C.fg;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+w/2-2,y+18);ctx.quadraticCurveTo(x+w/2+14,y+44,x+w/2+8,y+52);ctx.quadraticCurveTo(x+w/2,y+58,x+w/2-10,y+52);ctx.stroke();
-  txt('OLER',x+w/2,y+h+13,'#9aa3aa',13,DISP,'center');
-  [x,y,w,h]=HOOD.fusebox;ctx.fillStyle='#111518';rr(x,y,w,h,8);ctx.fill();for(let i=0;i<6;i++){ctx.fillStyle=Object.values(FCOL)[i%4];rr(x+12+i*22,y+14,14,22,3);ctx.fill()}txt('CAJA DE FUSIBLES',x+w/2,y+h+12,'#9aa3aa',13,DISP,'center');
-  // vapor
-  if(fx('steam')&&e.on&&e.run>1.5){for(let i=0;i<5;i++){const t=(T*.6+i*.2)%1;ctx.globalAlpha=.25*(1-t);ctx.fillStyle='#f0f4f7';ctx.beginPath();ctx.arc(160+i*14,290-t*120,12+t*20,0,7);ctx.fill()}ctx.globalAlpha=1}
-  if(!e.on)txt('Con el motor apagado. Arráncalo con la llave para ver la correa girar y medir la batería en marcha.',455,560,C.muted,13,BODY,'center');
+  [x,y,w,h]=HOOD.smell;ctx.fillStyle='rgba(36,45,52,.9)';ctx.beginPath();ctx.arc(x+w/2,y+h/2,w/2,0,7);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle=C.fg;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+w/2-2,y+14);ctx.quadraticCurveTo(x+w/2+13,y+40,x+w/2+7,y+47);ctx.quadraticCurveTo(x+w/2,y+52,x+w/2-9,y+47);ctx.stroke();
+  txt('OLER',x+w/2,y+h+11,'#9aa3aa',12,DISP,'center');
+  if(fx('steam')&&e.on&&e.run>1.5){for(let i=0;i<6;i++){const t=(T*.6+i*.17)%1;ctx.globalAlpha=.25*(1-t);ctx.fillStyle='#f0f4f7';ctx.beginPath();ctx.arc(180+i*16,250-t*130,12+t*22,0,7);ctx.fill()}ctx.globalAlpha=1}
+  if(!e.on)txt('Motor apagado: arráncalo con la llave para ver la correa girar y medir la batería en marcha.',455,574,'rgba(255,255,255,.6)',12,BODY,'center');
 }
+/* ---------- vista de la rueda: cuatro ruedas, desmontaje y cubeta de agua ---------- */
+const WNAME={DI:'delantera izquierda',DD:'delantera derecha',TI:'trasera izquierda',TD:'trasera derecha'};
+const WHEEL_ITEMS={tyreP:[80,452,100,70],tread:[86,120,170,90],rim:[230,240,70,70],pads:[368,206,64,70],nuts:[244,284,72,72],spring:[600,96,80,134],shockF:[612,236,52,84],bieleta:[684,250,70,110],tie:[540,354,110,40],rotinf:[470,430,90,44],boot:[560,296,120,48],sensor:[400,346,70,40]};
+function wheelInfo(w){const c=G.R.car,f=c.faults,front=w[0]==='D';
+  return {front,flat:c.flat===w,worn:front&&f.includes('gastado'),inner:front&&f.includes('alineacion'),bent:c.bent===w,pads:front&&f.includes('pastillas'),disc:front&&f.includes('discos')}}
+function wheelNote(kind,w){const i=wheelInfo(w),n='Rueda '+WNAME[w];
+  if(kind==='tyreP')return n+': '+(i.flat?'1,8 bar':'2,3 bar')+' (lo normal: 2,3 bar)';
+  if(kind==='tread')return n+': dibujo de '+(i.worn?'1 mm (mínimo legal 1,6 mm)':i.inner?'5 mm por fuera y casi nada por dentro':'5 mm, desgaste uniforme');
+  if(kind==='rim')return n+': llanta '+(i.bent?'con un golpe en el borde, doblada':'recta, sin golpes');
+  if(kind==='tank')return n+' en la cubeta: '+(i.flat?'salen burbujas junto a un clavo en la banda de rodadura':'no sale ninguna burbuja');
+  if(kind==='pads')return n+': '+(i.pads?'pastillas de 2 mm (mínimo 3 mm)':i.disc?'pastillas de 8 mm, disco con surcos y zonas azuladas':'pastillas de 9 mm, disco liso');
+}
+function drawTread(x,y,w,h,i){ctx.fillStyle='#16191b';rr(x,y,w,h,8);ctx.fill();
+  const depth=i.worn?.15:1;for(let k=0;k<5;k++){const gx=x+14+k*(w-28)/4;const local=i.inner&&k<2?.12:depth;ctx.fillStyle=`rgba(0,0,0,${.25+.6*local})`;rr(gx-5,y+8,10*local+2,h-16,3);ctx.fill()}
+  ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=2;for(let k=0;k<6;k++){ctx.beginPath();ctx.moveTo(x+6,y+12+k*12);ctx.lineTo(x+w-6,y+6+k*12);ctx.stroke()}
+  if(i.inner)txt('lado interior',x+30,y+h+12,'#ffb3ab',11,BODY,'center')}
+function drawWheelView(){
+  const R=G.R,v=R.wv,full=R.step===3,w=v.w,i=wheelInfo(w),ck=v.chk[w]||(v.chk[w]={}),f=R.car.faults,has=k=>f.includes(k),wx=280,wy=330;
+  ctx.fillStyle='rgba(8,10,12,.72)';ctx.fillRect(0,0,900,588);
+  ctx.fillStyle='#161b1f';rr(60,24,780,556,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
+  txt(v.phase==='tank'?'CUBETA DE AGUA':full&&i.front?'DESPIECE':'RUEDA',84,48,C.muted,16);
+  ctx.fillStyle=C.panel2;rr(710,32,110,32,8);ctx.fill();txt('CERRAR  ✕',765,48,C.fg,16,DISP,'center');
+  // selector de rueda
+  if(v.phase==='view')['DI','DD','TI','TD'].forEach((k,n)=>{const x=250+n*112;ctx.fillStyle=k===w?C.amber:C.panel2;rr(x,32,104,32,8);ctx.fill();txt({DI:'Del. izq.',DD:'Del. der.',TI:'Tras. izq.',TD:'Tras. der.'}[k],x+52,48,k===w?C.ink:C.fg,15,DISP,'center')});
+  if(v.phase==='tank'){
+    const tx=150,ty=250,tw=600,th=270;ctx.fillStyle='#3a4248';rr(tx-10,ty-10,tw+20,th+20,12);ctx.fill();
+    ctx.save();ctx.translate(450,300);ctx.rotate(v.rot);drawTyre(0,0,150,i,false);ctx.restore();
+    ctx.fillStyle='rgba(60,140,210,.45)';ctx.fillRect(tx,ty+40,tw,th-40);ctx.strokeStyle='rgba(180,220,255,.6)';ctx.lineWidth=2;ctx.beginPath();for(let x=tx;x<=tx+tw;x+=10)ctx.lineTo(x,ty+40+Math.sin(x*.05+T*3)*2.5);ctx.stroke();
+    // burbujas si el clavo está bajo el agua
+    if(i.flat){const na=v.rot+Math.PI*.3,nx=450+Math.cos(na)*178,ny=300+Math.sin(na)*178;
+      if(ny>ty+46){ctx.fillStyle='#c9ced2';ctx.beginPath();ctx.arc(nx,ny,4,0,7);ctx.fill();if(Math.random()<.5)G.parts.push({x:nx+rand(-4,4),y:ny,vx:rand(-8,8),vy:rand(-90,-60),r:rand(2,4),life:1.2,max:1.2,col:'rgba(220,240,255,.9)',a:.9,bubble:ty+44})}}
+    txt(v.hold?'Girando la rueda en el agua…':'MANTÉN PULSADA LA RUEDA PARA GIRARLA',450,560,v.hold?C.fg:C.amber,18,DISP,'center');
+    pbar(300,536,300,8,v.rot/(Math.PI*2),C.info);return;
+  }
+  if(v.phase==='bolts'){
+    drawTyre(wx,wy,1,i,true);ctx.fillStyle='#4a5258';ctx.beginPath();ctx.arc(wx,wy,60,0,7);ctx.fill();
+    for(let k=0;k<5;k++){const a=-Math.PI/2+k*Math.PI*2/5,bx=wx+Math.cos(a)*40,by=wy+Math.sin(a)*40,out=v.bolts[k];ctx.beginPath();for(let q=0;q<6;q++){const b=q*Math.PI/3;ctx.lineTo(bx+Math.cos(b)*12,by+Math.sin(b)*12)}ctx.closePath();ctx.fillStyle=out?'#20262b':'#c3cad0';ctx.fill()}
+    txt('Toca los 5 tornillos para quitarlos',560,330,C.amber,20,DISP,'center');txt('Rueda '+WNAME[w],560,360,C.muted,15,BODY,'center');return;
+  }
+  if(full&&i.front){
+    const sx=640;ctx.fillStyle='#4b545b';rr(sx-26,84,52,18,6);ctx.fill();
+    ctx.strokeStyle=has('muelle')&&R.under.chk.spring?'#ff6b5e':'#c23b2c';ctx.lineWidth=8;ctx.beginPath();for(let k=0;k<=8;k++)ctx.lineTo(sx+(k%2?-34:34),110+k*14);ctx.stroke();
+    if(has('muelle')&&R.under.chk.spring){ctx.fillStyle='#161b1f';ctx.fillRect(sx-8,150,20,10)}
+    ctx.fillStyle=metal(sx-14,0,sx+14,0,'#5d666d','#c3cad0');rr(sx-6,96,12,150,4);ctx.fill();
+    ctx.fillStyle=metal(sx-20,0,sx+20,0,'#2c3236','#5b646a');rr(sx-20,236,40,90,8);ctx.fill();
+    ctx.fillStyle='#4f585e';ctx.beginPath();ctx.moveTo(sx-20,320);ctx.lineTo(sx-90,300);ctx.lineTo(sx-120,350);ctx.lineTo(sx-60,420);ctx.lineTo(sx-10,400);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#8a939a';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(sx+20,270);ctx.lineTo(sx+80,340);ctx.stroke();
+    [[sx+20,270],[sx+80,340]].forEach(([a,b])=>{ctx.fillStyle='#2a2f33';ctx.beginPath();ctx.arc(a,b,9,0,7);ctx.fill();if(has('bieleta')&&R.under.chk.bieleta){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;ctx.stroke()}});
+    ctx.strokeStyle='#3d454b';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(sx+80,340);ctx.lineTo(sx+80,384);ctx.lineTo(820,384);ctx.stroke();txt('barra estabilizadora',815,404,C.muted,11,BODY,'right');
+    ctx.strokeStyle='#596269';ctx.lineWidth=14;ctx.beginPath();ctx.moveTo(sx-80,440);ctx.lineTo(sx+150,470);ctx.stroke();ctx.fillStyle='#2a2f33';ctx.beginPath();ctx.arc(sx-112,452,12,0,7);ctx.fill();
+    ctx.strokeStyle='#7d878e';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(sx-60,374);ctx.lineTo(820,370);ctx.stroke();ctx.fillStyle='#2a2f33';ctx.beginPath();ctx.arc(sx-60,374,11,0,7);ctx.fill();
+    if(has('rotula')&&R.under.chk.tie){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx-60,374,14,0,7);ctx.stroke()}
+    ctx.strokeStyle='#6b7278';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(wx+60,wy-8);ctx.lineTo(820,318);ctx.stroke();
+    ctx.fillStyle='#1b1d1f';for(let k=0;k<5;k++){ctx.beginPath();ctx.ellipse(580+k*16,318,8,16+(k%2)*3,0,0,7);ctx.fill()}
+    if(has('homocinetica')&&R.under.chk.boot){ctx.fillStyle='#3a2f1c';for(let k=0;k<9;k++){ctx.beginPath();ctx.arc(570+((k*37)%80),298+((k*23)%44),3,0,7);ctx.fill()}}
+    ctx.strokeStyle=has('abs')&&R.under.chk.sensor?'#ff6b5e':'#0c0d0e';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(440,360);ctx.bezierCurveTo(480,400,420,430,470,470);ctx.stroke();ctx.fillStyle='#3a4146';rr(426,352,24,14,3);ctx.fill();
+    [['muelle',sx+48,104],['amortiguador',sx+26,252],['bieleta',sx+100,300],['rótula de dirección',sx-40,404],['rótula inferior',sx-150,490],['fuelle',590,292],['sensor ABS',480,486]].forEach(([l,a,b])=>txt(l,a,b,C.muted,12,DISP));
+  }
+  drawTyre(wx,wy,1,i,true);
+  // pinza asomando
+  ctx.fillStyle='#b8322a';rr(wx+82,wy-92,48,70,12);ctx.fill();txt('PINZA',wx+106,wy-56,'#fff',11,DISP,'center');
+  if(ck.rim&&i.bent){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=3;ctx.beginPath();ctx.arc(wx+100,wy-108,16,0,7);ctx.stroke()}
+  // dibujo del neumático en grande
+  if(ck.tread){drawTread(86,120,170,90,i);const t=i.worn?'1 mm':i.inner?'5 / 0,5 mm':'5 mm';ctx.fillStyle='#0e1a14';rr(86,214,110,24,5);ctx.fill();txt('profundidad '+t,92,226,'#8ff0b4',11,MONO)}
+  else txt('dibujo',170,165,C.muted,12,DISP,'center');
+  if(ck.tyreP){ctx.fillStyle='#0e1a14';rr(84,526,96,24,5);ctx.fill();txt(i.flat?'1,8 bar':'2,3 bar',132,538,'#8ff0b4',13,MONO,'center')}
+  if(ck.pads){ctx.fillStyle='#0e1a14';rr(360,174,190,24,5);ctx.fill();txt(i.pads?'pastilla 2 mm':i.disc?'disco con surcos':i.front?'pastilla 9 mm':'zapatas en buen estado',368,186,'#8ff0b4',12,MONO)}
+  const [mx,my]=[130,482];ctx.fillStyle='#2a3036';ctx.beginPath();ctx.arc(mx,my,26,0,7);ctx.fill();ctx.strokeStyle='#e8edf0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(mx,my,20,Math.PI*.8,Math.PI*2.2);ctx.stroke();ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(mx+14,my-10);ctx.stroke();txt('MANÓMETRO',mx,my-38,C.muted,11,DISP,'center');
+  txt('TORNILLOS',wx,wy+46,'#1b1f22',11,DISP,'center');txt('quitar y probar en agua',wx,wy+76,C.amber,12,DISP,'center');
+  Object.entries(WHEEL_ITEMS).forEach(([k,[x,y,ww,hh]])=>{const sus=!['tyreP','tread','rim','pads','nuts'].includes(k);if(sus&&!(full&&i.front))return;if(sus?R.under.chk[k]:ck[k])return;
+    ctx.strokeStyle='rgba(242,179,61,.8)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.globalAlpha=.45+.4*Math.sin(T*5);rr(x,y,ww,hh,10);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1});
+  txt('llanta',262,232,C.muted,12,DISP,'center');
+  if(!full)txt('Con el coche en el suelo solo ves la rueda. Levántalo para ver la suspensión.',450,566,C.muted,13,BODY,'center');
+}
+function drawTyre(wx,wy,sc,i,showDisc){
+  if(showDisc){const gd=ctx.createRadialGradient(wx,wy,20,wx,wy,112);gd.addColorStop(0,'#5f686f');gd.addColorStop(1,'#9aa3aa');ctx.fillStyle=gd;ctx.beginPath();ctx.arc(wx,wy,112,0,7);ctx.fill()}
+  else{ctx.fillStyle='#2a2f33';ctx.beginPath();ctx.arc(wx,wy,112,0,7);ctx.fill()}
+  ctx.lineWidth=58;ctx.strokeStyle='#121416';ctx.beginPath();ctx.arc(wx,wy,180,0,7);ctx.stroke();
+  ctx.strokeStyle=i.worn?'#1a1c1e':'#25292c';ctx.lineWidth=4;for(let k=0;k<48;k++){const a=k*Math.PI*2/48;ctx.beginPath();ctx.moveTo(wx+Math.cos(a)*(i.worn?201:192),wy+Math.sin(a)*(i.worn?201:192));ctx.lineTo(wx+Math.cos(a)*206,wy+Math.sin(a)*206);ctx.stroke()}
+  const gr=ctx.createRadialGradient(wx-30,wy-30,10,wx,wy,150);gr.addColorStop(0,'#eef1f3');gr.addColorStop(.7,'#a6afb6');gr.addColorStop(1,'#6d767d');
+  ctx.save();ctx.translate(wx,wy);ctx.strokeStyle=gr;ctx.lineWidth=16;ctx.beginPath();ctx.arc(0,0,146,0,7);ctx.stroke();
+  for(let k=0;k<5;k++){const a=-Math.PI/2+k*Math.PI*2/5;ctx.save();ctx.rotate(a);ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(26,-14);ctx.lineTo(140,-24);ctx.lineTo(140,24);ctx.lineTo(26,14);ctx.closePath();ctx.fill();ctx.restore()}
+  ctx.fillStyle='#4a5258';ctx.beginPath();ctx.arc(0,0,34,0,7);ctx.fill();ctx.fillStyle='#c3cad0';for(let k=0;k<5;k++){const a=k*Math.PI*2/5;ctx.beginPath();ctx.arc(Math.cos(a)*20,Math.sin(a)*20,4.5,0,7);ctx.fill()}ctx.restore();
+}
+/* ---------- animaciones de inspección: la pieza sale y se ve de cerca ---------- */
+const ANIM_TITLE={filter:'Filtro de aire',oil:'Varilla del aceite',plug:'Bujía',batt:'Batería con multímetro',belt:'Correa de accesorios',hose:'Manguito del radiador',cool:'Depósito de refrigerante',bfl:'Depósito de líquido de frenos',psf:'Depósito de dirección',smell:'Olor del vano motor'};
+function drawAnim(){
+  const R=G.R,a=R.insp.anim;if(!a)return;const id=a.id,t=a.t,f=R.car.faults,has=k=>f.includes(k),e=R.eng;
+  const [hx,hy,hw,hh]=HOOD[id],p=clamp(t/.7,0,1),ease=1-Math.pow(1-p,3);
+  const cx=450,cy=300,CW=480,CH=330;
+  // la pieza sale de su sitio y se acerca
+  const bx=hx+(cx-CW/2-hx)*ease,by=hy+(cy-CH/2-hy)*ease,bw=hw+(CW-hw)*ease,bh=hh+(CH-hh)*ease;
+  ctx.fillStyle=`rgba(5,7,9,${.55*ease})`;ctx.fillRect(0,0,900,588);
+  if(id==='oil'&&t<.8){const up=Math.min(1,t/.8)*170;ctx.fillStyle='#e9c12a';ctx.beginPath();ctx.arc(hx+hw/2,hy+hh/2-up,12,0,7);ctx.lineWidth=6;ctx.strokeStyle='#e9c12a';ctx.stroke();ctx.fillStyle='#b9bfc3';ctx.fillRect(hx+hw/2-3,hy+hh/2+12-up,6,up);return}
+  if(id==='filter'&&t<.7){ctx.save();ctx.translate(hx,hy);ctx.fillStyle='#2b3035';ctx.translate(0,-p*50);ctx.rotate(-p*.5);rr(0,0,hw,hh*.45,10);ctx.fill();ctx.restore();return}
+  if(id==='plug'&&t<.7){const r=p*Math.PI*6;ctx.save();ctx.translate(hx+hw/2,hy+hh/2-p*60);ctx.rotate(r);ctx.fillStyle='#e9e9e9';rr(-8,-26,16,52,4);ctx.fill();ctx.fillStyle='#8a939a';rr(-12,-4,24,10,3);ctx.fill();ctx.restore();return}
+  ctx.fillStyle='rgba(16,20,23,.97)';rr(bx,by,bw,bh,16);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
+  if(p<1)return;
+  const X=cx-CW/2,Y=cy-CH/2;
+  txt(ANIM_TITLE[id].toUpperCase(),X+24,Y+28,C.amber,18,DISP);txt('toca para cerrar',X+CW-20,Y+28,C.muted,12,BODY,'right');
+  if(id==='filter'){const dirty=has('filtro');ctx.save();ctx.translate(cx,cy+16);ctx.rotate(Math.sin(T*1.2)*.04);
+    ctx.fillStyle=dirty?'#2c2722':'#efe3c6';rr(-170,-90,340,180,10);ctx.fill();ctx.strokeStyle='#5d4f39';ctx.lineWidth=6;ctx.strokeRect(-170,-90,340,180);
+    for(let i=0;i<22;i++){ctx.strokeStyle=dirty?(i%2?'#17130f':'#3a332b'):(i%2?'#d8c9a4':'#f6ecd4');ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(-160+i*15.3,-84);ctx.lineTo(-160+i*15.3,84);ctx.stroke()}
+    if(dirty){ctx.fillStyle='rgba(20,15,10,.55)';for(let i=0;i<40;i++){ctx.beginPath();ctx.arc(((i*73)%320)-160,((i*41)%160)-80,3+(i%4),0,7);ctx.fill()}ctx.fillStyle='#6b5a2f';ctx.beginPath();ctx.ellipse(60,-30,18,8,.6,0,7);ctx.fill()}
+    ctx.restore();txt(dirty?'Negro, lleno de polvo y hojas: taponado':'Limpio: el aire pasa bien',cx,Y+CH-24,dirty?'#ffb3ab':'#8ff0b4',16,BODY,'center')}
+  if(id==='oil'){const lv=fx('oilLow')||.62,milky=fx('milky');ctx.fillStyle='#c9ccce';rr(X+40,cy-8,CW-80,16,8);ctx.fill();ctx.fillStyle=milky?'#b89a72':'rgba(150,110,25,.95)';rr(X+40,cy-8,(CW-80)*lv,16,8);ctx.fill();
+    ctx.strokeStyle='#e9c12a';ctx.lineWidth=7;ctx.beginPath();ctx.arc(X+CW-30,cy,14,0,7);ctx.stroke();
+    [['MIN',.35],['MAX',.75]].forEach(([l,v])=>{ctx.fillStyle='#e8edf0';ctx.fillRect(X+40+(CW-80)*v-1,cy-16,3,32);txt(l,X+40+(CW-80)*v,cy-28,'#e8edf0',13,MONO,'center')});
+    const ok=lv>=.35;txt(milky?'Aceite marrón claro, lechoso, como café con leche':lv<.3?'El aceite no llega a la marca MIN':lv<.45?'El aceite apenas llega al MIN':'Nivel entre MIN y MAX, color miel',cx,cy+70,milky||!ok||lv<.45?'#ffb3ab':'#8ff0b4',16,BODY,'center')}
+  if(id==='plug'){const pc=has('bujias')?'#111':has('segmentos')?'#3b2a10':'#a5774b';ctx.save();ctx.translate(cx-150,cy+10);
+    ctx.fillStyle='#ececec';rr(0,-22,150,44,10);ctx.fill();ctx.fillStyle='#8a939a';ctx.beginPath();for(let i=0;i<6;i++){const a=i*Math.PI/3;ctx.lineTo(170+Math.cos(a)*30,Math.sin(a)*30)}ctx.closePath();ctx.fill();
+    ctx.fillStyle='#b5bcc1';rr(196,-14,70,28,4);ctx.fill();ctx.strokeStyle='#7d868c';ctx.lineWidth=2;for(let i=0;i<8;i++){ctx.beginPath();ctx.moveTo(200+i*8,-14);ctx.lineTo(206+i*8,14);ctx.stroke()}
+    ctx.fillStyle=pc;rr(266,-10,26,20,4);ctx.fill();ctx.strokeStyle='#7d868c';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(292,0);ctx.lineTo(302,0);ctx.lineTo(302,-12);ctx.stroke();ctx.restore();
+    txt(has('bujias')?'Punta negra de hollín y electrodo gastado':has('segmentos')?'Punta mojada de aceite':'Punta marrón claro: combustión correcta',cx,Y+CH-30,has('bujias')||has('segmentos')?'#ffb3ab':'#8ff0b4',16,BODY,'center')}
+  if(id==='batt'){ctx.fillStyle='#16191b';rr(cx-200,cy-30,170,110,10);ctx.fill();ctx.fillStyle='#c8261d';rr(cx-186,cy-46,30,20,4);ctx.fill();ctx.fillStyle='#222';rr(cx-74,cy-46,30,20,4);ctx.fill();
+    ctx.fillStyle='#e3b21b';rr(cx+30,cy-60,170,200,14);ctx.fill();ctx.fillStyle='#0e1a14';rr(cx+46,cy-44,138,60,6);ctx.fill();
+    const alt=has('alternador'),v=has('bateria')?(e.on?'14,1':'11,9'):alt?(e.on?'11,8':'12,5'):(e.on?'14,1':'12,6');txt(v+' V',cx+115,cy-14,'#8ff0b4',30,MONO,'center');
+    ctx.fillStyle='#222';ctx.beginPath();ctx.arc(cx+115,cy+60,30,0,7);ctx.fill();
+    ctx.strokeStyle='#c8261d';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx+60,cy+130);ctx.quadraticCurveTo(cx-60,cy+120,cx-171,cy-30);ctx.stroke();ctx.strokeStyle='#111';ctx.beginPath();ctx.moveTo(cx+170,cy+130);ctx.quadraticCurveTo(cx,cy+150,cx-59,cy-30);ctx.stroke();
+    txt((e.on?'Con el motor en marcha':'Con el motor parado')+' · lo normal: 12,6 V parado y de 13,8 a 14,4 V en marcha',cx,Y+CH-20,C.muted,13,BODY,'center')}
+  if(id==='belt'){const bad=has('correa');ctx.fillStyle='#141618';rr(X+40,cy-30,CW-80,60,8);ctx.fill();for(let i=0;i<6;i++){ctx.fillStyle='#262a2d';rr(X+46,cy-24+i*9,CW-92,5,2);ctx.fill()}
+    if(bad){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;for(let i=0;i<9;i++){const x0=X+70+i*40;ctx.beginPath();ctx.moveTo(x0,cy-26);ctx.lineTo(x0+5,cy-6);ctx.lineTo(x0-3,cy+10);ctx.stroke()}ctx.fillStyle='rgba(255,255,255,.18)';rr(X+40,cy-30,CW-80,14,6);ctx.fill()}
+    txt(bad?'Grietas en los nervios y superficie brillante (cristalizada)':'Nervios enteros y sin brillo',cx,cy+70,bad?'#ffb3ab':'#8ff0b4',16,BODY,'center')}
+  if(id==='hose'){const bad=has('manguito');ctx.strokeStyle='#141618';ctx.lineWidth=46;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(X+60,cy+20);ctx.quadraticCurveTo(cx,cy-60,X+CW-60,cy+20);ctx.stroke();ctx.lineCap='butt';
+    if(bad){ctx.strokeStyle='#ff6b5e';ctx.lineWidth=2;for(let i=0;i<5;i++){ctx.beginPath();ctx.moveTo(cx-40+i*18,cy-30);ctx.lineTo(cx-32+i*18,cy-14);ctx.stroke()}for(let i=0;i<2;i++){const t2=((T*.9)+i*.5)%1;ctx.fillStyle='#3fcf8e';ctx.beginPath();ctx.arc(cx,cy-8+t2*90,5,0,7);ctx.fill()}}
+    txt(bad?'Agrietado y húmedo: gotea refrigerante':'Goma flexible y sin grietas',cx,cy+90,bad?'#ffb3ab':'#8ff0b4',16,BODY,'center')}
+  if(['cool','bfl','psf'].includes(id)){const low=id==='cool'?fx('coolLow'):id==='bfl'?fx('sink'):has('bomba'),col=id==='cool'?'#3fcf8e':id==='bfl'?'#e3c468':'#c3302a',tx=cx-80,ty=Y+60,tw=160,th=220,Yv=v=>ty+th-v*th;
+    ctx.fillStyle='rgba(230,236,240,.14)';rr(tx,ty,tw,th,16);ctx.fill();ctx.strokeStyle='rgba(235,240,245,.5)';ctx.lineWidth=2;ctx.stroke();
+    ctx.save();rr(tx,ty,tw,th,16);ctx.clip();ctx.fillStyle=col;ctx.globalAlpha=.8;ctx.fillRect(tx,Yv(low?.3:.68)+Math.sin(T*3)*2,tw,th);ctx.restore();ctx.globalAlpha=1;
+    if(id==='cool'&&has('junta'))for(let i=0;i<6;i++){ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(tx+20+i*24,Yv(.3)+10-((T*40+i*17)%50),5,0,7);ctx.stroke()}
+    [['MAX',.8],['MIN',.45]].forEach(([l,v])=>{ctx.strokeStyle='#e8edf0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(tx+tw-34,Yv(v));ctx.lineTo(tx+tw+14,Yv(v));ctx.stroke();txt(l,tx+tw+20,Yv(v),'#e8edf0',14,MONO)});
+    txt(low?'Por debajo del MIN':'Entre MIN y MAX',cx,Y+CH-20,low?'#ffb3ab':'#8ff0b4',16,BODY,'center')}
+  if(id==='smell'){const s=has('junta')||has('manguito')?['#3fcf8e','Dulzón, a anticongelante']:has('carter')?['#7a5a2a','A aceite quemado']:has('escape')?['#888','A gases de escape']:['#5c6670','Nada raro'];
+    for(let i=0;i<5;i++){const t2=(T*.5+i*.2)%1;ctx.globalAlpha=.6*(1-t2);ctx.strokeStyle=s[0];ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(cx-120+t2*80,cy+40-i*16);ctx.quadraticCurveTo(cx-80+t2*80,cy+10-i*16,cx-40+t2*80,cy+40-i*16);ctx.stroke()}ctx.globalAlpha=1;
+    ctx.strokeStyle=C.fg;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(cx+60,cy-60);ctx.quadraticCurveTo(cx+110,cy+20,cx+90,cy+40);ctx.quadraticCurveTo(cx+70,cy+56,cx+44,cy+40);ctx.stroke();
+    txt('Olor: '+s[1].toLowerCase(),cx,Y+CH-24,C.fg,17,BODY,'center')}
+}
+function leakInfo(){const R=G.R,d=R.car.faults.map(k=>FAULTS[k].fx.drip).find(Boolean);if(!d&&!R.car.water)return null;const f=R.car.faults;
+  const col=d||'rgba(200,225,240,.55)',gx=f.includes('manguito')?640:f.includes('bomba')?560:d?600:500;return {col,gx}}
 function liftScene(){
   const R=G.R,l=R.lift,ground=600,py=ground-l.h*170;
   ctx.fillStyle='#2b343b';ctx.fillRect(0,ground,900,H-ground);hatch(0,ground,900,8,C.amber,4);
   ctx.fillStyle='#4b5760';ctx.fillRect(120,240,34,ground-240);ctx.fillRect(626,240,34,ground-240);
   ctx.fillStyle=C.amber;ctx.fillRect(150,py-6,110,10);ctx.fillRect(520,py-6,110,10);ctx.fillRect(136,py-16,22,26);ctx.fillRect(622,py-16,22,26);
   carSide(390,py+24,460,R.car.color);
-  if(fx('flat')){ctx.fillStyle='#121416';ctx.beginPath();ctx.ellipse(532,py+24-6,52,10,0,0,7);ctx.fill()}
   return py+24;
 }
 function drawUnder(yb){
@@ -799,10 +991,13 @@ function drawButtons(){
     if(s.scan){UI.push({x:580,y:530,w:180,h:40,id:'scanclose'});if(s.scan.sys)UI.push({x:140,y:530,w:180,h:40,id:'scanback'});
       else if(s.scan.phase==='tree')SYS.forEach(([k],i)=>{if(s.scan.t>1.4+i*.25)UI.push({x:160,y:150+i*58,w:580,h:48,id:'sys-'+k})});return}
     if(s.lamps){UI.push({x:650,y:32,w:170,h:32,id:'lampsclose'});LAMPS.forEach(([k],i)=>UI.push({x:90+i*122,y:470,w:112,h:70,id:'lamp-'+k}));return}
+    if(s.anim){UI.push({x:0,y:0,w:900,h:588,id:'animclose'});return}
+    if(R.wv){wheelUI();return}
     if(s.fuses){UI.push({x:630,y:72,w:130,h:32,id:'fuseclose'});FUSES.forEach(([k],i)=>{const [x,y]=fuseXY(i);UI.push({x:x-34,y:y-40,w:68,h:150,id:'fuse-'+k})});return}
     if(s.hood)Object.entries(HOOD).forEach(([id,[x,y,w,h]])=>UI.push({x,y,w,h,id}));
     else UI.push({x:566,y:388,w:130,h:60,id:'hood'},{x:160,y:388,w:128,h:60,id:'push'},{x:132,y:512,w:64,h:48,id:'tail'},{x:540,y:452,w:104,h:104,id:'tyre'},{x:650,y:446,w:56,h:52,id:'lamps'});
-    UI.push({x:30,y:606,w:74,h:100,id:'key'},{x:118,y:606,w:84,h:100,key:'wheel'},{x:230,y:606,w:66,h:100,key:'brake'},{x:308,y:606,w:52,h:100,key:'gas'},{x:390,y:608,w:122,h:98,id:'dash'},{x:536,y:608,w:100,h:98,id:'obd'},{x:690,y:612,w:180,h:84,id:'lift'});
+    const lk=leakInfo();if(lk)UI.push({x:lk.gx-66,y:CAR.yb+2,w:132,h:24,id:'floor'});
+    UI.push({x:30,y:606,w:74,h:100,id:'key'},{x:118,y:606,w:84,h:100,key:'wheel'},{x:230,y:606,w:66,h:100,key:'brake'},{x:308,y:606,w:52,h:100,key:'gas'},{x:390,y:608,w:122,h:98,id:'dash'},{x:508,y:608,w:88,h:98,id:'obd'},{x:602,y:608,w:90,h:98,key:'road'},{x:702,y:612,w:168,h:84,id:'lift'});
     if(G.n===1&&!s.hood){const order=['key','gas','brake','wheel','dash','tail','push','hood','obd','lift'],done=id=>({key:'start',tail:'smoke',hood:'oil',obd:'scan',lift:'_'}[id]||id);
       const nx=order.find(k=>k==='lift'||!R.notes.some(n=>n.id===done(k)));const u=UI.find(u=>u.key===nx||u.id===nx);
       if(u&&!(nx==='lift'&&R.notes.length<5)){ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.globalAlpha=.5+.5*Math.sin(T*6);rr(u.x-4,u.y-4,u.w+8,u.h+8,10);ctx.stroke();ctx.globalAlpha=1}}
@@ -826,12 +1021,18 @@ function drawButtons(){
     ctx.fillStyle=C.fg;ctx.beginPath();ctx.moveTo(gx-4,Y(l.h));ctx.lineTo(gx-16,Y(l.h)-8);ctx.lineTo(gx-16,Y(l.h)+8);ctx.closePath();ctx.fill();ctx.fillRect(gx,Y(l.h)-1.5,40,3);
     txt(l.h.toFixed(2).replace('.',',')+' m',gx+20,gy-12,C.fg,16,MONO,'center');
   }
+  if(R.step===3&&R.wv){wheelUI();return}
   if(R.step===3){const yb=600-R.lift.h*170+24,xf=390+.31*460,cy=yb-48;
-    UI.push({x:xf-56,y:cy-60,w:112,h:84,id:'pads'},{x:190,y:yb+2,w:100,h:44,id:'exhaust'},{x:304,y:yb-22,w:48,h:72,id:'shock'},{x:410,y:yb-4,w:88,h:34,id:'tie'},{x:504,y:yb-30,w:70,h:44,id:'boot'},{x:xf-112,y:cy+2,w:52,h:40,id:'sensor'},{x:330,y:582,w:300,h:44,id:'floor'},{x:24,y:78,w:132,h:190,id:'report'});
+    UI.push({x:xf-60,y:cy-60,w:120,h:110,id:'wheelview'},{x:190,y:yb+2,w:100,h:44,id:'exhaust'},{x:304,y:yb-22,w:48,h:72,id:'shock'},{x:330,y:582,w:300,h:44,id:'floor'},{x:24,y:78,w:132,h:190,id:'report'});
     UI.forEach(u=>{if(u.id==='report'||R.under.chk[u.id])return;ctx.strokeStyle='rgba(242,179,61,.8)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.globalAlpha=.45+.4*Math.sin(T*5);rr(u.x,u.y,u.w,u.h,10);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1});
-    [['rueda',xf,cy-72],['escape',240,yb+60],['amortiguador',328,yb+66],['dirección',454,yb+44],['transmisión',540,yb-42],['sensor ABS',xf-150,cy+22],['suelo',480,642]].forEach(([l,x,y])=>txt(l,x,y,C.muted,13,DISP,'center'));
+    [['rueda y suspensión',xf,cy-72],['escape',240,yb+60],['amortiguador',328,yb+66],['suelo',480,642]].forEach(([l,x,y])=>txt(l,x,y,C.muted,13,DISP,'center'));
   }
 }
+function wheelUI(){const R=G.R,v=R.wv,full=R.step===3,i=wheelInfo(v.w);UI.push({x:710,y:32,w:110,h:32,id:'wvclose'});
+  if(v.phase==='tank'){UI.push({x:280,y:130,w:340,h:340,key:'spin'});return}
+  if(v.phase==='bolts'){for(let k=0;k<5;k++){if(v.bolts[k])continue;const a=-Math.PI/2+k*Math.PI*2/5;UI.push({x:280+Math.cos(a)*40-18,y:330+Math.sin(a)*40-18,w:36,h:36,id:'bolt-'+k})}return}
+  ['DI','DD','TI','TD'].forEach((k,n)=>UI.push({x:250+n*112,y:32,w:104,h:32,id:'wsel-'+k}));
+  Object.entries(WHEEL_ITEMS).forEach(([k,[x,y,w,h]])=>{const sus=!['tyreP','tread','rim','pads','nuts'].includes(k);if(sus&&!(full&&i.front))return;UI.push({x,y,w,h,id:'wv-'+k})})}
 function draw(){
   const R=G.R;
   ctx.save();if(G.shake>0)ctx.translate(rand(-6,6)*G.shake*2,rand(-6,6)*G.shake*2);
@@ -845,7 +1046,7 @@ function draw(){
     txt('CASO '+G.n,40,40,C.amber,22);txt(R.car.model,40,70,C.fg,26);txt(R.car.plate,40,98,C.muted,15,MONO);
   }
   if(R.step===1)drawGround();
-  if(R.step>=2){const yb=liftScene();if(R.step===3)drawUnder(yb);if(R.step===2)txt(R.lift.locked?'SEGURO PUESTO':'SEGURO QUITADO',40,40,R.lift.locked?C.ok:C.amber,20);else txt('COCHE ARRIBA · MIRA POR DEBAJO',450,40,C.muted,18,DISP,'center')}
+  if(R.step>=2){const yb=liftScene();if(R.step===3)drawUnder(yb);if(R.step===2)txt(R.lift.locked?'SEGURO PUESTO':'SEGURO QUITADO',40,40,R.lift.locked?C.ok:C.amber,20);else txt('COCHE ARRIBA · MIRA POR DEBAJO',450,40,C.muted,18,DISP,'center');if(R.step===3&&R.wv)drawWheelView()}
   ctx.restore();
   drawButtons();
   if(R.last){ctx.globalAlpha=Math.min(1,R.last.life);ctx.font=`17px ${BODY}`;let lt=R.last.t;while(ctx.measureText(lt).width>790&&lt.length>10)lt=lt.slice(0,-2);if(lt!==R.last.t)lt=lt.trim()+'…';const w=Math.min(850,ctx.measureText(lt).width+60);ctx.fillStyle='rgba(16,20,23,.95)';rr(450-w/2,112,w,46,10);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
@@ -882,7 +1083,7 @@ $('bSound').addEventListener('click',()=>{soundOn=!soundOn;$('bSound').setAttrib
 newDay();
 openModal({eyebrow:'Simulador de diagnóstico · jornada de 8 coches',title:'¿Qué le pasa a este coche?',
   body:`<p>Los clientes solo te cuentan lo que notan. Lo que tiene el coche <b>lo descubres tú</b>, como en un taller de verdad: arranca y escucha, acelera, frena, gira el volante, mira el cuadro y el humo del escape, empuja la carrocería, abre el capó, mide, huele, revisa luces y fusibles, conecta el escáner y mira por debajo.</p>
-  <div class="how"><div><b>27 averías</b>Frenos, motor, electricidad, refrigeración, suspensión, escape, ABS, airbag, luces y fusibles.</div><div><b>Varias a la vez</b>Desde el tercer coche puede haber más de una. Y no todo lo raro es avería.</div><div><b>Aprende</b>Al firmar el informe verás qué pistas delataban cada avería.</div></div>
+  <div class="how"><div><b>31 averías</b>Frenos, motor, electricidad, refrigeración, suspensión, escape, ABS, airbag, luces y fusibles.</div><div><b>Varias a la vez</b>Desde el tercer coche puede haber más de una. Y no todo lo raro es avería.</div><div><b>Aprende</b>Al firmar el informe verás qué pistas delataban cada avería.</div></div>
   <p style="color:var(--muted);font-size:13.5px">Todo se hace tocando las cosas del taller con el ratón o el dedo. <b>Sube el volumen</b>: muchas averías se oyen.</p>`,
   buttons:[{label:'Empezar la jornada',primary:true,fn:()=>{audio();sfx.ok()}}]});
 resize();requestAnimationFrame(frame);

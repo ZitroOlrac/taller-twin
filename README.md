@@ -9,10 +9,13 @@ Simulador de diagnóstico de averías. Una jornada de 8 coches: el cliente solo 
 ## Las pruebas
 
 - **En el suelo:** arrancar con la llave (arranque lento, solo «clic», ralentí que tiembla), acelerar (chillido de correa, escape como un tractor, tirones), frenar (chirrido, vibración, pedal esponjoso), girar el volante («clonc», «clac-clac», gemido de la dirección), cuadro de instrumentos con testigos, humo del escape (azul, blanco o negro), empujar la carrocería, presión y desgaste del neumático, faros prueba de luces (cruce, freno, intermitentes, marcha atrás, limpiaparabrisas) y escáner OBD con escaneo de todos los sistemas (motor, cambio, ABS, airbag, carrocería, climatización), códigos y datos en vivo.
-- **Bajo el capó:** batería con multímetro (parado y en marcha), varilla del aceite (nivel y color), depósitos de refrigerante, líquido de frenos y de dirección, correa, filtro de aire, bujía, manguitos, caja de fusibles (filamento de cada fusible) y olor.
+- **Bajo el capó** (cada pieza sale y se ve de cerca con una animación): batería con multímetro (parado y en marcha), varilla del aceite (nivel y color), depósitos de refrigerante, líquido de frenos y de dirección, correa, filtro de aire, bujía, manguitos, caja de fusibles (filamento de cada fusible) y olor.
+- **Ruedas, una a una:** presión con manómetro, dibujo del neumático (se ve el desgaste), llanta y frenos. Para encontrar un pinchazo lento quitas los 5 tornillos, metes la rueda en una cubeta de agua y la giras hasta ver burbujas.
+- **Prueba en carretera:** por baches (bieleta, muelle, amortiguador) y a 100 km/h (llanta doblada, alineación, pinchazo).
+- **Despiece de la suspensión** con el coche levantado: muelle, amortiguador, bieleta, rótulas, fuelle y sensor ABS.
 - **Por debajo:** pastillas y discos, amortiguador, escape, rótulas, fuelles de la transmisión y gotas en el suelo según su color.
 
-## 27 averías
+## 31 averías
 
 Frenos (pastillas, discos alabeados, falta de líquido), motor (bujía o bobina, filtro de aire, junta de culata, segmentos, fuga de aceite, correa), electricidad (batería, alternador, motor de arranque, sonda lambda), refrigeración (manguito con fuga), suspensión y dirección (amortiguador, rótula, homocinética, bomba de dirección), escape roto y ruedas y luces (pinchazo, alineación), ABS y airbag (sensor de rueda, conector del airbag) y luces y fusibles (bombillas de cruce, intermitente y freno, fusible fundido).
 
