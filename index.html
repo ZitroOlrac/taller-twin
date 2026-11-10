@@ -179,6 +179,7 @@ document.querySelectorAll('#pad button').forEach(b=>{const k=b.dataset.k;
   const up=()=>{keys[k]=0;b.classList.remove('on')};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up)});
 function takeAct(){const a=actEdge;actEdge=false;return a}
 
+let hold=null;const ptr={x:0,y:0},UI=[];
 /* ---------- estado ---------- */
 let G;
 let played=false;
@@ -245,7 +246,7 @@ function startRepair(c){
     diag:{wrong:-1},
     rep:{phase:'loosen',order:[],last:-1,cur:-1,tq:0,done:[],hold:0,bad:[]},
     low:{unlocked:false,box:Math.random()<.65,boxX:450,done:false}};
-  $('pad').hidden=false;stepEnter();sfx.ok();
+  stepEnter();sfx.ok();
 }
 function makePoints(){
   const ok=[[-82,-118],[82,-118],[-82,118],[82,118]].map(p=>({x:p[0],y:p[1],ok:true}));
@@ -255,44 +256,46 @@ function makePoints(){
 function mark(k,v){const R=G.R;if(R.k[k]===false)return;if(v===false){R.k[k]=false;return}if(R.k[k]==null)R.k[k]=true}
 function bad(k,txt){const R=G.R;const was=R.k[k];R.k[k]=false;sfx.bad();G.shake=.35;if(txt)setMsg('<b>Cuidado.</b> '+txt);return was!==false}
 function next(){G.R.step++;G.R.t=0;sfx.ok();if(G.R.step>=6)finishRepair();else stepEnter()}
-function padShow(l,u,d,r,act){$('pL').hidden=!l;$('pR').hidden=!r;$('pU').hidden=!u;$('pD').hidden=!d;$('pA').hidden=!act;if(act)$('pA').textContent=act}
+function padShow(l,u,d,r,act){if(G.R)G.R.btn={u:!!u,d:!!d,act:act||''}}
 function stepEnter(){
   const R=G.R,f=R.f;
-  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('Mantén <kbd>▲</kbd> para avanzar y <kbd>◀</kbd> <kbd>▶</kbd> para centrarte. Para dentro de la <b>zona verde</b> y pon el freno de mano con <kbd>Espacio</kbd>.')}
+  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('<b>Mantén pulsado</b> sobre la pista para avanzar y mueve el ratón (o el dedo) a los lados para centrarte. Suelta dentro de la <b>zona verde</b> y pulsa <b>Freno de mano</b>.')}
   if(R.step===1){padShow(0,0,0,0,'');setMsg('Coloca los 4 brazos solo en los <b>puntos reforzados ▲</b> del chasis. Tócalos.')}
-  if(R.step===2){padShow(0,1,1,0,'Comprobar apoyo');setMsg('Sube con <kbd>▲</kbd> hasta <b>20 cm</b> y para. Comprueba que apoya bien con <kbd>Espacio</kbd>.')}
+  if(R.step===2){padShow(0,1,1,0,'Comprobar apoyo');setMsg('<b>Mantén pulsado Subir</b> hasta <b>20 cm</b> y suelta. Luego pulsa <b>Comprobar apoyo</b>.')}
   if(R.step===3){padShow(0,0,0,0,'');setMsg(`El cliente dice: «${f.sym}». Lee la medida, compárala con el valor bueno y elige qué hacer.`)}
   if(R.step===4){padShow(0,0,0,0,'');setMsg(G.first?'Afloja los 5 tornillos <b>en estrella</b>: salta uno cada vez. Empieza por el marcado.':'Afloja los 5 tornillos <b>en estrella</b>: salta uno cada vez.')}
-  if(R.step===5){padShow(0,0,1,0,'Quitar seguro');setMsg('Quita el seguro con <kbd>Espacio</kbd>. Antes de bajar, <b>mira que no haya nada debajo</b>.')}
+  if(R.step===5){padShow(0,0,1,0,'Quitar seguro');setMsg('Pulsa <b>Quitar seguro</b>. Antes de bajar, <b>mira que no haya nada debajo</b>.')}
 }
 function repairUpdate(dt){
   const R=G.R;R.t+=dt;const act=takeAct();
+  const U=keys.up||hold==='up'||hold==='drive', D=keys.down||hold==='down', A=keys.act||hold==='act';
   if(R.step===0){const d=R.drive;
-    if(keys.up)d.v=Math.min(170,d.v+420*dt);else if(keys.down)d.v=Math.max(-110,d.v-420*dt);else d.v*=Math.pow(.015,dt);
+    if(U)d.v=Math.min(170,d.v+420*dt);else if(D)d.v=Math.max(-110,d.v-420*dt);else d.v*=Math.pow(.015,dt);
     d.y-=d.v*dt;d.y=clamp(d.y,120,940);
     d.x+=((keys.right?1:0)-(keys.left?1:0))*130*dt*(Math.abs(d.v)>10?1:.4)+Math.sin(R.t*1.7)*10*dt;
+    if(hold==='drive')d.x+=clamp((ptr.x-d.x)*2.2,-130,130)*dt*(Math.abs(d.v)>10?1:.4);
     d.x=clamp(d.x,330,570);
     const top=d.y-125,bot=d.y+125,inPosts=[[228,282],[438,492]].some(([a,b])=>bot>a&&top<b);
     if(inPosts&&Math.abs(d.x-450)>58){d.x+=(450-d.x)*.5;d.v=-40;d.hit=.5;if(bad('k1','Has golpeado una columna del elevador. Céntrate antes de entrar.'))sfx.bump()}
     d.hit=Math.max(0,d.hit-dt);
     if(act){
-      if(Math.abs(d.v)>25)setMsg('Primero para del todo: suelta <kbd>▲</kbd>.');
+      if(Math.abs(d.v)>25)setMsg('Primero para del todo: suelta el botón.');
       else if(Math.abs(d.y-360)<26){mark('k1',true);mark('k2',true);setMsg('Bien colocado. Freno de mano puesto.');next()}
-      else{R.k.k2=false;sfx.bad();setMsg('Estás fuera de la zona verde. Ajusta con <kbd>▲</kbd> o <kbd>▼</kbd> y vuelve a frenar.')}
+      else{R.k.k2=false;sfx.bad();setMsg('Estás fuera de la zona verde. Avanza un poco más (o atrás con <kbd>▼</kbd>) y vuelve a frenar.')}
     }
   }
   else if(R.step===2){const l=R.lift;
-    if(!l.locked){const dir=(keys.up?1:0)-(keys.down?1:0);l.h=clamp(l.h+dir*.32*dt,0,2);setHum(dir!==0,dir>0?75:60);
+    if(!l.locked){const dir=(U?1:0)-(D?1:0);l.h=clamp(l.h+dir*.32*dt,0,2);setHum(dir!==0,dir>0?75:60);
       if(!l.checked&&l.h>.42&&!l.warned){l.warned=true;l.checked=true;bad('k4','Te has pasado la parada de 20 cm. Siempre se para a comprobar que el coche apoya bien.');padShow(0,1,1,0,'Poner seguro')}
       if(act){
-        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;mark('k4',true);sfx.ok();setMsg('Apoyo correcto. Sigue subiendo hasta la <b>franja verde</b> y pon el seguro.');padShow(0,1,1,0,'Poner seguro')}else{sfx.bad();setMsg('Para cerca de la marca de <b>20 cm</b> para comprobar.')}}
+        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;mark('k4',true);sfx.ok();setMsg('Apoyo correcto. <b>Mantén pulsado Subir</b> hasta la <b>franja verde</b> y pulsa <b>Poner seguro</b>.');padShow(0,1,1,0,'Poner seguro')}else{sfx.bad();setMsg('Para cerca de la marca de <b>20 cm</b> para comprobar.')}}
         else{if(l.h>=1.55&&l.h<=1.85){l.locked=true;setHum(false);mark('k5',true);setMsg('Seguro puesto. A trabajar.');setTimeout(()=>{if(G.R&&G.R.step===2)next()},500)}else{R.k.k5=false;sfx.bad();setMsg('El seguro solo se pone a la altura de trabajo, la <b>franja verde</b>.')}}
       }}
   }
   else if(R.step===4){const r=R.rep;
-    if(r.phase==='swap'){if(keys.act){r.hold+=dt;if(Math.random()<.3)sfx.ratchet()}if(r.hold>=1.6){r.phase='tighten';r.last=-1;r.cur=-1;setMsg(`Pieza nueva puesta. Ahora aprieta en estrella: toca un tornillo y mantén <kbd>Espacio</kbd>. Suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`);padShow(0,0,0,0,'');sfx.ok()}}
+    if(r.phase==='swap'){if(A){r.hold+=dt;if(Math.random()<.3)sfx.ratchet()}if(r.hold>=1.6){r.phase='tighten';r.last=-1;r.cur=-1;setMsg(`Pieza nueva puesta. Aprieta en estrella: <b>mantén pulsado un tornillo</b> y suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`);padShow(0,0,0,0,'');sfx.ok()}}
     if(r.phase==='tighten'&&r.cur>=0){
-      if(keys.act){r.tq+=R.f.hi*.5*dt;if(Math.random()<.35)sfx.ratchet();if(r.tq>R.f.hi*1.35)r.tq=R.f.hi*1.35}
+      if(A){r.tq+=R.f.hi*.5*dt;if(Math.random()<.35)sfx.ratchet();if(r.tq>R.f.hi*1.35)r.tq=R.f.hi*1.35}
       else if(r.tq>0){const t=r.tq;
         if(t<R.f.lo){if(r.tq>R.f.lo*.15)setMsg(`Flojo: ${Math.round(t)} Nm. Sigue apretando hasta ${R.f.lo}–${R.f.hi} Nm.`)}
         else{if(t>R.f.hi){r.bad.push(r.cur);bad('k8',`Sobreapriete: ${Math.round(t)} Nm. Pasarse puede romper la rosca.`)}else{mark('k8',true);sfx.ok()}
@@ -303,8 +306,8 @@ function repairUpdate(dt){
     }
   }
   else if(R.step===5){const l=R.lift,w=R.low;
-    if(act&&!w.unlocked){w.unlocked=true;sfx.click();padShow(0,0,1,0,'');setMsg(w.box?'Seguro quitado. Ojo: hay algo debajo del coche. <b>Tócalo</b> para apartarlo y baja con <kbd>▼</kbd>.':'Seguro quitado. Baja con <kbd>▼</kbd>.')}
-    if(w.unlocked&&!w.done){const dir=keys.down?1:0;l.h=clamp(l.h-dir*.36*dt,0,2);setHum(dir>0,58);
+    if(act&&!w.unlocked){w.unlocked=true;sfx.click();padShow(0,0,1,0,'');setMsg(w.box?'Seguro quitado. Ojo: hay algo debajo del coche. <b>Tócalo</b> para apartarlo y <b>mantén pulsado Bajar</b>.':'Seguro quitado. <b>Mantén pulsado Bajar</b>.')}
+    if(w.unlocked&&!w.done){const dir=D?1:0;l.h=clamp(l.h-dir*.36*dt,0,2);setHum(dir>0,58);
       if(w.box&&l.h<.75){w.box=false;w.crushed=true;bad('k9','Has bajado con la caja de herramientas debajo. Antes de bajar, zona despejada.');sfx.bump()}
       if(l.h<=0){w.done=true;setHum(false);mark('k9',true);setTimeout(()=>{if(G.R&&G.R.step===5)next()},350)}}
   }
@@ -321,12 +324,12 @@ function repairClick(x,y){
     if(r.phase==='loosen'){
       if(want>=0&&i!==want){if(R.k.k7!==false)setMsg('Así no: en estrella se salta un tornillo cada vez.');R.k.k7=false;sfx.bad();if(G.first)return}
       r.order.push(i);r.last=i;sfx.ratchet();sfx.click();
-      if(r.order.length===5){mark('k7',true);r.phase='swap';r.hold=0;padShow(0,0,0,0,'Cambiar pieza (mantén)');setMsg(`Tornillos fuera. Mantén <kbd>Espacio</kbd> para cambiar: ${R.f.part}.`)}
+      if(r.order.length===5){mark('k7',true);r.phase='swap';r.hold=0;padShow(0,0,0,0,'Cambiar pieza (mantén)');setMsg(`Tornillos fuera. <b>Mantén pulsada la pieza</b> para cambiar: ${R.f.part}.`)}
     }else if(r.phase==='tighten'&&r.cur<0){
       if(want>=0&&i!==want&&!r.done.includes(want)){if(R.k.k7!==false)setMsg('En estrella: salta uno cada vez.');R.k.k7=false;sfx.bad();if(G.first)return}
-      r.cur=i;r.tq=0;sfx.click();padShow(0,0,0,0,'Apretar (mantén)');setMsg(`Mantén <kbd>Espacio</kbd> y suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`)}
+      r.cur=i;r.tq=0;sfx.click();padShow(0,0,0,0,'Apretar (mantén)');setMsg(`Mantén pulsado y suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`)}
   }
-  if(R.step===5){const w=R.low;if(w.box&&Math.abs(x-w.boxX)<70&&y>520&&y<640){w.box=false;sfx.click();setMsg('Zona despejada. Ya puedes bajar con <kbd>▼</kbd>.')}}
+  if(R.step===5){const w=R.low;if(w.box&&Math.abs(x-w.boxX)<70&&y>520&&y<615){w.box=false;sfx.click();setMsg('Zona despejada. <b>Mantén pulsado Bajar</b>.')}}
 }
 function boltPos(i){const a=-Math.PI/2+i*2*Math.PI/5;return [450+Math.cos(a)*125,380+Math.sin(a)*125]}
 function boltAt(x,y){for(let i=0;i<5;i++){const [bx,by]=boltPos(i);if(Math.hypot(bx-x,by-y)<34)return i}return -1}
@@ -391,24 +394,81 @@ function txt(t,x,y,col,size,font,al,bl){ctx.fillStyle=col;ctx.font=`${size}px ${
 function wrap(t,x,y,maxW,lh,col,size,font,al){ctx.font=`${size}px ${font||BODY}`;const words=t.split(' ');let line='',yy=y;for(const w of words){const test=line?line+' '+w:w;if(ctx.measureText(test).width>maxW&&line){txt(line,x,yy,col,size,font||BODY,al);line=w;yy+=lh}else line=test}txt(line,x,yy,col,size,font||BODY,al);return yy}
 function hatch(x,y,w,h,col,lw){ctx.save();rr(x,y,w,h,0);ctx.clip();ctx.strokeStyle=col;ctx.lineWidth=lw||8;for(let i=-h;i<w+h;i+=22){ctx.beginPath();ctx.moveTo(x+i,y+h);ctx.lineTo(x+i+h,y);ctx.stroke()}ctx.restore()}
 function floorGrid(x0,y0,w,h){ctx.fillStyle=C.floor;ctx.fillRect(x0,y0,w,h);ctx.strokeStyle='rgba(255,255,255,.035)';ctx.lineWidth=1;for(let x=x0;x<x0+w;x+=48){ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y0+h);ctx.stroke()}for(let y=y0;y<y0+h;y+=48){ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x0+w,y);ctx.stroke()}}
+function shade(hex,amt){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const t=amt<0?0:255,k=Math.abs(amt);r=Math.round(r+(t-r)*k);g=Math.round(g+(t-g)*k);b=Math.round(b+(t-b)*k);return `rgb(${r},${g},${b})`}
+/* coche visto desde arriba, morro hacia +x */
 function carTop(x,y,len,wid,color,rot,glow){
+  const L=len/2,Wd=wid/2;
   ctx.save();ctx.translate(x,y);ctx.rotate(rot||0);
-  ctx.fillStyle='#0c0f11';[[.3,.5],[.3,-.5],[-.3,.5],[-.3,-.5]].forEach(([a,b])=>{rr(len*a-len*.08,wid*b-wid*.09,len*.16,wid*.18,3);ctx.fill()});
-  if(glow){ctx.shadowColor=C.amber;ctx.shadowBlur=24}
-  rr(-len/2,-wid/2,len,wid,wid*.3);ctx.fillStyle=color;ctx.fill();ctx.shadowBlur=0;
-  ctx.lineWidth=glow?3:1.5;ctx.strokeStyle=glow?C.amber:'rgba(0,0,0,.5)';ctx.stroke();
-  ctx.fillStyle='rgba(12,20,28,.62)';rr(len*.1,-wid*.38,len*.17,wid*.76,7);ctx.fill();rr(-len*.37,-wid*.35,len*.12,wid*.7,6);ctx.fill();
-  ctx.fillStyle='rgba(255,255,255,.13)';rr(-len*.23,-wid*.37,len*.31,wid*.74,8);ctx.fill();
-  ctx.fillStyle='rgba(255,240,200,.85)';ctx.fillRect(len*.47,-wid*.36,len*.03,wid*.18);ctx.fillRect(len*.47,wid*.18,len*.03,wid*.18);
+  // sombra en el suelo
+  ctx.save();ctx.filter='blur(6px)';ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(3,5,L*1.0,Wd*1.0,0,0,7);ctx.fill();ctx.restore();
+  // ruedas asomando
+  ctx.fillStyle='#090b0c';[[.62,1],[.62,-1],[-.6,1],[-.6,-1]].forEach(([a,s])=>{rr(L*a-len*.085,s*Wd*.9-wid*.08,len*.17,wid*.16,4);ctx.fill()});
+  // carrocería
+  const body=()=>{ctx.beginPath();ctx.moveTo(-L*.86,-Wd);ctx.lineTo(L*.6,-Wd);ctx.bezierCurveTo(L*.88,-Wd,L,-Wd*.78,L,-Wd*.38);ctx.lineTo(L,Wd*.38);ctx.bezierCurveTo(L,Wd*.78,L*.88,Wd,L*.6,Wd);ctx.lineTo(-L*.86,Wd);ctx.bezierCurveTo(-L*.98,Wd,-L,Wd*.82,-L,Wd*.5);ctx.lineTo(-L,-Wd*.5);ctx.bezierCurveTo(-L,-Wd*.82,-L*.98,-Wd,-L*.86,-Wd);ctx.closePath()};
+  const g=ctx.createLinearGradient(0,-Wd,0,Wd);g.addColorStop(0,shade(color,-.45));g.addColorStop(.18,shade(color,-.05));g.addColorStop(.45,shade(color,.22));g.addColorStop(.62,color);g.addColorStop(.86,shade(color,-.15));g.addColorStop(1,shade(color,-.5));
+  body();if(glow){ctx.shadowColor=C.amber;ctx.shadowBlur=26}ctx.fillStyle=g;ctx.fill();ctx.shadowBlur=0;
+  ctx.lineWidth=glow?3:1.2;ctx.strokeStyle=glow?C.amber:'rgba(0,0,0,.55)';ctx.stroke();
+  // nervios del capó
+  ctx.strokeStyle='rgba(0,0,0,.18)';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(L*.34,-Wd*.42);ctx.quadraticCurveTo(L*.7,-Wd*.36,L*.94,-Wd*.3);ctx.moveTo(L*.34,Wd*.42);ctx.quadraticCurveTo(L*.7,Wd*.36,L*.94,Wd*.3);ctx.stroke();
+  // lunas
+  const glass=(x0,x1,a0,a1)=>{const gg=ctx.createLinearGradient(x0,-Wd,x1,Wd);gg.addColorStop(0,'#1d2b38');gg.addColorStop(.5,'#3b5266');gg.addColorStop(1,'#141d26');ctx.fillStyle=gg;ctx.beginPath();ctx.moveTo(x1,-Wd*a1);ctx.lineTo(x1,Wd*a1);ctx.lineTo(x0,Wd*a0);ctx.lineTo(x0,-Wd*a0);ctx.closePath();ctx.fill()};
+  glass(L*.04,L*.32,.82,.66);
+  glass(-L*.64,-L*.46,.66,.78);
+  ctx.fillStyle='#16202a';ctx.fillRect(-L*.46,-Wd*.9,L*.5,Wd*.1);ctx.fillRect(-L*.46,Wd*.8,L*.5,Wd*.1);
+  // techo
+  const rg=ctx.createLinearGradient(0,-Wd*.8,0,Wd*.8);rg.addColorStop(0,shade(color,-.2));rg.addColorStop(.4,shade(color,.3));rg.addColorStop(1,shade(color,-.25));
+  ctx.fillStyle=rg;rr(-L*.46,-Wd*.78,L*.5,Wd*1.56,Wd*.25);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.14)';ctx.beginPath();ctx.moveTo(L*.28,-Wd*.6);ctx.lineTo(L*.2,-Wd*.6);ctx.lineTo(L*.1,Wd*.2);ctx.lineTo(L*.16,Wd*.2);ctx.closePath();ctx.fill();
+  // retrovisores
+  ctx.fillStyle=shade(color,-.2);[-1,1].forEach(s=>{ctx.beginPath();ctx.ellipse(L*.2,s*Wd*1.06,len*.025,wid*.07,0,0,7);ctx.fill()});
+  // faros y pilotos
+  ctx.fillStyle='#f6f2df';[-1,1].forEach(s=>{ctx.beginPath();ctx.ellipse(L*.93,s*Wd*.64,len*.022,wid*.14,0,0,7);ctx.fill()});
+  ctx.fillStyle='#c8261d';[-1,1].forEach(s=>{rr(-L*.995,s*Wd*.64-wid*.11,len*.022,wid*.22,2);ctx.fill()});
+  ctx.fillStyle='rgba(0,0,0,.45)';rr(L*.965,-Wd*.3,len*.02,Wd*.6,2);ctx.fill();
   ctx.restore();
 }
+/* coche de perfil, morro a la derecha; yb = suelo bajo las ruedas */
 function carSide(x,yb,len,color){
-  const h=len*.22;ctx.fillStyle='#0c0f11';
-  ctx.beginPath();ctx.arc(x-len*.3,yb-h*.05,len*.1,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+len*.3,yb-h*.05,len*.1,0,7);ctx.fill();
-  ctx.fillStyle='#8a939a';ctx.beginPath();ctx.arc(x-len*.3,yb-h*.05,len*.045,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+len*.3,yb-h*.05,len*.045,0,7);ctx.fill();
-  ctx.fillStyle=color;rr(x-len/2,yb-h*1.05,len,h*.75,12);ctx.fill();
-  ctx.beginPath();ctx.moveTo(x-len*.32,yb-h*1.0);ctx.lineTo(x-len*.2,yb-h*1.7);ctx.lineTo(x+len*.14,yb-h*1.7);ctx.lineTo(x+len*.3,yb-h*1.0);ctx.closePath();ctx.fill();
-  ctx.fillStyle='rgba(12,20,28,.6)';ctx.beginPath();ctx.moveTo(x-len*.27,yb-h*1.05);ctx.lineTo(x-len*.18,yb-h*1.6);ctx.lineTo(x+len*.12,yb-h*1.6);ctx.lineTo(x+len*.25,yb-h*1.05);ctx.closePath();ctx.fill();
+  const Hh=len*.3,rw=len*.105,xf=x+len*.31,xr=x-len*.31,cy=yb-rw;
+  ctx.save();ctx.filter='blur(5px)';ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPath();ctx.ellipse(x,yb+2,len*.5,8,0,0,7);ctx.fill();ctx.restore();
+  // carrocería
+  ctx.beginPath();
+  ctx.moveTo(x-len*.5,yb-rw*.5);ctx.lineTo(x-len*.5,yb-Hh*.58);
+  ctx.quadraticCurveTo(x-len*.5,yb-Hh*.7,x-len*.43,yb-Hh*.72);
+  ctx.bezierCurveTo(x-len*.36,yb-Hh*.76,x-len*.3,yb-Hh*1.02,x-len*.22,yb-Hh*1.04);
+  ctx.lineTo(x+len*.06,yb-Hh*1.04);
+  ctx.bezierCurveTo(x+len*.12,yb-Hh*1.02,x+len*.2,yb-Hh*.78,x+len*.27,yb-Hh*.7);
+  ctx.bezierCurveTo(x+len*.38,yb-Hh*.66,x+len*.47,yb-Hh*.64,x+len*.49,yb-Hh*.52);
+  ctx.quadraticCurveTo(x+len*.51,yb-rw*.9,x+len*.49,yb-rw*.5);
+  ctx.closePath();
+  const g=ctx.createLinearGradient(0,yb-Hh*1.04,0,yb);g.addColorStop(0,shade(color,.25));g.addColorStop(.35,shade(color,.12));g.addColorStop(.42,color);g.addColorStop(.75,shade(color,-.12));g.addColorStop(1,shade(color,-.5));
+  ctx.fillStyle=g;ctx.fill();ctx.lineWidth=1.2;ctx.strokeStyle='rgba(0,0,0,.5)';ctx.stroke();
+  // lunas laterales
+  const wg=ctx.createLinearGradient(0,yb-Hh,0,yb-Hh*.72);wg.addColorStop(0,'#41596d');wg.addColorStop(1,'#16202a');ctx.fillStyle=wg;
+  ctx.beginPath();ctx.moveTo(x-len*.37,yb-Hh*.74);ctx.bezierCurveTo(x-len*.31,yb-Hh*.8,x-len*.27,yb-Hh*.97,x-len*.21,yb-Hh*.98);ctx.lineTo(x+len*.05,yb-Hh*.98);ctx.bezierCurveTo(x+len*.1,yb-Hh*.96,x+len*.16,yb-Hh*.8,x+len*.22,yb-Hh*.74);ctx.closePath();ctx.fill();
+  ctx.fillStyle=shade(color,-.1);ctx.fillRect(x-len*.085,yb-Hh*1.0,len*.022,Hh*.28);ctx.fillRect(x-len*.27,yb-Hh*.95,len*.02,Hh*.22);
+  ctx.fillStyle='rgba(255,255,255,.18)';ctx.beginPath();ctx.moveTo(x-len*.02,yb-Hh*.96);ctx.lineTo(x+len*.02,yb-Hh*.96);ctx.lineTo(x-len*.04,yb-Hh*.76);ctx.lineTo(x-len*.08,yb-Hh*.76);ctx.closePath();ctx.fill();
+  // línea de cintura, puertas y tiradores
+  ctx.strokeStyle='rgba(255,255,255,.22)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-len*.46,yb-Hh*.66);ctx.lineTo(x+len*.44,yb-Hh*.6);ctx.stroke();
+  ctx.strokeStyle='rgba(0,0,0,.35)';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(x-len*.085,yb-Hh*.72);ctx.lineTo(x-len*.09,yb-rw*.75);ctx.moveTo(x+len*.17,yb-Hh*.73);ctx.quadraticCurveTo(x+len*.15,yb-Hh*.4,x+len*.16,yb-rw*.75);ctx.moveTo(x-len*.3,yb-Hh*.73);ctx.lineTo(x-len*.29,yb-rw*.9);ctx.stroke();
+  ctx.fillStyle='rgba(0,0,0,.4)';rr(x-len*.04,yb-Hh*.6,len*.045,4,2);ctx.fill();rr(x-len*.25,yb-Hh*.6,len*.045,4,2);ctx.fill();
+  ctx.fillStyle=shade(color,-.25);ctx.beginPath();ctx.ellipse(x+len*.2,yb-Hh*.72,len*.022,Hh*.06,0,0,7);ctx.fill();
+  // faros, pilotos, paragolpes, talonera
+  ctx.fillStyle='#f6f2df';ctx.beginPath();ctx.moveTo(x+len*.42,yb-Hh*.62);ctx.lineTo(x+len*.49,yb-Hh*.56);ctx.lineTo(x+len*.49,yb-Hh*.5);ctx.lineTo(x+len*.41,yb-Hh*.54);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#c8261d';rr(x-len*.505,yb-Hh*.62,len*.03,Hh*.12,3);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.45)';rr(x-len*.5,yb-rw*.85,len*.06,rw*.35,4);ctx.fill();rr(x+len*.44,yb-rw*.85,len*.06,rw*.35,4);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.3)';ctx.fillRect(xr+rw*1.1,yb-rw*.62,(xf-xr)-rw*2.2,rw*.14);
+  // pasos de rueda y ruedas
+  [xr,xf].forEach(wx=>{
+    ctx.fillStyle='#0a0c0e';ctx.beginPath();ctx.arc(wx,cy,rw*1.16,Math.PI,0);ctx.lineTo(wx+rw*1.16,yb-rw*.5);ctx.lineTo(wx-rw*1.16,yb-rw*.5);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#121416';ctx.beginPath();ctx.arc(wx,cy,rw,0,7);ctx.fill();
+    ctx.strokeStyle='#26292c';ctx.lineWidth=rw*.12;ctx.beginPath();ctx.arc(wx,cy,rw*.86,0,7);ctx.stroke();
+    const rgm=ctx.createRadialGradient(wx-rw*.2,cy-rw*.2,rw*.05,wx,cy,rw*.64);rgm.addColorStop(0,'#e6eaed');rgm.addColorStop(.7,'#9aa3aa');rgm.addColorStop(1,'#5d666d');
+    ctx.fillStyle=rgm;ctx.beginPath();ctx.arc(wx,cy,rw*.62,0,7);ctx.fill();
+    ctx.strokeStyle='#4a5258';ctx.lineWidth=rw*.13;for(let k=0;k<5;k++){const a=k*Math.PI*2/5-Math.PI/2;ctx.beginPath();ctx.moveTo(wx+Math.cos(a)*rw*.16,cy+Math.sin(a)*rw*.16);ctx.lineTo(wx+Math.cos(a)*rw*.56,cy+Math.sin(a)*rw*.56);ctx.stroke()}
+    ctx.fillStyle='#3a4146';ctx.beginPath();ctx.arc(wx,cy,rw*.14,0,7);ctx.fill();
+    ctx.fillStyle='#8b1f18';rr(wx-rw*.5,cy-rw*.62,rw*.22,rw*.36,3);ctx.fill();
+  });
 }
 function pbar(x,y,w,h,p,col){ctx.fillStyle='rgba(0,0,0,.45)';rr(x,y,w,h,h/2);ctx.fill();ctx.fillStyle=col;rr(x,y,Math.max(h,w*clamp(p,0,1)),h,h/2);ctx.fill()}
 function arrow(x,y){const b=Math.sin(T*6)*8;ctx.fillStyle=C.amber;ctx.beginPath();ctx.moveTo(x,y+b);ctx.lineTo(x-16,y-22+b);ctx.lineTo(x+16,y-22+b);ctx.closePath();ctx.fill()}
@@ -486,7 +546,7 @@ function drawRepair(){
     ctx.fillStyle='#2b343b';ctx.fillRect(0,ground,900,H-ground);hatch(0,ground,900,8,C.amber,4);
     ctx.fillStyle='#4b5760';ctx.fillRect(120,240,34,ground-240);ctx.fillRect(626,240,34,ground-240);
     ctx.fillStyle=C.amber;ctx.fillRect(150,py-6,110,10);ctx.fillRect(520,py-6,110,10);ctx.fillRect(136,py-16,22,26);ctx.fillRect(622,py-16,22,26);
-    carSide(390,py-10,460,R.car.color);
+    carSide(390,py+24,460,R.car.color);
     if(R.step===5&&R.low.box){ctx.fillStyle='#b8322a';rr(R.low.boxX-55,ground-58,110,58,6);ctx.fill();ctx.fillStyle='#7d1f19';ctx.fillRect(R.low.boxX-55,ground-40,110,6);ctx.fillStyle='#d7d7d7';ctx.fillRect(R.low.boxX-14,ground-68,28,10);
       if(R.low.unlocked){ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.setLineDash([6,5]);rr(R.low.boxX-66,ground-80,132,86,8);ctx.stroke();ctx.setLineDash([])}}
     if(R.low&&R.low.crushed&&R.step===5){ctx.fillStyle='#7d1f19';rr(R.low.boxX-62,ground-14,124,14,3);ctx.fill()}
@@ -531,7 +591,22 @@ function drawRepair(){
       txt(Math.round(r.tq)+' Nm',cx0,cy0+36,C.fg,24,MONO,'center');txt(f.lo+'–'+f.hi+' Nm',cx0,cy0+64,C.ok,15,MONO,'center');txt('LLAVE DINAMOMÉTRICA',cx0,cy0-rad-24,C.muted,14,DISP,'center')}
   }
   ctx.restore();
+  drawButtons();
   drawPanel();
+}
+function drawButtons(){
+  const R=G.R,b=R.btn||{};UI.length=0;
+  if(R.step===0)UI.push({x:40,y:620,w:250,h:70,label:'FRENO DE MANO',tap:1});
+  if(R.step===2||R.step===5){
+    if(b.u)UI.push({x:40,y:626,w:150,h:68,label:'▲ SUBIR',key:'up'});
+    if(b.d)UI.push({x:206,y:626,w:150,h:68,label:'▼ BAJAR',key:'down'});
+    if(b.act)UI.push({x:372,y:626,w:250,h:68,label:b.act.toUpperCase(),tap:1});
+  }
+  UI.forEach(u=>{const on=(!u.tap&&hold===u.key)||(u.key==='up'&&keys.up)||(u.key==='down'&&keys.down);
+    ctx.fillStyle=u.tap?C.amber:on?'#3a4650':C.panel2;rr(u.x,u.y,u.w,u.h,12);ctx.fill();
+    ctx.lineWidth=2;ctx.strokeStyle=u.tap?C.amber:on?C.amber:C.line;ctx.stroke();
+    txt(u.label,u.x+u.w/2,u.y+u.h/2+1,u.tap?C.ink:C.fg,22,DISP,'center');
+    if(!u.tap)txt('mantén pulsado',u.x+u.w/2,u.y+u.h-11,C.muted,11,BODY,'center')});
 }
 function drawFX(dt){
   G.floats=G.floats.filter(f=>(f.life-=dt)>0);G.floats.forEach(f=>{ctx.globalAlpha=Math.min(1,f.life);txt(f.t,f.x,f.y-(1.6-f.life)*60,f.col,34,DISP,'center');ctx.globalAlpha=1});
@@ -560,11 +635,21 @@ function hud(){
   const avg=G.stars.length?G.stars.reduce((a,b)=>a+b,0)/G.stars.length:null;$('hStars').textContent=avg==null?'–':avg.toFixed(1).replace('.',',')+' ★';
   $('hWait').textContent=G.queue.length;$('hWaitBox').classList.toggle('warn',G.queue.some(c=>c.pat<.3));
 }
+function ptrXY(e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]}
 cv.addEventListener('pointerdown',e=>{
-  audio();const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;
+  audio();const [x,y]=ptrXY(e);ptr.x=x;ptr.y=y;
   if(G.paused||!$('ov').hidden)return;
-  if(G.phase==='shop')shopClick(x,y);else if(G.phase==='repair')repairClick(x,y);
+  if(G.phase==='shop'){shopClick(x,y);return}
+  if(G.phase!=='repair'||!G.R)return;
+  e.preventDefault();try{cv.setPointerCapture(e.pointerId)}catch(_){}
+  const b=UI.find(b=>x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h);
+  if(b){if(b.tap){actEdge=true;sfx.click()}else hold=b.key;return}
+  const R=G.R;repairClick(x,y);
+  if(R.step===0&&x<900)hold='drive';
+  if(R.step===4){const r=R.rep;if(r.phase==='swap'&&Math.hypot(x-450,y-380)<200)hold='act';if(r.phase==='tighten'&&r.cur>=0&&boltAt(x,y)===r.cur)hold='act'}
 });
+cv.addEventListener('pointermove',e=>{const [x,y]=ptrXY(e);ptr.x=x;ptr.y=y});
+['pointerup','pointercancel','lostpointercapture'].forEach(ev=>cv.addEventListener(ev,()=>{hold=null}));
 $('bPause').addEventListener('click',()=>{G.paused=!G.paused;$('bPause').setAttribute('aria-pressed',String(G.paused));$('bPause').textContent=G.paused?'Seguir':'Pausa';setHum(false)});
 $('bSound').addEventListener('click',()=>{soundOn=!soundOn;$('bSound').setAttribute('aria-pressed',String(soundOn));$('bSound').textContent='Sonido: '+(soundOn?'sí':'no');if(!soundOn)setHum(false);else{audio();sfx.click()}});
 
@@ -573,7 +658,7 @@ newShift();
 openModal({eyebrow:'Simulador de taller · turno de mañana',title:'Tú llevas el taller y el elevador 1',
   body:`<p>Llegan clientes con averías. Decide quién repara cada coche y, en tu elevador, <b>hazlo tú con tus manos</b>: mételo, súbelo, diagnostica y aprieta. Igual que en un taller de verdad, se evalúa la seguridad.</p>
   <div class="how"><div><b>1 · Reparte</b>Toca un coche y luego un elevador.</div><div><b>2 · Repara</b>6 pasos guiados, con nota y estrellas.</div><div><b>3 · No hagas esperar</b>Si se acaba la paciencia, el cliente se va.</div></div>
-  <p style="color:var(--muted);font-size:13.5px">Mandos: <kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd> o WASD y <kbd>Espacio</kbd>. En el móvil, botones en pantalla. El turno dura unos 6 minutos.</p>`,
+  <p style="color:var(--muted);font-size:13.5px">Todo se hace con el ratón o el dedo: <b>mantén pulsado</b> para conducir, subir, bajar y apretar. También vale el teclado: flechas y <kbd>Espacio</kbd>. El turno dura unos 6 minutos.</p>`,
   buttons:[{label:'Empezar turno',primary:true,fn:()=>{audio();sfx.ok()}}]});
 resize();hud();requestAnimationFrame(frame);
 })();
