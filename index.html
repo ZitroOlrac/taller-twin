@@ -252,6 +252,7 @@ function allTonesOff(){Object.keys(tones).forEach(k=>{tones[k].f?noise(k,false):
 const keys={up:0,down:0,act:0};let actEdge=false,hold=null;const ptr={x:0,y:0},UI=[];
 const KM={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',Space:'act'};
 window.addEventListener('keydown',e=>{const k=KM[e.code];if(!k||!$('ov').hidden)return;e.preventDefault();audio();if(k==='act'&&!keys.act)actEdge=true;keys[k]=1});
+window.addEventListener('keydown',e=>{if(e.code==='Escape'&&$('ov').hidden&&G&&G.R&&closeTop())e.preventDefault()});
 window.addEventListener('keyup',e=>{const k=KM[e.code];if(k)keys[k]=0});
 window.addEventListener('blur',()=>{for(const k in keys)keys[k]=0;hold=null;allTonesOff()});
 function takeAct(){const a=actEdge;actEdge=false;return a}
@@ -284,9 +285,14 @@ function stepEnter(){const R=G.R;
 /* ================= PRUEBAS ================= */
 function startEngine(){const e=G.R.eng;if(e.on||e.crank>0)return;e.crank=fx('click')?2.2:fx('slowcrank')?2.4:fx('longcrank')?3.2:1.1;e.fails=fx('click')?1:0}
 function needEngine(){if(!G.R.eng.on){setMsg('Primero arranca el motor con la <b>llave</b>.');sfx.bad();return true}return false}
+function anyOverlay(){const R=G.R,s=R.insp;return !!(s.anim||s.fuses||R.wv||s.scan||s.lamps||s.hood)}
+function closeTop(){const R=G.R,s=R.insp;if(!R)return false;
+  if(s.anim){s.anim=null}else if(s.fuses){s.fuses=null}else if(R.wv){R.wv=null;noise('water',false)}else if(s.scan){s.scan=null}else if(s.lamps){s.lamps=null;noise('wipe',false)}else if(s.hood){s.hood=false}else return false;
+  sfx.click();return true}
 function has0(k){return G.R.car.faults.includes(k)}
 function objTap(id){
   const R=G.R,s=R.insp;
+  if(id==='xclose'){closeTop();return}
   if(id==='key'){if(R.eng.on){R.eng.on=false;R.eng.rpm=0;allTonesOff();if(s.scan){s.scan=null;setMsg('Has apagado el motor: el escáner pierde la comunicación.')}sfx.click()}else startEngine();return}
   if(id==='dash'){s.dash=3.5;note('dash');return}
   if(id==='hood'){s.hood=true;sfx.click();return}
@@ -459,7 +465,7 @@ function drawScanner(){
       const act=d.filter(x=>x.state==='ACTIVO').length,t=na?'NO EQUIPADO':d.length?d.length+(d.length===1?' código':' códigos'):'OK';
       ctx.fillStyle=na?'#26333a':act?'#5a1f1b':d.length?'#4a3a14':'#163a28';rr(586,y+10,140,28,14);ctx.fill();
       txt(t,656,y+24,na?'#8aa3b0':act?'#ffb3ab':d.length?'#ffd27a':'#8ff0b4',13,MONO,'center')});
-    if(sc.t>1.4+SYS.length*.22)return}
+    return}
   const k=sc.sys,d=dtcs(k);scr(SYSN[k].toUpperCase(),170,96,'#4fc3f7',16);
   if(k==='motor'){[['codes','CÓDIGOS'],['live','DATOS EN VIVO']].forEach(([t,l],i)=>{const x=500+i*124;ctx.fillStyle=sc.tab===t?'#4fc3f7':'#16262d';rr(x,82,116,28,6);ctx.fill();txt(l,x+58,96,sc.tab===t?'#0f1a1f':'#bfe9ff',13,MONO,'center')})}
   if(k==='motor'&&sc.tab==='live'){
@@ -1049,6 +1055,7 @@ function drawPanel(){
 }
 function drawButtons(){
   const R=G.R;UI.length=0;
+  if(anyOverlay()){UI.push({x:842,y:14,w:56,h:56,id:'xclose'});ctx.fillStyle=C.amber;ctx.beginPath();ctx.arc(870,42,24,0,7);ctx.fill();ctx.strokeStyle=C.ink;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(861,33);ctx.lineTo(879,51);ctx.moveTo(879,33);ctx.lineTo(861,51);ctx.stroke();ctx.lineCap='butt';txt('cerrar',870,78,C.amber,12,DISP,'center')}
   if(R.step===0){const d=R.drive;
     if(d.v<25&&d.y<760){const ix=d.x+120,iy=d.y;UI.push({x:ix-40,y:iy-40,w:80,h:80,tap:1});
       ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(ix,iy,32+4*Math.sin(T*6),0,7);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=C.bad;ctx.stroke();
