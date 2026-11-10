@@ -19,7 +19,7 @@ Cada paso crítico mal hecho quita estrellas y dinero. Los coches que pasas a lo
 
 ## Mandos
 
-Todo se juega con el ratón o el dedo, manteniendo pulsado: sobre la pista para conducir, en Subir y Bajar para mover el elevador, sobre la pieza para cambiarla y sobre cada tornillo para apretarlo con la llave dinamométrica. También funciona con teclado (flechas y Espacio).
+Todo se juega tocando las cosas del taller con el ratón o el dedo, como en la realidad: mantén pulsado sobre la pista para conducir, toca la P del freno de mano, usa la botonera de la columna para subir y bajar, toca el brazo para comprobar el apoyo y el candado para el seguro, y mantén pulsada la rueda o cada tornillo para cambiar la pieza y apretar. También funciona con teclado (flechas y Espacio).
 
 ## Cómo está hecho
 
