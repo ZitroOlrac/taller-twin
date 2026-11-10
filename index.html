@@ -269,17 +269,16 @@ function nextCase(){
     insp:{gas:0,brake:0,wheel:0,ang:0,clonc:0,bounce:null,hood:false,chk:{},dash:0,lights:0,smoke:0,brakeDip:0,scan:null,lamps:null,fuses:null,anim:null,road:0},
     lift:{h:0,checked:false,locked:false,warned:false},under:{chk:{}},wv:null,hl:null};
   G.parts=[];allTonesOff();
-  setMsg(G.n===1?'Primer caso. El coche entra solo al elevador. Cuando pare, toca la <b>P</b> del freno de mano.':`Caso ${G.n}. Llega un ${car.model}. Toca la <b>P</b> cuando pare.`);
+  setMsg(`Caso ${G.n} de ${CASES}: ${car.model}.`);
 }
 let msgHTML='';function setMsg(h){if(h!==msgHTML){msgHTML=h;$('msg').innerHTML=h}}
 function toast(t,cls){G.toast={t,cls,life:3}}
-function note(id){const R=G.R;if(R.notes.some(n=>n.id===id))return false;const t=clue(id);R.notes.push({id,t});R.last={t,life:4.5};sfx.note();
-  if(G.n===1&&R.notes.length===5&&R.step===1)setMsg('Bien, ya tienes 5 pistas. Sigue probando o toca <b>Levantar</b> para mirar por debajo.');return true}
+function note(id){const R=G.R;if(R.notes.some(n=>n.id===id))return false;const t=clue(id);R.notes.push({id,t});R.last={t,life:4.5};sfx.note();return true}
 function next(){const R=G.R;R.step++;R.t=0;allTonesOff();R.eng.on=false;R.eng.rpm=0;stepEnter()}
 function stepEnter(){const R=G.R;
-  if(R.step===1)setMsg(`El cliente dice: «${R.car.says}». <b>Investiga.</b> Gira la <b>llave</b> para arrancar, escucha, pisa el <b>acelerador</b> y el <b>freno</b>, gira el <b>volante</b>, sal a la <b>carretera</b>, mira el <b>cuadro</b>, las <b>luces</b>, las <b>ruedas</b>, el <b>escape</b> y el <b>charco</b>, empuja el coche, abre el <b>capó</b> y conecta el <b>escáner</b>…`);
-  if(R.step===2)setMsg('En la botonera, <b>mantén pulsado ▲</b> hasta <b>20 cm</b> y suelta. Luego <b>toca un brazo</b> para comprobar que apoya bien.');
-  if(R.step===3)setMsg('Mira por debajo: toca la <b>rueda</b> para ver el despiece de la suspensión, el <b>amortiguador</b> trasero, el <b>escape</b> y el <b>goteo</b> al suelo. Cuando lo tengas claro, toca el <b>informe</b>.');
+  if(R.step===1)setMsg(`El cliente dice: «${R.car.says}».`);
+  if(R.step===2)setMsg('');
+  if(R.step===3)setMsg('');
 }
 
 /* ================= PRUEBAS ================= */
@@ -288,42 +287,42 @@ function needEngine(){if(!G.R.eng.on){setMsg('Primero arranca el motor con la <b
 function has0(k){return G.R.car.faults.includes(k)}
 function objTap(id){
   const R=G.R,s=R.insp;
-  if(id==='key'){if(R.eng.on){R.eng.on=false;R.eng.rpm=0;allTonesOff();setMsg('Motor apagado.');sfx.click()}else startEngine();return}
+  if(id==='key'){if(R.eng.on){R.eng.on=false;R.eng.rpm=0;allTonesOff();sfx.click()}else startEngine();return}
   if(id==='dash'){s.dash=3.5;note('dash');return}
-  if(id==='hood'){s.hood=true;sfx.click();setMsg('Capó abierto. Toca la <b>batería</b>, la <b>varilla</b>, los <b>depósitos</b>, la <b>correa</b>, el <b>filtro</b>, la <b>bujía</b>, los <b>manguitos</b> o <b>huele</b>.');return}
+  if(id==='hood'){s.hood=true;sfx.click();return}
   if(id==='close'){s.hood=false;sfx.click();return}
   if(id==='push'){if(!s.bounce){s.bounce={t:0};beep(120,.1,'triangle',.15)}return}
-  if(id==='tail'){if(needEngine())return;s.smoke=3;setMsg('Miras el escape con el motor en marcha. Pisa el <b>acelerador</b> para ver mejor el humo.');setTimeout(()=>{if(G.R===R)note('smoke')},1300);return}
+  if(id==='tail'){if(needEngine())return;s.smoke=3;setTimeout(()=>{if(G.R===R)note('smoke')},1300);return}
   if(id==='fuelcap'){note('fuelcap');beep(has0('evap')?240:900,.06,'square',.05);return}
-  if(id==='tyre'||id==='wheelview'){R.wv={w:'DI',phase:'view',bolts:{},rot:0,chk:{}};sfx.click();setMsg(R.step===3?'Despiece de la rueda y la suspensión. Elige la rueda arriba y toca cada pieza para revisarla.':'Elige la rueda arriba. Mide la presión, mira el dibujo y la llanta. Si sospechas un pinchazo, quita los tornillos y prueba la rueda en la cubeta de agua.');return}
-  if(id==='lamps'){s.lamps={fn:null,t:0};sfx.click();setMsg('Prueba de luces. Toca cada interruptor y mira delante y detrás.');return}
+  if(id==='tyre'||id==='wheelview'){R.wv={w:'DI',phase:'view',bolts:{},rot:0,chk:{}};sfx.click();return}
+  if(id==='lamps'){s.lamps={fn:null,t:0};sfx.click();return}
   if(id==='lampsclose'){s.lamps=null;tone('wipe',false);sfx.click();return}
   if(id.startsWith('lamp-')){const k=id.slice(5);s.lamps.fn=k;s.lamps.t=2.6;s.lamps.tick=0;sfx.click();setTimeout(()=>{if(G.R===R&&s.lamps&&s.lamps.fn===k)noteT('lamp-'+k,LAMPTXT[k](lampState()))},1400);return}
-  if(id==='obd'){s.scan={phase:'connect',t:0,sys:null,tab:'codes'};sfx.click();setMsg('Escáner conectado al enchufe OBD. Espera al escaneo de todos los sistemas. Puedes acelerar mientras miras los datos en vivo.');return}
+  if(id==='obd'){s.scan={phase:'connect',t:0,sys:null,tab:'codes'};sfx.click();return}
   if(id==='scanclose'){s.scan=null;sfx.click();return}
   if(id==='scanback'){if(s.scan)s.scan.sys=null;sfx.click();return}
-  if(id==='scanclear'){R.clr={since:0};sfx.ok();noteT('clear','Escáner: códigos borrados. Toca arrancar y esperar para ver cuáles vuelven');setMsg('Códigos borrados. Deja el motor en marcha unos segundos y vuelve a mirar: <b>solo vuelven los fallos reales</b>.');return}
-  if(id==='tab-codes'||id==='tab-live'){s.scan.tab=id.slice(4);sfx.click();if(s.scan.tab==='live'&&R.eng.on)setTimeout(()=>{if(G.R===R&&s.scan&&s.scan.tab==='live')noteT('live',liveNote())},1500);return}
+  if(id==='scanclear'){R.clr={since:0};sfx.ok();noteT('clear','Escáner: códigos borrados. Toca arrancar y esperar para ver cuáles vuelven');setMsg(R.eng.on?'':'Códigos borrados. Para que vuelvan los reales, el motor tiene que estar en marcha.');return}
+  if(id==='tab-codes'||id==='tab-live'){s.scan.tab=id.slice(4);sfx.click();if(s.scan.tab==='live'&&!R.eng.on)setMsg('Para ver datos en vivo, primero arranca el motor con la <b>llave</b>.');if(s.scan.tab==='live'&&R.eng.on)setTimeout(()=>{if(G.R===R&&s.scan&&s.scan.tab==='live')noteT('live',liveNote())},1500);return}
   if(id.startsWith('sys-')){const k=id.slice(4);s.scan.sys=k;s.scan.tab='codes';sfx.click();
     if(sysNA(k)){noteT('scan-'+k,'Escáner · Dirección asistida: no equipada (dirección hidráulica, sin centralita)');return}
     const d=dtcs(k),txt2=d.length?d.map(x=>x.code+' '+x.desc.charAt(0).toLowerCase()+x.desc.slice(1)+(x.state==='HISTÓRICO'?' (histórico)':'')).join(' · '):'sin códigos';
     if(R.clr){if(R.clr.since>=5)noteT('scan2-'+k,'Tras borrar y arrancar · '+SYSN[k]+': '+(d.length?txt2:'no vuelve ningún código'))}
     else noteT('scan-'+k,'Escáner · '+SYSN[k]+': '+txt2);return}
-  if(id==='fusebox'){s.fuses={chk:{}};sfx.click();setMsg('Caja de fusibles. Saca los fusibles que tengan que ver con lo que falla y mira el filamento.');return}
+  if(id==='fusebox'){s.fuses={chk:{}};sfx.click();return}
   if(id==='fuseclose'){s.fuses=null;sfx.click();return}
   if(id.startsWith('fuse-')){const k=id.slice(5),fz=FUSES.find(f=>f[0]===k);s.fuses.chk[k]=1;beep(600,.05,'square',.05);noteT('fuse'+k,`Fusible ${k} · ${fz[1]} ${fz[2]} A: ${R.car.fuse===k?'fundido':'bien'}`);return}
-  if(id==='lift'){if(R.notes.length<4&&!R.warnLift){R.warnLift=true;sfx.bad();setMsg('Llevas pocas pruebas. Un buen técnico revisa antes de levantar. Toca <b>Levantar</b> otra vez si quieres seguir.');return}next();return}
+  if(id==='lift'){if(R.notes.length<4&&!R.warnLift){R.warnLift=true;sfx.bad();setMsg('Llevas pocas pruebas para levantarlo ya. Toca otra vez si quieres seguir.');return}next();return}
   if(id==='report'){openReport();return}
   if(id==='animclose'){if(s.anim&&s.anim.t>.8)s.anim=null;return}
-  if(id==='fan'&&!(R.eng.on&&R.eng.run>6)){s.anim={id,t:0,nonote:1};return}
+  if(id==='fan'&&!(R.eng.on&&R.eng.run>6)){s.anim={id,t:0,nonote:1};setMsg(R.eng.on?'El motor aún está frío: déjalo en marcha un poco más y vuelve a mirar el ventilador.':'Primero arranca el motor y deja que se caliente.');return}
   if(['batt','oil','cool','bfl','psf','belt','filter','plug','hose','smell','egr','vac','fan','valve'].includes(id)){s.chk[id]=1;s.anim={id,t:0};beep(id==='filter'?300:500,.08,'triangle',.08);return}
   if(id==='wvclose'){R.wv=null;sfx.click();return}
   if(id.startsWith('wsel-')){R.wv.w=id.slice(5);sfx.click();return}
   if(id.startsWith('wv-')){const k=id.slice(3),v=R.wv,ck=v.chk[v.w]||(v.chk[v.w]={});
-    if(k==='nuts'){v.phase='bolts';v.bolts={};sfx.click();setMsg('Quita los 5 tornillos de la rueda '+WNAME[v.w]+'.');return}
+    if(k==='nuts'){v.phase='bolts';v.bolts={};sfx.click();return}
     if(['tyreP','tread','rim','pads'].includes(k)){ck[k]=1;noteT('w-'+k+'-'+v.w,wheelNote(k,v.w));return}
     R.under.chk[k]=1;note(k);return}
-  if(id.startsWith('bolt-')){const v=R.wv;v.bolts[+id.slice(5)]=1;sfx.ratchet&&0;beep(1800,.02,'square',.05);beep(300,.05,'square',.04);if(Object.keys(v.bolts).length>=5){v.phase='tank';v.rot=0;setMsg('Rueda fuera y en la cubeta. <b>Mantén pulsada la rueda</b> para girarla y mira si salen burbujas.')}return}
+  if(id.startsWith('bolt-')){const v=R.wv;v.bolts[+id.slice(5)]=1;sfx.ratchet&&0;beep(1800,.02,'square',.05);beep(300,.05,'square',.04);if(Object.keys(v.bolts).length>=5){v.phase='tank';v.rot=0;}return}
   if(['shock','exhaust','floor','carter','rack'].includes(id)){R.under.chk[id]=1;note(id)}
 }
 function update(dt){
@@ -340,7 +339,7 @@ function update(dt){
     // arranque
     if(e.crank>0){e.crank-=dt;
       if(fx('click')){if(Math.floor(e.crank*2.5)!==Math.floor((e.crank+dt)*2.5))sfx.relay();
-        if(e.crank<=0){note('start');setMsg('No arranca: solo hace clic. Lo arrancas con el <b>arrancador de pinzas</b> para seguir probando.');e.crank=0;setTimeout(()=>{if(G.R===R){R.eng.on=true;R.eng.run=0}},900)}}
+        if(e.crank<=0){note('start');setMsg('No arranca: solo hace clic. Lo arrancas con el arrancador de pinzas para poder seguir.');e.crank=0;setTimeout(()=>{if(G.R===R){R.eng.on=true;R.eng.run=0}},900)}}
       else{const rate=fx('slowcrank')?3.2:9;noise('crank',true,700,.11*(.55+.45*Math.sin(T*rate*6.28)));
         if(e.crank<=0){noise('crank',false);e.on=true;e.run=0;note('start');beep(70,.35,'sawtooth',.12,45)}}}
     // motor en marcha
@@ -397,16 +396,16 @@ function update(dt){
   }
   if(R.step===2){const l=R.lift;
     if(!l.locked){const dir=(U?1:0)-(D?1:0);l.h=clamp(l.h+dir*.34*dt,0,2);if(dir)tone('hyd',true,dir>0?75:60,.025,'sawtooth');else tone('hyd',false);
-      if(!l.checked&&l.h>.42&&!l.warned){l.warned=true;l.checked=true;R.safe.k4=false;sfx.bad();G.shake=.3;setMsg('<b>Cuidado.</b> Te has pasado la parada de 20 cm. Siempre se para a comprobar que el coche apoya bien. Sigue subiendo y pon el <b>seguro</b>.')}
+      if(!l.checked&&l.h>.42&&!l.warned){l.warned=true;l.checked=true;R.safe.k4=false;sfx.bad();G.shake=.3;setMsg('<b>Cuidado.</b> Te has pasado la parada de 20 cm: siempre se para a comprobar que el coche apoya bien.')}
       if(act){
-        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;R.safe.k4=true;sfx.ok();setMsg('Apoyo correcto. <b>Mantén pulsado ▲</b> hasta la franja verde y toca el <b>candado</b>.')}else{sfx.bad();setMsg('Para cerca de la marca de <b>20 cm</b> para comprobar.')}}
+        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;R.safe.k4=true;sfx.ok();setMsg('')}else{sfx.bad();setMsg('Para comprobar el apoyo, el coche tiene que estar a unos <b>20 cm</b>.')}}
         else if(l.h>=1.55&&l.h<=1.85){l.locked=true;tone('hyd',false);if(R.safe.k5==null)R.safe.k5=true;sfx.ok();setTimeout(()=>{if(G.R===R&&R.step===2)next()},500)}
         else{R.safe.k5=false;sfx.bad();setMsg('El seguro solo se pone a la altura de trabajo, la <b>franja verde</b>.')}
       }}
   }
   // partículas
   if(R.wv&&R.wv.phase==='tank'){const v=R.wv;v.hold=hold==='spin';if(v.hold){v.rot+=dt*1.3;noise('water',true,1200,.03)}else noise('water',false);
-    if(v.rot>=Math.PI*2&&!v.done){v.done=1;noise('water',false);(v.chk[v.w]||(v.chk[v.w]={})).tank=1;noteT('w-tank-'+v.w,wheelNote('tank',v.w));setTimeout(()=>{if(G.R===R&&R.wv){R.wv.phase='view';R.wv.done=0;R.wv.rot=0;setMsg('Rueda montada otra vez. Prueba otra rueda o sigue investigando.')}},1200)}}
+    if(v.rot>=Math.PI*2&&!v.done){v.done=1;noise('water',false);(v.chk[v.w]||(v.chk[v.w]={})).tank=1;noteT('w-tank-'+v.w,wheelNote('tank',v.w));setTimeout(()=>{if(G.R===R&&R.wv){R.wv.phase='view';R.wv.done=0;R.wv.rot=0;}},1200)}}
   G.parts=G.parts.filter(p=>(p.life-=dt)>0&&!(p.bubble&&p.y<p.bubble));G.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy-=12*dt;p.r+=18*dt});
 }
 
@@ -460,13 +459,13 @@ function drawScanner(){
       const act=d.filter(x=>x.state==='ACTIVO').length,t=na?'NO EQUIPADO':d.length?d.length+(d.length===1?' código':' códigos'):'OK';
       ctx.fillStyle=na?'#26333a':act?'#5a1f1b':d.length?'#4a3a14':'#163a28';rr(586,y+10,140,28,14);ctx.fill();
       txt(t,656,y+24,na?'#8aa3b0':act?'#ffb3ab':d.length?'#ffd27a':'#8ff0b4',13,MONO,'center')});
-    if(sc.t>1.4+SYS.length*.22)scr('Toca un sistema para ver sus códigos',170,512,'#7f9fb0',12);return}
+    if(sc.t>1.4+SYS.length*.22)return}
   const k=sc.sys,d=dtcs(k);scr(SYSN[k].toUpperCase(),170,96,'#4fc3f7',16);
   if(k==='motor'){[['codes','CÓDIGOS'],['live','DATOS EN VIVO']].forEach(([t,l],i)=>{const x=500+i*124;ctx.fillStyle=sc.tab===t?'#4fc3f7':'#16262d';rr(x,82,116,28,6);ctx.fill();txt(l,x+58,96,sc.tab===t?'#0f1a1f':'#bfe9ff',13,MONO,'center')})}
   if(k==='motor'&&sc.tab==='live'){
     if(!R.eng.on){scr('Arranca el motor para ver los datos en vivo',170,150,'#7f9fb0',14);return}
     const v=lv();LIVEROWS.forEach(([n,fn],i)=>{const y=136+i*44;ctx.fillStyle=i%2?'#132229':'#16262d';rr(160,y,580,38,6);ctx.fill();scr(n,180,y+19,'#9fc6d8',14);txt(fn(v),720,y+19,'#e6f6ff',16,MONO,'right')});
-    scr('Pisa el acelerador para ver cómo cambian los valores',170,500,'#7f9fb0',12);return}
+    return}
   if(sysNA(k)){scr('No equipado: este coche lleva dirección hidráulica',170,150,'#9fc6d8',15);scr('(bomba y líquido; no tiene centralita)',170,176,'#7f9fb0',13);return}
   if(!d.length)scr(R.clr&&R.clr.since<5?'Sin códigos. Arranca el motor y espera unos segundos':'Sin códigos de avería memorizados',170,150,'#8ff0b4',15);
   d.forEach((c,i)=>{const y=124+i*94;ctx.fillStyle='#16262d';rr(160,y,580,84,8);ctx.fill();txt(c.code,180,y+20,c.state==='ACTIVO'?'#ffb3ab':'#ffd27a',22,MONO);
@@ -511,7 +510,7 @@ function drawFuses(){
   ctx.fillStyle='rgba(8,10,12,.75)';ctx.fillRect(0,0,900,588);
   ctx.fillStyle='#1f2428';rr(120,60,660,480,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
   txt('CAJA DE FUSIBLES',150,88,C.muted,16);ctx.fillStyle=C.panel2;rr(630,72,130,32,8);ctx.fill();txt('CERRAR  ✕',695,88,C.fg,16,DISP,'center');
-  txt('Toca un fusible para sacarlo y mirar el filamento',450,520,C.muted,14,BODY,'center');
+  
   FUSES.forEach(([id,n,a],i)=>{const [x,y]=fuseXY(i),pulled=fu.chk[id],blown=R.car.fuse===id,up=pulled?-26:0;
     ctx.fillStyle='#111518';rr(x-30,y-6,60,70,6);ctx.fill();
     ctx.fillStyle=FCOL[a];rr(x-22,y+up,44,52,6);ctx.fill();ctx.fillStyle='rgba(255,255,255,.25)';rr(x-16,y+4+up,32,18,4);ctx.fill();
@@ -842,7 +841,7 @@ function drawHood(){
   ctx.strokeStyle=C.fg;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+w/2-2,y+14);ctx.quadraticCurveTo(x+w/2+13,y+40,x+w/2+7,y+47);ctx.quadraticCurveTo(x+w/2,y+52,x+w/2-9,y+47);ctx.stroke();
   txt('OLER',x+w/2,y+h+11,'#9aa3aa',12,DISP,'center');
   if(fx('steam')&&e.on&&e.run>1.5){for(let i=0;i<6;i++){const t=(T*.6+i*.17)%1;ctx.globalAlpha=.25*(1-t);ctx.fillStyle='#f0f4f7';ctx.beginPath();ctx.arc(180+i*16,250-t*130,12+t*22,0,7);ctx.fill()}ctx.globalAlpha=1}
-  if(!e.on)txt('Motor apagado: arráncalo con la llave para ver la correa girar y medir la batería en marcha.',455,574,'rgba(255,255,255,.6)',12,BODY,'center');
+  
 }
 /* ---------- vista de la rueda: cuatro ruedas, desmontaje y cubeta de agua ---------- */
 const WNAME={DI:'delantera izquierda',DD:'delantera derecha',TI:'trasera izquierda',TD:'trasera derecha'};
@@ -875,13 +874,13 @@ function drawWheelView(){
     // burbujas si el clavo está bajo el agua
     if(i.flat){const na=v.rot+Math.PI*.3,nx=450+Math.cos(na)*178,ny=300+Math.sin(na)*178;
       if(ny>ty+46){ctx.fillStyle='#c9ced2';ctx.beginPath();ctx.arc(nx,ny,4,0,7);ctx.fill();if(Math.random()<.5)G.parts.push({x:nx+rand(-4,4),y:ny,vx:rand(-8,8),vy:rand(-90,-60),r:rand(2,4),life:1.2,max:1.2,col:'rgba(220,240,255,.9)',a:.9,bubble:ty+44})}}
-    txt(v.hold?'Girando la rueda en el agua…':'MANTÉN PULSADA LA RUEDA PARA GIRARLA',450,560,v.hold?C.fg:C.amber,18,DISP,'center');
+    txt(v.hold?'Girando…':'mantén pulsada la rueda',450,560,v.hold?C.fg:C.muted,15,BODY,'center');
     pbar(300,536,300,8,v.rot/(Math.PI*2),C.info);return;
   }
   if(v.phase==='bolts'){
     drawTyre(wx,wy,1,i,true);ctx.fillStyle='#4a5258';ctx.beginPath();ctx.arc(wx,wy,60,0,7);ctx.fill();
     for(let k=0;k<5;k++){const a=-Math.PI/2+k*Math.PI*2/5,bx=wx+Math.cos(a)*40,by=wy+Math.sin(a)*40,out=v.bolts[k];ctx.beginPath();for(let q=0;q<6;q++){const b=q*Math.PI/3;ctx.lineTo(bx+Math.cos(b)*12,by+Math.sin(b)*12)}ctx.closePath();ctx.fillStyle=out?'#20262b':'#c3cad0';ctx.fill()}
-    txt('Toca los 5 tornillos para quitarlos',560,330,C.amber,20,DISP,'center');txt('Rueda '+WNAME[w],560,360,C.muted,15,BODY,'center');return;
+    txt('Rueda '+WNAME[w],560,360,C.muted,15,BODY,'center');return;
   }
   if(full&&i.front){
     const sx=640;ctx.fillStyle='#4b545b';rr(sx-26,84,52,18,6);ctx.fill();
@@ -912,11 +911,11 @@ function drawWheelView(){
   if(ck.tyreP){ctx.fillStyle='#0e1a14';rr(84,526,96,24,5);ctx.fill();txt(i.flat?'1,8 bar':'2,3 bar',132,538,'#8ff0b4',13,MONO,'center')}
   if(ck.pads){ctx.fillStyle='#0e1a14';rr(360,174,190,24,5);ctx.fill();txt(i.pads?'pastilla 2 mm':i.disc?'disco con surcos':i.front?'pastilla 9 mm':'zapatas en buen estado',368,186,'#8ff0b4',12,MONO)}
   const [mx,my]=[130,482];ctx.fillStyle='#2a3036';ctx.beginPath();ctx.arc(mx,my,26,0,7);ctx.fill();ctx.strokeStyle='#e8edf0';ctx.lineWidth=2;ctx.beginPath();ctx.arc(mx,my,20,Math.PI*.8,Math.PI*2.2);ctx.stroke();ctx.beginPath();ctx.moveTo(mx,my);ctx.lineTo(mx+14,my-10);ctx.stroke();txt('MANÓMETRO',mx,my-38,C.muted,11,DISP,'center');
-  txt('TORNILLOS',wx,wy+46,'#1b1f22',11,DISP,'center');txt('quitar y probar en agua',wx,wy+76,C.amber,12,DISP,'center');
+  txt('TORNILLOS',wx,wy+46,'#1b1f22',11,DISP,'center');
   Object.entries(WHEEL_ITEMS).forEach(([k,[x,y,ww,hh]])=>{const sus=!['tyreP','tread','rim','pads','nuts'].includes(k);if(sus&&!(full&&i.front))return;if(sus?R.under.chk[k]:ck[k])return;
     ctx.strokeStyle='rgba(242,179,61,.8)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.globalAlpha=.45+.4*Math.sin(T*5);rr(x,y,ww,hh,10);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1});
   txt('llanta',262,232,C.muted,12,DISP,'center');
-  if(!full)txt('Con el coche en el suelo solo ves la rueda. Levántalo para ver la suspensión.',450,566,C.muted,13,BODY,'center');
+  
 }
 function drawTyre(wx,wy,sc,i,showDisc){
   if(showDisc){const gd=ctx.createRadialGradient(wx,wy,20,wx,wy,112);gd.addColorStop(0,'#5f686f');gd.addColorStop(1,'#9aa3aa');ctx.fillStyle=gd;ctx.beginPath();ctx.arc(wx,wy,112,0,7);ctx.fill()}
@@ -1066,9 +1065,6 @@ function drawButtons(){
     else UI.push({x:566,y:388,w:130,h:60,id:'hood'},{x:160,y:388,w:128,h:60,id:'push'},{x:132,y:512,w:64,h:48,id:'tail'},{x:540,y:452,w:104,h:104,id:'tyre'},{x:650,y:446,w:56,h:52,id:'lamps'},{x:296,y:432,w:46,h:34,id:'fuelcap'});
     const lk=leakInfo();if(lk)UI.push({x:lk.gx-66,y:CAR.yb+2,w:132,h:24,id:'floor'});
     UI.push({x:30,y:606,w:74,h:100,id:'key'},{x:118,y:606,w:84,h:100,key:'wheel'},{x:230,y:606,w:66,h:100,key:'brake'},{x:308,y:606,w:52,h:100,key:'gas'},{x:390,y:608,w:122,h:98,id:'dash'},{x:508,y:608,w:88,h:98,id:'obd'},{x:602,y:608,w:90,h:98,key:'road'},{x:702,y:612,w:168,h:84,id:'lift'});
-    if(G.n===1&&!s.hood){const order=['key','gas','brake','wheel','dash','tail','push','hood','obd','lift'],done=id=>({key:'start',tail:'smoke',hood:'oil',obd:'scan',lift:'_'}[id]||id);
-      const nx=order.find(k=>k==='lift'||!R.notes.some(n=>n.id===done(k)));const u=UI.find(u=>u.key===nx||u.id===nx);
-      if(u&&!(nx==='lift'&&R.notes.length<5)){ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.globalAlpha=.5+.5*Math.sin(T*6);rr(u.x-4,u.y-4,u.w+8,u.h+8,10);ctx.stroke();ctx.globalAlpha=1}}
   }
   if(R.step===2){const l=R.lift,py=600-l.h*170;
     ctx.fillStyle='#d9dde0';rr(26,300,92,180,10);ctx.fill();ctx.fillStyle='#2a3238';rr(34,308,76,164,8);ctx.fill();
@@ -1078,7 +1074,7 @@ function drawButtons(){
       txt(g,72,y+1,'#fff',22,BODY,'center');if(en)UI.push({x:36,y:y-36,w:72,h:72,key:k})});
     txt('mantén pulsado',72,496,C.muted,12,BODY,'center');
     if(!l.checked){const pul=.5+.5*Math.sin(T*6);[[150,260],[520,630]].forEach(([x0,x1])=>{ctx.strokeStyle=`rgba(242,179,61,${.4+.6*pul})`;ctx.lineWidth=3;rr(x0-6,py-22,x1-x0+12,34,8);ctx.stroke();UI.push({x:x0-10,y:py-40,w:x1-x0+20,h:70,tap:1})});
-      txt('Toca el brazo para comprobar',390,660,C.amber,16,DISP,'center')}
+      }
     else if(!l.locked){const cx=643,cy=530;ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(cx,cy,30+3*Math.sin(T*6),0,7);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=C.amber;ctx.stroke();lockIcon(cx,cy+2,false,C.amber);txt('PONER SEGURO',cx,cy-46,C.amber,14,DISP,'center');UI.push({x:cx-40,y:cy-40,w:80,h:80,tap:1})}
     else lockIcon(643,532,true,C.ok);
     // medidor
