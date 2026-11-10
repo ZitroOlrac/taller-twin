@@ -15,7 +15,7 @@ Simulador de diagnóstico de averías. Una jornada de 8 coches: el cliente solo 
 - **Despiece de la suspensión** con el coche levantado: muelle, amortiguador, bieleta, rótulas, fuelle y sensor ABS.
 - **Por debajo:** pastillas y discos, amortiguador, escape, rótulas, fuelles de la transmisión y gotas en el suelo según su color.
 
-## 31 averías
+## 43 averías
 
 Frenos (pastillas, discos alabeados, falta de líquido), motor (bujía o bobina, filtro de aire, junta de culata, segmentos, fuga de aceite, correa), electricidad (batería, alternador, motor de arranque, sonda lambda), refrigeración (manguito con fuga), suspensión y dirección (amortiguador, rótula, homocinética, bomba de dirección), escape roto y ruedas y luces (pinchazo, alineación), ABS y airbag (sensor de rueda, conector del airbag) y luces y fusibles (bombillas de cruce, intermitente y freno, fusible fundido).
 
@@ -28,3 +28,12 @@ JavaScript puro y Canvas 2D, sin dependencias, en un único `index.html`: modelo
 ## Autor
 
 Carlo Prado Ortiz · [Portafolio](https://zitroolrac.github.io/Portfolio/)
+
+## El escáner, como en un taller
+
+- Escaneo de 7 sistemas (motor, cambio, ABS, airbag, dirección asistida, carrocería, climatización) con códigos **activos** e **históricos** y **datos congelados**.
+- **Datos en vivo** del motor: régimen, temperatura, tensión, sonda lambda, ajuste de combustible, presión de gasolina, caudal de aire y EGR (consigna y real). Se puede acelerar mientras se miran.
+- **Borrar códigos y volver a arrancar:** solo vuelven los fallos reales.
+- Un código no dice la pieza: un P0171 puede ser una fuga de vacío, la bomba de gasolina o el caudalímetro, y se confirma con los datos en vivo y mirando el coche.
+- La dirección hidráulica no tiene centralita; la eléctrica (EPS) sí da códigos.
+- Las fugas a veces gotean y a veces solo dejan manchas en el cárter, la cremallera o los manguitos.
