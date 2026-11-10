@@ -152,28 +152,28 @@ const NORMAL={
  start:'Arranque: arranca a la primera',idle:'Ralentí: estable y suave',gas:'Al acelerar: sube de vueltas con normalidad',
  brake:'Al frenar: sin ruidos, pedal firme',wheel:'Al girar el volante: suave y sin ruidos',dash:'Cuadro: ningún testigo encendido',
  smoke:'Escape: sin humo',push:'Al empujar atrás: rebota una vez y para',tyre:'Neumático delantero: 2,3 bar, desgaste uniforme',
- lights:'Luces: funcionan todas',oil:'Aceite: entre MIN y MAX, color miel',cool:'Refrigerante: entre MIN y MAX, limpio',
+ oil:'Aceite: entre MIN y MAX, color miel',cool:'Refrigerante: entre MIN y MAX, limpio',
  bfl:'Líquido de frenos: nivel correcto',psf:'Líquido de dirección: nivel correcto',batt:'Batería: 12,6 V parado · 14,1 V en marcha',
  belt:'Correa: en buen estado',filter:'Filtro de aire: limpio',plug:'Bujía: color marrón claro, en buen estado',hose:'Manguitos: sin grietas',
- smell:'Olor: nada raro',obd:'Escáner: sin códigos de avería',pads:'Frenos delanteros: pastillas de 9 mm, discos lisos',
+ smell:'Olor: nada raro',sensor:'Sensor ABS delantero: cable entero',pads:'Frenos delanteros: pastillas de 9 mm, discos lisos',
  shock:'Amortiguadores: secos',tie:'Rueda delantera: sin juego',boot:'Fuelles de la transmisión: enteros',exhaust:'Tubo de escape: entero',
  floor:'Suelo: limpio, sin gotas'};
-const GROUPS=[['frenos','Frenos'],['motor','Motor'],['elec','Electricidad'],['frio','Refrigeración'],['susp','Suspensión y dirección'],['escape','Escape'],['ruedas','Ruedas y luces']];
+const GROUPS=[['frenos','Frenos'],['motor','Motor'],['elec','Electricidad'],['frio','Refrigeración'],['susp','Suspensión y dirección'],['escape','Escape'],['seg','ABS y airbag'],['ruedas','Ruedas, luces y fusibles']];
 const FAULTS={
  pastillas:{g:'frenos',n:'Pastillas de freno gastadas',says:['Hace un ruido raro','Frena raro'],c:{brake:'Al frenar: chirrido metálico agudo',pads:'Frenos delanteros: pastillas de 2 mm (mínimo 3 mm)'},fx:{screech:1}},
  discos:{g:'frenos',n:'Discos de freno alabeados',says:['Frena raro','Le tiembla el volante'],c:{brake:'Al frenar: el pedal y el volante vibran',pads:'Frenos delanteros: pastillas de 8 mm, discos con surcos y zonas azuladas'},fx:{judder:1}},
  liqfrenos:{g:'frenos',n:'Falta líquido de frenos',says:['Frena raro','Tiene una luz encendida'],c:{brake:'Al frenar: el pedal va esponjoso y se hunde',bfl:'Líquido de frenos: por debajo del MIN',dash:'Cuadro: testigo de freno (!) encendido'},fx:{sink:1}},
- bujias:{g:'motor',n:'Bujía o bobina fallando',says:['Va raro','Tiene una luz encendida'],c:{idle:'Ralentí: el motor tiembla y falla a ratos',gas:'Al acelerar: da tirones',plug:'Bujía: electrodo negro de hollín y desgastado',obd:'Escáner: P0301 · fallo de encendido en el cilindro 1',dash:'Cuadro: testigo de motor encendido'},fx:{misfire:1,light:'engine'}},
+ bujias:{g:'motor',n:'Bujía o bobina fallando',says:['Va raro','Tiene una luz encendida'],c:{idle:'Ralentí: el motor tiembla y falla a ratos',gas:'Al acelerar: da tirones',plug:'Bujía: electrodo negro de hollín y desgastado',dash:'Cuadro: testigo de motor encendido'},dtc:[['motor','P0301','Fallo de encendido en el cilindro 1'],['motor','P0300','Fallos de encendido aleatorios']],fx:{misfire:1,light:'engine'}},
  filtro:{g:'motor',n:'Filtro de aire taponado',says:['Va raro','Echa humo'],c:{gas:'Al acelerar: le cuesta subir de vueltas',filter:'Filtro de aire: negro y taponado',smoke:'Escape: humo negro al acelerar'},fx:{smoke:'#1b1b1b',slow:1}},
- junta:{g:'motor',n:'Junta de culata quemada',says:['Echa humo','Se calienta'],c:{smoke:'Escape: humo blanco espeso que huele dulce',oil:'Aceite: color marrón lechoso, como café con leche',cool:'Refrigerante: por debajo del MIN y con burbujas',dash:'Cuadro: testigo de temperatura encendido',smell:'Olor: dulzón'},fx:{smoke:'#f2f2f2',steam:1,light:'temp',milky:1,coolLow:1}},
+ junta:{g:'motor',n:'Junta de culata quemada',says:['Echa humo','Se calienta'],c:{smoke:'Escape: humo blanco espeso que huele dulce',oil:'Aceite: color marrón lechoso, como café con leche',cool:'Refrigerante: por debajo del MIN y con burbujas',dash:'Cuadro: testigo de temperatura encendido',smell:'Olor: dulzón'},dtc:[['motor','P0217','Temperatura del motor excesiva']],fx:{smoke:'#f2f2f2',steam:1,light:'temp',milky:1,coolLow:1}},
  segmentos:{g:'motor',n:'Segmentos gastados (quema aceite)',says:['Echa humo','Gasta mucho aceite'],c:{smoke:'Escape: humo azulado al acelerar',oil:'Aceite: rozando el MIN; el cliente lo rellena a menudo',plug:'Bujía: mojada de aceite'},fx:{smoke:'#7f9fd0',oilLow:.4}},
  carter:{g:'motor',n:'Fuga de aceite por el cárter',says:['Gasta mucho aceite','Tiene una luz encendida'],c:{oil:'Aceite: por debajo del MIN',floor:'Suelo: gotas negras bajo el motor',smell:'Olor: a aceite quemado',dash:'Cuadro: testigo de presión de aceite encendido'},fx:{drip:'#17120c',light:'oil',oilLow:.15}},
  correa:{g:'motor',n:'Correa de accesorios agrietada',says:['Hace un ruido raro'],c:{gas:'Al acelerar: chillido agudo que sube con las vueltas',belt:'Correa: agrietada y brillante'},fx:{squeal:1}},
  bateria:{g:'elec',n:'Batería agotada',says:['Le cuesta arrancar'],c:{start:'Arranque: el motor gira despacio y le cuesta',batt:'Batería: 11,9 V parado (bien: 12,6 V) · 14,1 V en marcha'},fx:{slowcrank:1}},
- alternador:{g:'elec',n:'Alternador que no carga',says:['Le cuesta arrancar','Tiene una luz encendida'],c:{batt:'Batería: 12,5 V parado · 11,8 V en marcha (bien: 13,8 a 14,4 V)',dash:'Cuadro: testigo de batería encendido',obd:'Escáner: P0562 · tensión del sistema baja'},fx:{light:'batt'}},
+ alternador:{g:'elec',n:'Alternador que no carga',says:['Le cuesta arrancar','Tiene una luz encendida'],c:{batt:'Batería: 12,5 V parado · 11,8 V en marcha (bien: 13,8 a 14,4 V)',dash:'Cuadro: testigo de batería encendido'},dtc:[['motor','P0562','Tensión del sistema demasiado baja']],fx:{light:'batt'}},
  arranque:{g:'elec',n:'Motor de arranque averiado',says:['Le cuesta arrancar','No arranca a la primera'],c:{start:'Arranque: solo suena «clic, clic»; el motor no gira'},fx:{click:1}},
- lambda:{g:'elec',n:'Sonda lambda averiada',says:['Tiene una luz encendida','Gasta mucha gasolina'],c:{obd:'Escáner: P0133 · sonda lambda con respuesta lenta',dash:'Cuadro: testigo de motor encendido'},fx:{light:'engine'}},
- manguito:{g:'frio',n:'Manguito de refrigerante con fuga',says:['Se calienta','Huele raro'],c:{cool:'Refrigerante: por debajo del MIN',hose:'Manguito inferior: agrietado y húmedo',floor:'Suelo: gotas verdes bajo el radiador',smell:'Olor: dulzón, a anticongelante',dash:'Cuadro: testigo de temperatura encendido'},fx:{drip:'#3fcf8e',steam:1,light:'temp',coolLow:1}},
+ lambda:{g:'elec',n:'Sonda lambda averiada',says:['Tiene una luz encendida','Gasta mucha gasolina'],c:{dash:'Cuadro: testigo de motor encendido'},dtc:[['motor','P0133','Sonda lambda B1S1: respuesta lenta']],fx:{light:'engine'}},
+ manguito:{g:'frio',n:'Manguito de refrigerante con fuga',says:['Se calienta','Huele raro'],c:{cool:'Refrigerante: por debajo del MIN',hose:'Manguito inferior: agrietado y húmedo',floor:'Suelo: gotas verdes bajo el radiador',smell:'Olor: dulzón, a anticongelante',dash:'Cuadro: testigo de temperatura encendido'},dtc:[['motor','P0217','Temperatura del motor excesiva']],fx:{drip:'#3fcf8e',steam:1,light:'temp',coolLow:1}},
  amortiguador:{g:'susp',n:'Amortiguador trasero gastado',says:['Va raro en las curvas','Bota mucho'],c:{push:'Al empujar atrás: rebota cuatro veces',shock:'Amortiguador trasero: rezuma aceite'},fx:{bounce:1}},
  rotula:{g:'susp',n:'Rótula de dirección con holgura',says:['Hace un ruido raro','Va raro'],c:{wheel:'Al girar el volante: golpe seco («clonc») delante',tie:'Rueda delantera: tiene juego al moverla'},fx:{clonc:1}},
  homocinetica:{g:'susp',n:'Junta homocinética dañada',says:['Hace un ruido raro al girar'],c:{wheel:'Al girar en marcha: «clac-clac-clac» rápido',boot:'Fuelle de la transmisión: roto, con grasa salpicada'},fx:{clack:1}},
@@ -181,7 +181,12 @@ const FAULTS={
  escape:{g:'escape',n:'Tubo de escape roto',says:['Hace mucho ruido','Huele raro'],c:{gas:'Al acelerar: ruido muy fuerte, como un tractor',exhaust:'Tubo de escape: agujereado por el óxido',smell:'Olor: a gases de escape'},fx:{loud:1}},
  pinchazo:{g:'ruedas',n:'Pinchazo lento',says:['Va raro','Revisión antes de la ITV'],c:{tyre:'Neumático delantero: 1,1 bar (bien: 2,3 bar) y un clavo clavado'},fx:{flat:1}},
  alineacion:{g:'ruedas',n:'Dirección desalineada',says:['Va raro','Revisión antes de la ITV'],c:{tyre:'Neumático delantero: gastado solo por el lado de dentro'},fx:{}},
- faro:{g:'ruedas',n:'Lámpara de faro fundida',says:['Revisión antes de la ITV'],c:{lights:'Luces: el faro delantero no enciende'},fx:{deadlight:1}}
+ faro:{g:'ruedas',n:'Bombilla de cruce fundida',says:['Revisión antes de la ITV','No ve bien de noche'],c:{},lamp:'Prueba de luces: el cruce izquierdo no enciende',dtc:[['bcm','B1A20','Lámpara de cruce izquierda: circuito abierto']],fx:{deadlight:1}},
+ intermitente:{g:'ruedas',n:'Bombilla de intermitente fundida',says:['Revisión antes de la ITV','El intermitente suena raro'],c:{},lamp:'Prueba de luces: el intermitente izquierdo parpadea el doble de rápido y el de atrás no enciende',dtc:[['bcm','B1A10','Intermitente trasero izquierdo: circuito abierto']],fx:{}},
+ luzfreno:{g:'ruedas',n:'Bombilla de freno fundida',says:['Revisión antes de la ITV'],c:{},lamp:'Prueba de luces: solo falla la luz de freno izquierda (si fallan las dos, suele ser el fusible)',fx:{}},
+ fusible:{g:'ruedas',n:'Fusible fundido',says:['Algo eléctrico no funciona','Revisión antes de la ITV'],c:{},fuse:1,fx:{}},
+ abs:{g:'seg',n:'Sensor ABS de rueda averiado',says:['Tiene una luz encendida','Frena raro'],c:{dash:'Cuadro: testigos de ABS y ESP encendidos',sensor:'Sensor ABS delantero: cable pelado y cortado'},dtc:[['abs','C0035','Sensor de velocidad de la rueda delantera izquierda: circuito']],fx:{light:'abs'}},
+ airbag:{g:'seg',n:'Conector del airbag defectuoso',says:['Tiene una luz encendida'],c:{dash:'Cuadro: testigo del airbag encendido'},dtc:[['srs','B1001','Airbag del conductor: resistencia del circuito demasiado alta']],fx:{light:'srs'}}
 };
 const FKEYS=Object.keys(FAULTS);
 const TESTKEYS=Object.keys(NORMAL);
@@ -190,7 +195,8 @@ function rollCase(n){
   const p2=n<=2?0:n<=5?.5:.8;
   if(Math.random()<p2){const g=FAULTS[f[0]].g;const pool=FKEYS.filter(k=>FAULTS[k].g!==g);f.push(pick(pool))}
   const water=!f.some(k=>FAULTS[k].fx.drip)&&Math.random()<.4;
-  return {faults:f,water,says:pick(FAULTS[f[0]].says)};
+  let fuse=null;if(f.includes('fusible'))fuse=f.includes('luzfreno')?'F7':pick(['F7','F5']);
+  return {faults:f,water,fuse,says:pick(FAULTS[f[0]].says)};
 }
 function fx(name){return G.R.car.faults.map(k=>FAULTS[k].fx[name]).find(v=>v)}
 function clue(t){
@@ -235,7 +241,7 @@ function nextCase(){
   G.R={car,step:0,t:0,time:0,notes:[],last:null,safe:{k4:null,k5:null},
     drive:{y:900,x:450+rand(-55,55),v:0},
     eng:{on:false,crank:0,rpm:0,run:0,fails:0,miss:0},
-    insp:{gas:0,brake:0,wheel:0,ang:0,clonc:0,bounce:null,hood:false,chk:{},dash:0,lights:0,smoke:0,brakeDip:0},
+    insp:{gas:0,brake:0,wheel:0,ang:0,clonc:0,bounce:null,hood:false,chk:{},dash:0,lights:0,smoke:0,brakeDip:0,scan:null,lamps:null,fuses:null},
     lift:{h:0,checked:false,locked:false,warned:false},under:{chk:{}},hl:null};
   G.parts=[];allTonesOff();
   setMsg(G.n===1?'Primer caso. El coche entra solo al elevador. Cuando pare, toca la <b>P</b> del freno de mano.':`Caso ${G.n}. Llega un ${car.model}. Toca la <b>P</b> cuando pare.`);
@@ -246,9 +252,9 @@ function note(id){const R=G.R;if(R.notes.some(n=>n.id===id))return false;const t
   if(G.n===1&&R.notes.length===5&&R.step===1)setMsg('Bien, ya tienes 5 pistas. Sigue probando o toca <b>Levantar</b> para mirar por debajo.');return true}
 function next(){const R=G.R;R.step++;R.t=0;allTonesOff();R.eng.on=false;R.eng.rpm=0;stepEnter()}
 function stepEnter(){const R=G.R;
-  if(R.step===1)setMsg(`El cliente dice: «${R.car.says}». <b>Investiga.</b> Gira la <b>llave</b> para arrancar, escucha, pisa el <b>acelerador</b> y el <b>freno</b>, gira el <b>volante</b>, mira el <b>cuadro</b> y el <b>escape</b>, empuja el coche, abre el <b>capó</b>…`);
+  if(R.step===1)setMsg(`El cliente dice: «${R.car.says}». <b>Investiga.</b> Gira la <b>llave</b> para arrancar, escucha, pisa el <b>acelerador</b> y el <b>freno</b>, gira el <b>volante</b>, mira el <b>cuadro</b>, las <b>luces</b> y el <b>escape</b>, empuja el coche, abre el <b>capó</b> y conecta el <b>escáner</b>…`);
   if(R.step===2)setMsg('En la botonera, <b>mantén pulsado ▲</b> hasta <b>20 cm</b> y suelta. Luego <b>toca un brazo</b> para comprobar que apoya bien.');
-  if(R.step===3)setMsg('Mira por debajo: <b>rueda</b>, <b>amortiguador</b>, <b>escape</b>, <b>dirección</b>, <b>transmisión</b> y <b>suelo</b>. Cuando lo tengas claro, toca el <b>informe</b>.');
+  if(R.step===3)setMsg('Mira por debajo: <b>rueda</b>, <b>sensor ABS</b>, <b>amortiguador</b>, <b>escape</b>, <b>dirección</b>, <b>transmisión</b> y <b>suelo</b>. Cuando lo tengas claro, toca el <b>informe</b>.');
 }
 
 /* ================= PRUEBAS ================= */
@@ -263,13 +269,23 @@ function objTap(id){
   if(id==='push'){if(!s.bounce){s.bounce={t:0};beep(120,.1,'triangle',.15)}return}
   if(id==='tail'){if(needEngine())return;s.smoke=3;setMsg('Miras el escape con el motor en marcha. Pisa el <b>acelerador</b> para ver mejor el humo.');setTimeout(()=>{if(G.R===R)note('smoke')},1300);return}
   if(id==='tyre'){note('tyre');return}
-  if(id==='light'){s.lights=3;note('lights');return}
-  if(id==='obd'){note('obd');return}
+  if(id==='lamps'){s.lamps={fn:null,t:0};sfx.click();setMsg('Prueba de luces. Toca cada interruptor y mira delante y detrás.');return}
+  if(id==='lampsclose'){s.lamps=null;tone('wipe',false);sfx.click();return}
+  if(id.startsWith('lamp-')){const k=id.slice(5);s.lamps.fn=k;s.lamps.t=2.6;s.lamps.tick=0;sfx.click();setTimeout(()=>{if(G.R===R&&s.lamps&&s.lamps.fn===k)noteT('lamp-'+k,LAMPTXT[k](lampState()))},1400);return}
+  if(id==='obd'){s.scan={phase:'connect',t:0,sys:null};sfx.click();setMsg('Escáner conectado al enchufe OBD. Espera al escaneo de todos los sistemas.');return}
+  if(id==='scanclose'){s.scan=null;sfx.click();return}
+  if(id==='scanback'){if(s.scan)s.scan.sys=null;sfx.click();return}
+  if(id.startsWith('sys-')){const k=id.slice(4);s.scan.sys=k;sfx.click();const d=dtcs(k);
+    noteT('scan-'+k,'Escáner · '+SYSN[k]+': '+(d.length?d.map(x=>x[1]+' '+x[2].charAt(0).toLowerCase()+x[2].slice(1)).join(' · '):'sin códigos'));
+    if(k==='motor'&&R.eng.on)setTimeout(()=>{if(G.R===R&&s.scan&&s.scan.sys==='motor')noteT('live',liveNote())},1200);return}
+  if(id==='fusebox'){s.fuses={chk:{}};sfx.click();setMsg('Caja de fusibles. Saca los fusibles que tengan que ver con lo que falla y mira el filamento.');return}
+  if(id==='fuseclose'){s.fuses=null;sfx.click();return}
+  if(id.startsWith('fuse-')){const k=id.slice(5),fz=FUSES.find(f=>f[0]===k);s.fuses.chk[k]=1;beep(600,.05,'square',.05);noteT('fuse'+k,`Fusible ${k} · ${fz[1]} ${fz[2]} A: ${R.car.fuse===k?'fundido':'bien'}`);return}
   if(id==='lift'){if(R.notes.length<4&&!R.warnLift){R.warnLift=true;sfx.bad();setMsg('Llevas pocas pruebas. Un buen técnico revisa antes de levantar. Toca <b>Levantar</b> otra vez si quieres seguir.');return}next();return}
   if(id==='report'){openReport();return}
   if(id==='batt'){note('batt');s.chk.batt=1;return}
   if(['oil','cool','bfl','psf','belt','filter','plug','hose','smell'].includes(id)){s.chk[id]=1;note(id);return}
-  if(['pads','shock','tie','boot','exhaust','floor'].includes(id)){R.under.chk[id]=1;note(id)}
+  if(['pads','shock','tie','boot','exhaust','floor','sensor'].includes(id)){R.under.chk[id]=1;note(id)}
 }
 function update(dt){
   const R=G.R;R.t+=dt;if(R.step<4)R.time+=dt;const act=takeAct();
@@ -317,6 +333,13 @@ function update(dt){
     else{s.ang*=Math.pow(.02,dt);tone('wh',false)}
     if(s.bounce){s.bounce.t+=dt;if(s.bounce.t>2.3){note('push');s.bounce=null}}
     s.dash=Math.max(0,s.dash-dt);s.lights=Math.max(0,s.lights-dt);s.smoke=Math.max(0,s.smoke-dt);
+    if(s.scan){const before=s.scan.t;s.scan.t+=dt;if(s.scan.phase==='connect'&&s.scan.t>1.4){s.scan.phase='tree';sfx.ok()}
+      for(let i=0;i<SYS.length;i++){const at=1.4+i*.25;if(before<at&&s.scan.t>=at)beep(dtcs(SYS[i][0]).length?330:880,.05,'square',.04)}
+      if(before<1.4+SYS.length*.25&&s.scan.t>=1.4+SYS.length*.25){const bad=SYS.filter(([k])=>dtcs(k).length).map(x=>x[1]);noteT('scan',bad.length?'Escáner: códigos en '+bad.join(' y '):'Escáner: ningún sistema con códigos de avería')}}
+    if(s.lamps&&s.lamps.t>0){s.lamps.t-=dt;const l=s.lamps,st=lampState();
+      if(l.fn==='intiz'||l.fn==='intde'){const rate=l.fn==='intiz'&&!st.indL?5.2:2.6;const ph=Math.floor(T*rate);if(ph!==l.tick){l.tick=ph;beep(ph%2?1200:900,.015,'square',.06)}}
+      if(l.fn==='limpia'&&st.wiper)noise('wipe',true,900,.03*(.6+.4*Math.abs(Math.sin(T*5))));else tone('wipe',false),noise('wipe',false);
+      if(l.t<=0)noise('wipe',false)}
     // partículas
     const sc=fx('smoke');
     if(e.on&&(s.smoke>0||gas)){const n=gas?3:1;for(let i=0;i<n;i++)G.parts.push({x:166,y:536,vx:rand(-90,-40),vy:rand(-30,-8),r:rand(6,10),life:1.6,max:1.6,col:sc||'rgba(200,210,220,.35)',a:sc?.75:.18})}
@@ -333,6 +356,102 @@ function update(dt){
   }
   // partículas
   G.parts=G.parts.filter(p=>(p.life-=dt)>0);G.parts.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy-=12*dt;p.r+=18*dt});
+}
+
+/* ================= ESCÁNER, LUCES Y FUSIBLES ================= */
+const SYS=[['motor','Motor (ECU)'],['trans','Cambio automático'],['abs','ABS / ESP'],['srs','Airbag'],['bcm','Carrocería y luces'],['clima','Climatización']];
+const SYSN=Object.fromEntries(SYS);
+function dtcs(sys){const out=[];G.R.car.faults.forEach(k=>(FAULTS[k].dtc||[]).forEach(d=>{if(d[0]===sys&&!out.some(o=>o[1]===d[1]))out.push(d)}));return out}
+function liveData(){const f=G.R.car.faults,e=G.R.eng,temp=f.includes('junta')?112:f.includes('manguito')?108:90,volt=f.includes('alternador')?11.8:14.1;
+  const lam=f.includes('lambda')?(0.45+Math.sin(T*.6)*.02):(0.5+Math.sin(T*7)*.4);
+  return [['Régimen',Math.round(e.rpm)+' rpm'],['Temperatura del refrigerante',temp+' °C'],['Tensión de la batería',volt.toFixed(1).replace('.',',')+' V'],['Sonda lambda',lam.toFixed(2).replace('.',',')+' V'],['Ajuste de combustible',(f.includes('lambda')?'+14':f.includes('bujias')?'+9':'+2')+' %']]}
+function liveNote(){const f=G.R.car.faults,temp=f.includes('junta')?112:f.includes('manguito')?108:90,volt=f.includes('alternador')?'11,8':'14,1';
+  return `Datos en vivo: refrigerante ${temp} °C (normal: 90) · batería ${volt} V · sonda lambda ${f.includes('lambda')?'casi fija en 0,45 V':'oscila de 0,1 a 0,9 V'} · ajuste ${f.includes('lambda')?'+14':f.includes('bujias')?'+9':'+2'} % (normal: ±5)`}
+function lampState(){const c=G.R.car,f=c.faults;return{cruceL:!f.includes('faro'),brakeL:!(f.includes('luzfreno')||c.fuse==='F5'),brakeR:c.fuse!=='F5',indL:!f.includes('intermitente'),wiper:c.fuse!=='F7'}}
+const LAMPS=[['cruce','Luces de cruce'],['freno','Pisar freno'],['intiz','Intermitente izq.'],['intde','Intermitente der.'],['atras','Marcha atrás'],['limpia','Limpiaparabrisas']];
+const LAMPTXT={cruce:s=>s.cruceL?'Luces de cruce: encienden las dos':'Luces de cruce: la izquierda no enciende',
+ freno:s=>s.brakeL&&s.brakeR?'Luces de freno: encienden las dos':!s.brakeL&&!s.brakeR?'Luces de freno: no enciende ninguna':'Luces de freno: la izquierda no enciende',
+ intiz:s=>s.indL?'Intermitente izquierdo: parpadea normal':'Intermitente izquierdo: parpadea el doble de rápido y el de atrás no enciende',
+ intde:()=>'Intermitente derecho: parpadea normal',atras:()=>'Marcha atrás: encienden las dos',
+ limpia:s=>s.wiper?'Limpiaparabrisas: funciona':'Limpiaparabrisas: no se mueve ni hace ruido'};
+const FUSES=[['F1','Inyección',15],['F2','Bomba de gasolina',15],['F3','Cruce izquierdo',10],['F4','Cruce derecho',10],['F5','Luces de freno',10],['F6','Intermitentes',10],['F7','Limpiaparabrisas',20],['F8','Elevalunas',30],['F9','Radio',10],['F10','Mechero',15],['F11','Ventilador',30],['F12','Claxon',15]];
+const FCOL={10:'#d83a2e',15:'#2f6fd0',20:'#e3c23a',30:'#3fae6a'};
+function noteT(id,t){const R=G.R;if(R.notes.some(n=>n.id===id))return false;R.notes.push({id,t});R.last={t,life:4.5};sfx.note();return true}
+function fuseXY(i){return [190+(i%6)*92,190+Math.floor(i/6)*150]}
+function drawScanner(){
+  const R=G.R,sc=R.insp.scan;
+  ctx.fillStyle='rgba(8,10,12,.7)';ctx.fillRect(0,0,900,588);
+  ctx.fillStyle='#2a2f34';rr(110,24,680,556,26);ctx.fill();ctx.fillStyle='#d9b03c';rr(110,24,680,40,20);ctx.fill();
+  txt('ESCÁNER OBD · DIAGNOSIS',140,44,'#1b1404',18,DISP);
+  ctx.fillStyle='#0f1a1f';rr(140,80,620,440,10);ctx.fill();
+  const scr=(t,x,y,c,s)=>txt(t,x,y,c||'#bfe9ff',s||17,MONO);
+  // botones del aparato
+  ctx.fillStyle='#3a4148';rr(140,530,180,40,8);ctx.fill();txt(sc.sys?'◀ VOLVER':'',230,551,C.fg,17,DISP,'center');
+  ctx.fillStyle='#3a4148';rr(580,530,180,40,8);ctx.fill();txt('DESCONECTAR ✕',670,551,C.fg,17,DISP,'center');
+  if(sc.phase==='connect'){const p=clamp(sc.t/1.4,0,1);scr('Conectando con el vehículo…',170,130);scr('Protocolo: ISO 15765-4 (CAN)',170,162,'#7f9fb0',14);
+    ctx.fillStyle='#1c2e36';rr(170,200,560,16,8);ctx.fill();ctx.fillStyle='#4fc3f7';rr(170,200,560*p,16,8);ctx.fill();
+    scr('VIN leído · '+R.car.model,170,250,'#7f9fb0',14);return}
+  if(!sc.sys){scr('ESCANEO COMPLETO · SISTEMAS',170,112,'#4fc3f7',16);
+    SYS.forEach(([k,n],i)=>{const y=150+i*58,d=dtcs(k),vis=sc.t>1.4+i*.25;if(!vis){scr('…',190,y+18,'#557080');return}
+      ctx.fillStyle='#16262d';rr(160,y,580,48,8);ctx.fill();
+      scr((i===SYS.length-1?'└ ':'├ ')+n,180,y+24,'#e6f6ff',17);
+      const t=d.length?d.length+(d.length===1?' código':' códigos'):'OK';ctx.fillStyle=d.length?'#5a1f1b':'#163a28';rr(590,y+10,130,28,14);ctx.fill();
+      txt(t,655,y+24,d.length?'#ffb3ab':'#8ff0b4',15,MONO,'center')});
+    if(sc.t>1.4+SYS.length*.25)scr('Toca un sistema para ver el detalle',170,505,'#7f9fb0',13);return}
+  const d=dtcs(sc.sys);scr(SYSN[sc.sys].toUpperCase(),170,112,'#4fc3f7',17);
+  if(!d.length)scr('Sin códigos de avería memorizados',170,160,'#8ff0b4');
+  d.forEach(([s,c,ds],i)=>{const y=145+i*74;ctx.fillStyle='#16262d';rr(160,y,580,62,8);ctx.fill();txt(c,180,y+22,'#ffb3ab',22,MONO);txt('ACTIVO',720,y+22,'#ffb3ab',12,MONO,'right');wrap(ds,180,y+46,540,18,'#e6f6ff',14,MONO)});
+  if(sc.sys==='motor'){const y0=160+Math.max(1,d.length)*74;scr('DATOS EN VIVO',170,y0,'#4fc3f7',15);
+    if(!R.eng.on)scr('Arranca el motor para ver los datos en vivo',170,y0+30,'#7f9fb0',14);
+    else liveData().forEach(([k,v],i)=>{scr(k,180,y0+30+i*26,'#9fc6d8',14);txt(v,720,y0+30+i*26,'#e6f6ff',15,MONO,'right')})}
+}
+function drawLamps(){
+  const R=G.R,l=R.insp.lamps,s=lampState(),on=l.fn&&l.t>0,blink=(rate)=>Math.floor(T*rate)%2===0;
+  ctx.fillStyle='rgba(8,10,12,.7)';ctx.fillRect(0,0,900,588);
+  ctx.fillStyle='#161b1f';rr(60,24,780,556,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
+  txt('PRUEBA DE LUCES',84,48,C.muted,16);ctx.fillStyle=C.panel2;rr(650,32,170,32,8);ctx.fill();txt('CERRAR  ✕',735,48,C.fg,16,DISP,'center');
+  const col=R.car.color;
+  // delantera
+  const fx0=250,fy=250;txt('DELANTE',fx0,92,C.muted,14,DISP,'center');
+  ctx.fillStyle=shade(col,-.1);rr(fx0-150,fy-60,300,140,30);ctx.fill();ctx.fillStyle='#2a3a48';ctx.beginPath();ctx.moveTo(fx0-110,fy-60);ctx.lineTo(fx0+110,fy-60);ctx.lineTo(fx0+86,fy-140);ctx.lineTo(fx0-86,fy-140);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#111';rr(fx0-60,fy+10,120,34,8);ctx.fill();
+  const head=(x,lit)=>{ctx.fillStyle=lit?'#fffbe0':'#3a3a36';if(lit){ctx.shadowColor='#fff6c8';ctx.shadowBlur=30}ctx.beginPath();ctx.ellipse(x,fy-18,34,18,0,0,7);ctx.fill();ctx.shadowBlur=0};
+  const cr=l.fn==='cruce'&&on;head(fx0-104,cr&&s.cruceL);head(fx0+104,cr);
+  const ind=(x,y,lit)=>{ctx.fillStyle=lit?'#ffae1a':'#4a3a1a';if(lit){ctx.shadowColor='#ffae1a';ctx.shadowBlur=24}rr(x-14,y-7,28,14,4);ctx.fill();ctx.shadowBlur=0};
+  const iz=l.fn==='intiz'&&on&&blink(s.indL?2.6:5.2),de=l.fn==='intde'&&on&&blink(2.6);
+  ind(fx0-130,fy+12,iz);ind(fx0+130,fy+12,de);
+  // limpiaparabrisas
+  const wa=l.fn==='limpia'&&on&&s.wiper?Math.sin(T*5)*.9:0;
+  ctx.strokeStyle='#0b0d0f';ctx.lineWidth=5;[fx0-50,fx0+30].forEach(px=>{ctx.save();ctx.translate(px,fy-64);ctx.rotate(-1.35+wa+.9);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(80,0);ctx.stroke();ctx.restore()});
+  // trasera
+  const rx=640,ry=250;txt('DETRÁS',rx,92,C.muted,14,DISP,'center');
+  ctx.fillStyle=shade(col,-.1);rr(rx-150,ry-60,300,140,30);ctx.fill();ctx.fillStyle='#2a3a48';ctx.beginPath();ctx.moveTo(rx-104,ry-60);ctx.lineTo(rx+104,ry-60);ctx.lineTo(rx+82,ry-132);ctx.lineTo(rx-82,ry-132);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#e6e6e0';rr(rx-34,ry+14,68,22,3);ctx.fill();txt(R.car.plate,rx,ry+26,'#111',11,MONO,'center');
+  const br=l.fn==='freno'&&on;
+  const tail=(x,lit)=>{ctx.fillStyle=lit?'#ff2a1a':'#5a1410';if(lit){ctx.shadowColor='#ff2a1a';ctx.shadowBlur=30}rr(x-30,ry-30,60,30,6);ctx.fill();ctx.shadowBlur=0};
+  tail(rx-112,br&&s.brakeL);tail(rx+112,br&&s.brakeR);
+  ctx.fillStyle=br&&(s.brakeL||s.brakeR)?'#ff2a1a':'#5a1410';rr(rx-30,ry-140,60,8,3);ctx.fill();
+  ind(rx-112,ry+8,l.fn==='intiz'&&on&&s.indL&&blink(2.6));ind(rx+112,ry+8,de);
+  const rv=l.fn==='atras'&&on;[rx-70,rx+70].forEach(x=>{ctx.fillStyle=rv?'#ffffff':'#3d3d3d';if(rv){ctx.shadowColor='#fff';ctx.shadowBlur=20}rr(x-12,ry+4,24,12,3);ctx.fill();ctx.shadowBlur=0});
+  // interruptores
+  LAMPS.forEach(([k,n],i)=>{const x=90+i*122,y=470,act=l.fn===k&&on,done=R.notes.some(m=>m.id==='lamp-'+k);ctx.fillStyle=act?C.amber:C.panel2;rr(x,y,112,70,10);ctx.fill();ctx.strokeStyle=done?C.ok:C.line;ctx.lineWidth=2;ctx.stroke();
+    wrap(n,x+56,y+(n.length>14?26:36),100,18,act?C.ink:C.fg,15,DISP,'center')});
+  if(on&&(l.fn==='intiz'||l.fn==='intde'))txt('tic-tac '+(l.fn==='intiz'&&!s.indL?'muy rápido':'normal'),450,440,C.muted,14,BODY,'center');
+}
+function drawFuses(){
+  const R=G.R,fu=R.insp.fuses;
+  ctx.fillStyle='rgba(8,10,12,.75)';ctx.fillRect(0,0,900,588);
+  ctx.fillStyle='#1f2428';rr(120,60,660,480,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
+  txt('CAJA DE FUSIBLES',150,88,C.muted,16);ctx.fillStyle=C.panel2;rr(630,72,130,32,8);ctx.fill();txt('CERRAR  ✕',695,88,C.fg,16,DISP,'center');
+  txt('Toca un fusible para sacarlo y mirar el filamento',450,520,C.muted,14,BODY,'center');
+  FUSES.forEach(([id,n,a],i)=>{const [x,y]=fuseXY(i),pulled=fu.chk[id],blown=R.car.fuse===id,up=pulled?-26:0;
+    ctx.fillStyle='#111518';rr(x-30,y-6,60,70,6);ctx.fill();
+    ctx.fillStyle=FCOL[a];rr(x-22,y+up,44,52,6);ctx.fill();ctx.fillStyle='rgba(255,255,255,.25)';rr(x-16,y+4+up,32,18,4);ctx.fill();
+    txt(String(a),x,y+38+up,'#111',14,MONO,'center');
+    if(pulled){ctx.strokeStyle='#e8e8e8';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-10,y+10+up);if(blown){ctx.lineTo(x-2,y+14+up);ctx.moveTo(x+3,y+12+up)}ctx.lineTo(x+10,y+10+up);ctx.stroke();
+      if(blown){ctx.fillStyle='rgba(40,20,10,.6)';rr(x-16,y+4+up,32,18,4);ctx.fill()}}
+    txt(id,x,y+78,C.fg,13,MONO,'center');wrap(n,x,y+96,86,14,C.muted,11.5,BODY,'center');
+    if(pulled)txt(blown?'FUNDIDO':'BIEN',x,y-36,blown?C.bad:C.ok,13,DISP,'center')});
 }
 
 /* ================= INFORME Y RESULTADO ================= */
@@ -357,7 +476,10 @@ function signReport(){
   const stars=allOk&&safeOk&&R.time<200?3:allOk?2:(missed.length+extra.length)<=1&&right.length?1:0;
   G.score+=pts;G.stars.push(stars);if(allOk)G.ok++;
   if(allOk)sfx.coin();else sfx.bad();
-  const keyClues=k=>Object.values(FAULTS[k].c).map(t=>`<li>${esc(t)}</li>`).join('');
+  const keyClues=k=>{const F=FAULTS[k],L=Object.values(F.c);(F.dtc||[]).forEach(([sy,c,d])=>L.push('Escáner · '+SYSN[sy]+': '+c+' '+d));if(F.lamp)L.push(F.lamp);
+    if(k==='fusible')L.push(R.car.fuse==='F5'?'Prueba de luces: no enciende ninguna luz de freno':'Prueba de luces: el limpiaparabrisas no se mueve','Caja de fusibles: '+R.car.fuse+' fundido (filamento roto)');
+    if(k==='alternador'||k==='junta'||k==='manguito'||k==='lambda')L.push('Datos en vivo del escáner: '+(k==='alternador'?'tensión 11,8 V':k==='lambda'?'sonda lambda casi fija y ajuste de combustible +14 %':'refrigerante por encima de 105 °C'));
+    return L.map(t=>`<li>${esc(t)}</li>`).join('')};
   const body=`<div class="stars" aria-label="${stars} de 3 estrellas">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3-stars)}</span></div>
     <div class="sum"><div><b>+${pts}</b><small>Puntos</small></div><div><b>${mmss(R.time)}</b><small>Tiempo</small></div><div><b>${R.notes.length}</b><small>Pruebas</small></div></div>
     <p style="margin-bottom:-4px"><b>Lo que tenía el coche</b></p>
@@ -499,7 +621,7 @@ function drawGround(){
   ctx.restore();
   // pistas visuales de los objetos
   if(!s.hood){const p=.45+.45*Math.sin(T*5);ctx.strokeStyle=`rgba(242,179,61,${p})`;ctx.lineWidth=2;ctx.setLineDash([6,6]);
-    [[566,388,130,60,'CAPÓ'],[160,388,128,60,'EMPUJAR'],[132,512,64,48,'ESCAPE'],[540,452,104,104,'RUEDA'],[650,446,56,52,'FARO']].forEach(([x,y,w,h,l])=>{rr(x,y,w,h,10);ctx.stroke();txt(l,x+w/2,y-12,C.amber,14,DISP,'center')});ctx.setLineDash([])}
+    [[566,388,130,60,'CAPÓ'],[160,388,128,60,'EMPUJAR'],[132,512,64,48,'ESCAPE'],[540,452,104,104,'RUEDA'],[650,446,56,52,'LUCES']].forEach(([x,y,w,h,l])=>{rr(x,y,w,h,10);ctx.stroke();txt(l,x+w/2,y-12,C.amber,14,DISP,'center')});ctx.setLineDash([])}
   // puesto de conducción
   ctx.fillStyle=C.panel;rr(16,588,868,124,12);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=1.5;ctx.stroke();
   txt('PUESTO DE CONDUCCIÓN',32,604,C.muted,13);
@@ -525,7 +647,7 @@ function drawGround(){
   // escáner
   ctx.strokeStyle='#0d0f11';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(585,612);ctx.quadraticCurveTo(565,575,520,520);ctx.stroke();
   ctx.fillStyle='#14191d';rr(540,616,92,62,8);ctx.fill();ctx.strokeStyle=C.line;ctx.stroke();ctx.fillStyle='#14231c';rr(550,624,72,34,4);ctx.fill();
-  txt(R.notes.some(n=>n.id==='obd')?'LEÍDO':'OBD',586,641,'#7fe0a4',13,MONO,'center');txt('ESCÁNER',586,700,C.muted,12,DISP,'center');
+  txt(R.notes.some(n=>n.id==='scan')?'LEÍDO':'OBD',586,641,'#7fe0a4',13,MONO,'center');txt('ESCÁNER',586,700,C.muted,12,DISP,'center');
   // levantar
   ctx.fillStyle='rgba(242,179,61,.12)';rr(690,612,180,84,10);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
   txt('LEVANTAR  ▶',780,644,C.amber,22,DISP,'center');txt('para mirar por debajo',780,672,C.muted,12,BODY,'center');
@@ -534,26 +656,31 @@ function drawGround(){
   if(e.crank>0)txt(fx('click')?'Clic… clic…':'Arrancando…',450,330,C.fg,20,BODY,'center');
   drawParts();
   if(s.hood)drawHood();
-  if(s.dash>0)drawDashBig();
+  if(s.fuses)drawFuses();
+  if(s.scan)drawScanner();
+  if(s.lamps)drawLamps();
+  if(s.dash>0&&!s.scan&&!s.lamps&&!s.fuses)drawDashBig();
 }
-const LIGHTS=[['engine','#f2b33d'],['batt','#ff6b5e'],['oil','#ff6b5e'],['temp','#ff6b5e'],['brake','#ff6b5e']];
+const LIGHTS=[['engine','#f2b33d'],['batt','#ff6b5e'],['oil','#ff6b5e'],['temp','#ff6b5e'],['brake','#ff6b5e'],['abs','#f2b33d'],['srs','#ff6b5e']];
 function activeLights(){const L=new Set(G.R.car.faults.map(k=>FAULTS[k].fx.light).filter(Boolean));if(fx('sink'))L.add('brake');return L}
 function iconLight(k,x,y,s,col){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;
   if(k==='engine'){ctx.strokeRect(-9,-5,16,11);ctx.fillRect(-12,-2,3,5);ctx.fillRect(7,-3,4,6);ctx.fillRect(-4,-9,6,4)}
   if(k==='batt'){ctx.strokeRect(-10,-6,20,13);ctx.fillRect(-7,-9,4,3);ctx.fillRect(3,-9,4,3);ctx.fillRect(-7,0,5,1.6);ctx.fillRect(2,0,5,1.6);ctx.fillRect(3.7,-1.7,1.6,5)}
   if(k==='oil'){ctx.beginPath();ctx.moveTo(-11,2);ctx.lineTo(-4,-4);ctx.lineTo(8,-4);ctx.lineTo(11,-7);ctx.lineTo(11,-4);ctx.lineTo(6,4);ctx.lineTo(-4,4);ctx.closePath();ctx.stroke();ctx.beginPath();ctx.arc(12,4,1.6,0,7);ctx.fill()}
   if(k==='temp'){ctx.fillRect(-1,-10,3,13);ctx.beginPath();ctx.arc(.5,5,4,0,7);ctx.fill();ctx.fillRect(3,-7,5,1.6);ctx.fillRect(3,-3,5,1.6);ctx.beginPath();ctx.moveTo(-11,9);ctx.quadraticCurveTo(-7,6,-3,9);ctx.moveTo(4,9);ctx.quadraticCurveTo(8,6,12,9);ctx.stroke()}
+  if(k==='abs'){ctx.beginPath();ctx.arc(0,0,11,0,7);ctx.stroke();ctx.font='bold 8px '+BODY;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ABS',0,.5)}
+  if(k==='srs'){ctx.beginPath();ctx.arc(-4,-7,3,0,7);ctx.fill();ctx.fillRect(-6,-3,4,10);ctx.fillRect(-6,6,9,3);ctx.beginPath();ctx.arc(5,-1,6,0,7);ctx.stroke()}
   if(k==='brake'){ctx.beginPath();ctx.arc(0,0,9,0,7);ctx.stroke();ctx.fillRect(-1,-5,2.6,7);ctx.fillRect(-1,4,2.6,2.6);ctx.beginPath();ctx.arc(0,0,12.5,-.8,.8);ctx.stroke();ctx.beginPath();ctx.arc(0,0,12.5,Math.PI-.8,Math.PI+.8);ctx.stroke()}
   ctx.restore()}
-function drawLights(x,y,show){const L=activeLights();LIGHTS.forEach(([k,col],i)=>{const on=show&&L.has(k);iconLight(k,x+(i%2)*22,y+Math.floor(i/2)*18,.62,on?col:'#2c353c')})}
+function drawLights(x,y,show){const L=activeLights();LIGHTS.forEach(([k,col],i)=>{const on=show&&L.has(k);iconLight(k,x+(i%2)*22,y-4+Math.floor(i/2)*15,.52,on?col:'#2c353c')})}
 function drawDashBig(){const R=G.R,L=activeLights(),a=Math.min(1,R.insp.dash);ctx.globalAlpha=a;
-  ctx.fillStyle='rgba(10,13,15,.94)';rr(170,150,560,190,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(10,13,15,.94)';rr(150,150,600,190,18);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
   txt('CUADRO DE INSTRUMENTOS',450,176,C.muted,15,DISP,'center');
-  LIGHTS.forEach(([k,col],i)=>{const on=L.has(k),x=240+i*105;ctx.fillStyle='#171c20';rr(x-38,200,76,76,12);ctx.fill();if(on){ctx.shadowColor=col;ctx.shadowBlur=18}iconLight(k,x,238,1.7,on?col:'#323b42');ctx.shadowBlur=0;
-    txt({engine:'Motor',batt:'Batería',oil:'Aceite',temp:'Temperatura',brake:'Freno'}[k],x,296,on?C.fg:C.muted,13,BODY,'center')});
+  LIGHTS.forEach(([k,col],i)=>{const on=L.has(k),x=210+i*80;ctx.fillStyle='#171c20';rr(x-34,200,68,76,12);ctx.fill();if(on){ctx.shadowColor=col;ctx.shadowBlur=18}iconLight(k,x,238,1.7,on?col:'#323b42');ctx.shadowBlur=0;
+    txt({engine:'Motor',batt:'Batería',oil:'Aceite',temp:'Temp.',brake:'Freno',abs:'ABS',srs:'Airbag'}[k],x,296,on?C.fg:C.muted,13,BODY,'center')});
   txt(L.size?'Testigos encendidos':'Ningún testigo encendido',450,322,L.size?C.amber:C.ok,15,BODY,'center');ctx.globalAlpha=1}
 function drawParts(){G.parts.forEach(p=>{ctx.globalAlpha=p.a*(p.life/p.max);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill()});ctx.globalAlpha=1}
-const HOOD={close:[650,38,180,34],batt:[100,92,150,96],bfl:[290,72,92,70],psf:[420,72,80,70],cool:[100,300,124,166],oil:[650,170,56,56],filter:[262,300,120,92],plug:[440,214,60,60],hose:[250,452,170,42],belt:[640,300,180,210],smell:[764,92,70,70]};
+const HOOD={close:[650,38,180,34],batt:[100,92,150,96],bfl:[290,72,92,70],psf:[420,72,80,70],cool:[100,300,124,166],oil:[650,170,56,56],filter:[262,300,120,92],plug:[440,214,60,60],hose:[250,452,170,42],fusebox:[440,368,150,66],belt:[640,300,180,210],smell:[764,92,70,70]};
 function drawHood(){
   const R=G.R,chk=R.insp.chk,e=R.eng;
   ctx.fillStyle='rgba(8,10,12,.6)';ctx.fillRect(0,0,900,588);
@@ -605,6 +732,7 @@ function drawHood(){
   [x,y,w,h]=HOOD.smell;ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(x+w/2,y+h/2,w/2,0,7);ctx.fill();ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.stroke();
   ctx.strokeStyle=C.fg;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+w/2-2,y+18);ctx.quadraticCurveTo(x+w/2+14,y+44,x+w/2+8,y+52);ctx.quadraticCurveTo(x+w/2,y+58,x+w/2-10,y+52);ctx.stroke();
   txt('OLER',x+w/2,y+h+13,'#9aa3aa',13,DISP,'center');
+  [x,y,w,h]=HOOD.fusebox;ctx.fillStyle='#111518';rr(x,y,w,h,8);ctx.fill();for(let i=0;i<6;i++){ctx.fillStyle=Object.values(FCOL)[i%4];rr(x+12+i*22,y+14,14,22,3);ctx.fill()}txt('CAJA DE FUSIBLES',x+w/2,y+h+12,'#9aa3aa',13,DISP,'center');
   // vapor
   if(fx('steam')&&e.on&&e.run>1.5){for(let i=0;i<5;i++){const t=(T*.6+i*.2)%1;ctx.globalAlpha=.25*(1-t);ctx.fillStyle='#f0f4f7';ctx.beginPath();ctx.arc(160+i*14,290-t*120,12+t*20,0,7);ctx.fill()}ctx.globalAlpha=1}
   if(!e.on)txt('Con el motor apagado. Arráncalo con la llave para ver la correa girar y medir la batería en marcha.',455,560,C.muted,13,BODY,'center');
@@ -633,6 +761,9 @@ function drawUnder(yb){
   ctx.strokeStyle='#6b7278';ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(505,yb+4);ctx.lineTo(xf-10,cy+10);ctx.stroke();
   ctx.fillStyle='#1b1d1f';for(let i=0;i<4;i++){ctx.beginPath();ctx.ellipse(540+i*8,yb-2-i*4,7,11,-.5,0,7);ctx.fill()}
   if(u.boot&&has('homocinetica')){ctx.fillStyle='#3a2f1c';for(let i=0;i<6;i++){ctx.beginPath();ctx.arc(530+rand(0,40),yb-20+rand(0,30),2.5,0,7);ctx.fill()}}
+  // sensor ABS
+  ctx.strokeStyle=u.sensor&&has('abs')?'#ff6b5e':'#1b1d1f';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(xf-30,cy+16);ctx.quadraticCurveTo(xf-70,cy+30,xf-84,cy+52);ctx.stroke();if(u.sensor&&has('abs')){ctx.fillStyle='#d49b5c';ctx.beginPath();ctx.arc(xf-62,cy+33,4,0,7);ctx.fill()}
+  ctx.fillStyle='#4a5258';rr(xf-38,cy+8,14,16,3);ctx.fill();
   // fugas
   const leak=R.car.faults.map(k=>FAULTS[k].fx.drip).find(Boolean)||(R.car.water?'rgba(200,225,240,.55)':null);
   if(leak){const lx=has('manguito')?560:has('bomba')?470:R.car.water&&!R.car.faults.some(k=>FAULTS[k].fx.drip)?380:450;
@@ -665,10 +796,14 @@ function drawButtons(){
       ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(ix,iy,32+4*Math.sin(T*6),0,7);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=C.bad;ctx.stroke();
       txt('P',ix,iy+2,C.fg,34,DISP,'center');txt('FRENO DE MANO',ix,iy+52,C.fg,14,DISP,'center')}}
   if(R.step===1){const s=R.insp;
+    if(s.scan){UI.push({x:580,y:530,w:180,h:40,id:'scanclose'});if(s.scan.sys)UI.push({x:140,y:530,w:180,h:40,id:'scanback'});
+      else if(s.scan.phase==='tree')SYS.forEach(([k],i)=>{if(s.scan.t>1.4+i*.25)UI.push({x:160,y:150+i*58,w:580,h:48,id:'sys-'+k})});return}
+    if(s.lamps){UI.push({x:650,y:32,w:170,h:32,id:'lampsclose'});LAMPS.forEach(([k],i)=>UI.push({x:90+i*122,y:470,w:112,h:70,id:'lamp-'+k}));return}
+    if(s.fuses){UI.push({x:630,y:72,w:130,h:32,id:'fuseclose'});FUSES.forEach(([k],i)=>{const [x,y]=fuseXY(i);UI.push({x:x-34,y:y-40,w:68,h:150,id:'fuse-'+k})});return}
     if(s.hood)Object.entries(HOOD).forEach(([id,[x,y,w,h]])=>UI.push({x,y,w,h,id}));
-    else UI.push({x:566,y:388,w:130,h:60,id:'hood'},{x:160,y:388,w:128,h:60,id:'push'},{x:132,y:512,w:64,h:48,id:'tail'},{x:540,y:452,w:104,h:104,id:'tyre'},{x:650,y:446,w:56,h:52,id:'light'});
+    else UI.push({x:566,y:388,w:130,h:60,id:'hood'},{x:160,y:388,w:128,h:60,id:'push'},{x:132,y:512,w:64,h:48,id:'tail'},{x:540,y:452,w:104,h:104,id:'tyre'},{x:650,y:446,w:56,h:52,id:'lamps'});
     UI.push({x:30,y:606,w:74,h:100,id:'key'},{x:118,y:606,w:84,h:100,key:'wheel'},{x:230,y:606,w:66,h:100,key:'brake'},{x:308,y:606,w:52,h:100,key:'gas'},{x:390,y:608,w:122,h:98,id:'dash'},{x:536,y:608,w:100,h:98,id:'obd'},{x:690,y:612,w:180,h:84,id:'lift'});
-    if(G.n===1&&!s.hood){const order=['key','gas','brake','wheel','dash','tail','push','hood','obd','lift'],done=id=>({key:'start',tail:'smoke',hood:'oil',lift:'_'}[id]||id);
+    if(G.n===1&&!s.hood){const order=['key','gas','brake','wheel','dash','tail','push','hood','obd','lift'],done=id=>({key:'start',tail:'smoke',hood:'oil',obd:'scan',lift:'_'}[id]||id);
       const nx=order.find(k=>k==='lift'||!R.notes.some(n=>n.id===done(k)));const u=UI.find(u=>u.key===nx||u.id===nx);
       if(u&&!(nx==='lift'&&R.notes.length<5)){ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.globalAlpha=.5+.5*Math.sin(T*6);rr(u.x-4,u.y-4,u.w+8,u.h+8,10);ctx.stroke();ctx.globalAlpha=1}}
   }
@@ -692,9 +827,9 @@ function drawButtons(){
     txt(l.h.toFixed(2).replace('.',',')+' m',gx+20,gy-12,C.fg,16,MONO,'center');
   }
   if(R.step===3){const yb=600-R.lift.h*170+24,xf=390+.31*460,cy=yb-48;
-    UI.push({x:xf-56,y:cy-60,w:112,h:84,id:'pads'},{x:190,y:yb+2,w:100,h:44,id:'exhaust'},{x:304,y:yb-22,w:48,h:72,id:'shock'},{x:410,y:yb-4,w:88,h:34,id:'tie'},{x:504,y:yb-30,w:70,h:44,id:'boot'},{x:330,y:582,w:300,h:44,id:'floor'},{x:24,y:78,w:132,h:190,id:'report'});
+    UI.push({x:xf-56,y:cy-60,w:112,h:84,id:'pads'},{x:190,y:yb+2,w:100,h:44,id:'exhaust'},{x:304,y:yb-22,w:48,h:72,id:'shock'},{x:410,y:yb-4,w:88,h:34,id:'tie'},{x:504,y:yb-30,w:70,h:44,id:'boot'},{x:xf-112,y:cy+2,w:52,h:40,id:'sensor'},{x:330,y:582,w:300,h:44,id:'floor'},{x:24,y:78,w:132,h:190,id:'report'});
     UI.forEach(u=>{if(u.id==='report'||R.under.chk[u.id])return;ctx.strokeStyle='rgba(242,179,61,.8)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.globalAlpha=.45+.4*Math.sin(T*5);rr(u.x,u.y,u.w,u.h,10);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1});
-    [['rueda',xf,cy-72],['escape',240,yb+60],['amortiguador',328,yb+66],['dirección',454,yb+44],['transmisión',540,yb-42],['suelo',480,642]].forEach(([l,x,y])=>txt(l,x,y,C.muted,13,DISP,'center'));
+    [['rueda',xf,cy-72],['escape',240,yb+60],['amortiguador',328,yb+66],['dirección',454,yb+44],['transmisión',540,yb-42],['sensor ABS',xf-150,cy+22],['suelo',480,642]].forEach(([l,x,y])=>txt(l,x,y,C.muted,13,DISP,'center'));
   }
 }
 function draw(){
@@ -713,8 +848,8 @@ function draw(){
   if(R.step>=2){const yb=liftScene();if(R.step===3)drawUnder(yb);if(R.step===2)txt(R.lift.locked?'SEGURO PUESTO':'SEGURO QUITADO',40,40,R.lift.locked?C.ok:C.amber,20);else txt('COCHE ARRIBA · MIRA POR DEBAJO',450,40,C.muted,18,DISP,'center')}
   ctx.restore();
   drawButtons();
-  if(R.last){ctx.globalAlpha=Math.min(1,R.last.life);ctx.font=`17px ${BODY}`;const w=Math.min(840,ctx.measureText(R.last.t).width+60);ctx.fillStyle='rgba(16,20,23,.95)';rr(450-w/2,112,w,46,10);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
-    txt('✎',450-w/2+22,136,C.amber,20,BODY,'center');txt(R.last.t,450-w/2+40,136,C.fg,17,BODY);ctx.globalAlpha=1}
+  if(R.last){ctx.globalAlpha=Math.min(1,R.last.life);ctx.font=`17px ${BODY}`;let lt=R.last.t;while(ctx.measureText(lt).width>790&&lt.length>10)lt=lt.slice(0,-2);if(lt!==R.last.t)lt=lt.trim()+'…';const w=Math.min(850,ctx.measureText(lt).width+60);ctx.fillStyle='rgba(16,20,23,.95)';rr(450-w/2,112,w,46,10);ctx.fill();ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.stroke();
+    txt('✎',450-w/2+22,136,C.amber,20,BODY,'center');txt(lt,450-w/2+40,136,C.fg,17,BODY);ctx.globalAlpha=1}
   drawPanel();
   if(G.toast){ctx.globalAlpha=Math.min(1,G.toast.life);ctx.font=`17px ${BODY}`;const w=ctx.measureText(G.toast.t).width+36;ctx.fillStyle='#5a1f1b';rr(450-w/2,H-60,w,40,8);ctx.fill();txt(G.toast.t,450,H-40,C.fg,17,BODY,'center');ctx.globalAlpha=1}
   if(G.paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);txt('EN PAUSA',W/2,H/2,C.fg,60,DISP,'center')}
@@ -746,8 +881,8 @@ $('bSound').addEventListener('click',()=>{soundOn=!soundOn;$('bSound').setAttrib
 /* ================= INICIO ================= */
 newDay();
 openModal({eyebrow:'Simulador de diagnóstico · jornada de 8 coches',title:'¿Qué le pasa a este coche?',
-  body:`<p>Los clientes solo te cuentan lo que notan. Lo que tiene el coche <b>lo descubres tú</b>, como en un taller de verdad: arranca y escucha, acelera, frena, gira el volante, mira el cuadro y el humo del escape, empuja la carrocería, abre el capó, mide, huele, usa el escáner y mira por debajo.</p>
-  <div class="how"><div><b>22 averías</b>Frenos, motor, electricidad, refrigeración, suspensión, escape, ruedas y luces.</div><div><b>Varias a la vez</b>Desde el tercer coche puede haber más de una. Y no todo lo raro es avería.</div><div><b>Aprende</b>Al firmar el informe verás qué pistas delataban cada avería.</div></div>
+  body:`<p>Los clientes solo te cuentan lo que notan. Lo que tiene el coche <b>lo descubres tú</b>, como en un taller de verdad: arranca y escucha, acelera, frena, gira el volante, mira el cuadro y el humo del escape, empuja la carrocería, abre el capó, mide, huele, revisa luces y fusibles, conecta el escáner y mira por debajo.</p>
+  <div class="how"><div><b>27 averías</b>Frenos, motor, electricidad, refrigeración, suspensión, escape, ABS, airbag, luces y fusibles.</div><div><b>Varias a la vez</b>Desde el tercer coche puede haber más de una. Y no todo lo raro es avería.</div><div><b>Aprende</b>Al firmar el informe verás qué pistas delataban cada avería.</div></div>
   <p style="color:var(--muted);font-size:13.5px">Todo se hace tocando las cosas del taller con el ratón o el dedo. <b>Sube el volumen</b>: muchas averías se oyen.</p>`,
   buttons:[{label:'Empezar la jornada',primary:true,fn:()=>{audio();sfx.ok()}}]});
 resize();requestAnimationFrame(frame);
