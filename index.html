@@ -287,7 +287,7 @@ function needEngine(){if(!G.R.eng.on){setMsg('Primero arranca el motor con la <b
 function has0(k){return G.R.car.faults.includes(k)}
 function objTap(id){
   const R=G.R,s=R.insp;
-  if(id==='key'){if(R.eng.on){R.eng.on=false;R.eng.rpm=0;allTonesOff();sfx.click()}else startEngine();return}
+  if(id==='key'){if(R.eng.on){R.eng.on=false;R.eng.rpm=0;allTonesOff();if(s.scan){s.scan=null;setMsg('Has apagado el motor: el escáner pierde la comunicación.')}sfx.click()}else startEngine();return}
   if(id==='dash'){s.dash=3.5;note('dash');return}
   if(id==='hood'){s.hood=true;sfx.click();return}
   if(id==='close'){s.hood=false;sfx.click();return}
@@ -298,7 +298,7 @@ function objTap(id){
   if(id==='lamps'){s.lamps={fn:null,t:0};sfx.click();return}
   if(id==='lampsclose'){s.lamps=null;tone('wipe',false);sfx.click();return}
   if(id.startsWith('lamp-')){const k=id.slice(5);s.lamps.fn=k;s.lamps.t=2.6;s.lamps.tick=0;sfx.click();setTimeout(()=>{if(G.R===R&&s.lamps&&s.lamps.fn===k)noteT('lamp-'+k,LAMPTXT[k](lampState()))},1400);return}
-  if(id==='obd'){s.scan={phase:'connect',t:0,sys:null,tab:'codes'};sfx.click();return}
+  if(id==='obd'){if(!R.eng.on){sfx.bad();setMsg('El escáner no se comunica con el coche: primero arranca el motor con la <b>llave</b>.');return}s.scan={phase:'connect',t:0,sys:null,tab:'codes'};sfx.click();return}
   if(id==='scanclose'){s.scan=null;sfx.click();return}
   if(id==='scanback'){if(s.scan)s.scan.sys=null;sfx.click();return}
   if(id==='scanclear'){R.clr={since:0};sfx.ok();noteT('clear','Escáner: códigos borrados. Toca arrancar y esperar para ver cuáles vuelven');setMsg(R.eng.on?'':'Códigos borrados. Para que vuelvan los reales, el motor tiene que estar en marcha.');return}
