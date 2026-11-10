@@ -259,7 +259,7 @@ function next(){G.R.step++;G.R.t=0;sfx.ok();if(G.R.step>=6)finishRepair();else s
 function padShow(l,u,d,r,act){if(G.R)G.R.btn={u:!!u,d:!!d,act:act||''}}
 function stepEnter(){
   const R=G.R,f=R.f;
-  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('<b>Mantén pulsado</b> sobre la pista para avanzar y mueve el ratón (o el dedo) a los lados para centrarte. Suelta dentro de la <b>zona verde</b> y toca la <b>P</b> del freno de mano.')}
+  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('El coche entra solo al elevador, centrado entre las columnas. Cuando pare en la <b>zona verde</b>, toca la <b>P</b> del freno de mano.')}
   if(R.step===1){padShow(0,0,0,0,'');setMsg('Coloca los 4 brazos solo en los <b>puntos reforzados ▲</b> del chasis. Tócalos.')}
   if(R.step===2){padShow(0,1,1,0,'Comprobar apoyo');setMsg('En la botonera, <b>mantén pulsado ▲</b> hasta <b>20 cm</b> y suelta. Luego <b>toca un brazo</b> para comprobar el apoyo.')}
   if(R.step===3){padShow(0,0,0,0,'');setMsg(`El cliente dice: «${f.sym}». Lee la medida, compárala con el valor bueno y elige qué hacer.`)}
@@ -270,16 +270,13 @@ function repairUpdate(dt){
   const R=G.R;R.t+=dt;const act=takeAct();
   const U=keys.up||hold==='up'||hold==='drive', D=keys.down||hold==='down', A=keys.act||hold==='act';
   if(R.step===0){const d=R.drive;
-    if(U)d.v=Math.min(170,d.v+420*dt);else if(D)d.v=Math.max(-110,d.v-420*dt);else d.v*=Math.pow(.015,dt);
-    d.y-=d.v*dt;d.y=clamp(d.y,120,940);
-    d.x+=((keys.right?1:0)-(keys.left?1:0))*130*dt*(Math.abs(d.v)>10?1:.4)+Math.sin(R.t*1.7)*10*dt;
-    if(hold==='drive')d.x+=clamp((ptr.x-d.x)*2.2,-130,130)*dt*(Math.abs(d.v)>10?1:.4);
-    d.x=clamp(d.x,330,570);
-    const top=d.y-125,bot=d.y+125,inPosts=[[228,282],[438,492]].some(([a,b])=>bot>a&&top<b);
-    if(inPosts&&Math.abs(d.x-450)>58){d.x+=(450-d.x)*.5;d.v=-40;d.hit=.5;if(bad('k1','Has golpeado una columna del elevador. Céntrate antes de entrar.'))sfx.bump()}
-    d.hit=Math.max(0,d.hit-dt);
+    // el coche entra solo, centrado, y frena en la zona
+    const rest=d.y-360;
+    if(rest>.5){d.v=Math.min(170,rest*1.8+12);d.y=Math.max(360,d.y-d.v*dt);setHum(true,52+d.v*.12)}
+    else if(d.v){d.y=360;d.v=0;setHum(false);mark('k1',true);sfx.click();setMsg('El coche ya está en su sitio. Toca la <b>P</b> para poner el freno de mano.')}
+    d.x+=(450-d.x)*Math.min(1,dt*2.5);
     if(act){
-      if(Math.abs(d.v)>25)setMsg('Primero para del todo: suelta el botón.');
+      if(Math.abs(d.v)>25)setMsg('Espera a que el coche pare del todo.');
       else if(Math.abs(d.y-360)<26){mark('k1',true);mark('k2',true);setMsg('Bien colocado. Freno de mano puesto.');next()}
       else{R.k.k2=false;sfx.bad();setMsg('Estás fuera de la zona verde. Avanza un poco más (o atrás con <kbd>▼</kbd>) y vuelve a frenar.')}
     }
@@ -665,7 +662,7 @@ cv.addEventListener('pointerdown',e=>{
   const b=UI.find(b=>x>b.x&&x<b.x+b.w&&y>b.y&&y<b.y+b.h);
   if(b){if(b.tap){actEdge=true;sfx.click()}else hold=b.key;return}
   const R=G.R;repairClick(x,y);
-  if(R.step===0&&x<900)hold='drive';
+  
   if(R.step===4){const r=R.rep;if(r.phase==='swap'&&Math.hypot(x-450,y-380)<230)hold='act';if(r.phase==='tighten'&&r.cur>=0&&boltAt(x,y)===r.cur)hold='act'}
 });
 cv.addEventListener('pointermove',e=>{const [x,y]=ptrXY(e);ptr.x=x;ptr.y=y});

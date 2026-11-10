@@ -8,7 +8,7 @@ Juego de taller con dos capas. Fuera, llevas el taller: llegan clientes con aver
 
 ## Los 6 pasos de cada reparación
 
-1. **Entrar al elevador**: conduces despacio y centrado, sin golpear las columnas, y frenas dentro de la zona.
+1. **Entrar al elevador**: el coche entra solo, centrado entre las columnas, y tú pones el freno de mano.
 2. **Brazos del elevador**: solo en los puntos de elevación reforzados del chasis.
 3. **Subir el coche**: parada de comprobación a 20 cm, altura de trabajo y seguro mecánico.
 4. **Diagnóstico**: lees la medida (multímetro, escáner OBD, manómetro…) y la comparas con el valor correcto.
@@ -19,7 +19,7 @@ Cada paso crítico mal hecho quita estrellas y dinero. Los coches que pasas a lo
 
 ## Mandos
 
-Todo se juega tocando las cosas del taller con el ratón o el dedo, como en la realidad: mantén pulsado sobre la pista para conducir, toca la P del freno de mano, usa la botonera de la columna para subir y bajar, toca el brazo para comprobar el apoyo y el candado para el seguro, y mantén pulsada la rueda o cada tornillo para cambiar la pieza y apretar. También funciona con teclado (flechas y Espacio).
+Todo se juega tocando las cosas del taller con el ratón o el dedo, como en la realidad: toca la P del freno de mano, usa la botonera de la columna para subir y bajar, toca el brazo para comprobar el apoyo y el candado para el seguro, y mantén pulsada la rueda o cada tornillo para cambiar la pieza y apretar. También funciona con teclado (flechas y Espacio).
 
 ## Cómo está hecho
 
