@@ -259,12 +259,12 @@ function next(){G.R.step++;G.R.t=0;sfx.ok();if(G.R.step>=6)finishRepair();else s
 function padShow(l,u,d,r,act){if(G.R)G.R.btn={u:!!u,d:!!d,act:act||''}}
 function stepEnter(){
   const R=G.R,f=R.f;
-  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('<b>Mantén pulsado</b> sobre la pista para avanzar y mueve el ratón (o el dedo) a los lados para centrarte. Suelta dentro de la <b>zona verde</b> y pulsa <b>Freno de mano</b>.')}
+  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('<b>Mantén pulsado</b> sobre la pista para avanzar y mueve el ratón (o el dedo) a los lados para centrarte. Suelta dentro de la <b>zona verde</b> y toca la <b>P</b> del freno de mano.')}
   if(R.step===1){padShow(0,0,0,0,'');setMsg('Coloca los 4 brazos solo en los <b>puntos reforzados ▲</b> del chasis. Tócalos.')}
-  if(R.step===2){padShow(0,1,1,0,'Comprobar apoyo');setMsg('<b>Mantén pulsado Subir</b> hasta <b>20 cm</b> y suelta. Luego pulsa <b>Comprobar apoyo</b>.')}
+  if(R.step===2){padShow(0,1,1,0,'Comprobar apoyo');setMsg('En la botonera, <b>mantén pulsado ▲</b> hasta <b>20 cm</b> y suelta. Luego <b>toca un brazo</b> para comprobar el apoyo.')}
   if(R.step===3){padShow(0,0,0,0,'');setMsg(`El cliente dice: «${f.sym}». Lee la medida, compárala con el valor bueno y elige qué hacer.`)}
   if(R.step===4){padShow(0,0,0,0,'');setMsg(G.first?'Afloja los 5 tornillos <b>en estrella</b>: salta uno cada vez. Empieza por el marcado.':'Afloja los 5 tornillos <b>en estrella</b>: salta uno cada vez.')}
-  if(R.step===5){padShow(0,0,1,0,'Quitar seguro');setMsg('Pulsa <b>Quitar seguro</b>. Antes de bajar, <b>mira que no haya nada debajo</b>.')}
+  if(R.step===5){padShow(0,0,1,0,'Quitar seguro');setMsg('Toca el <b>candado</b> para quitar el seguro. Antes de bajar, <b>mira que no haya nada debajo</b>.')}
 }
 function repairUpdate(dt){
   const R=G.R;R.t+=dt;const act=takeAct();
@@ -288,7 +288,7 @@ function repairUpdate(dt){
     if(!l.locked){const dir=(U?1:0)-(D?1:0);l.h=clamp(l.h+dir*.32*dt,0,2);setHum(dir!==0,dir>0?75:60);
       if(!l.checked&&l.h>.42&&!l.warned){l.warned=true;l.checked=true;bad('k4','Te has pasado la parada de 20 cm. Siempre se para a comprobar que el coche apoya bien.');padShow(0,1,1,0,'Poner seguro')}
       if(act){
-        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;mark('k4',true);sfx.ok();setMsg('Apoyo correcto. <b>Mantén pulsado Subir</b> hasta la <b>franja verde</b> y pulsa <b>Poner seguro</b>.');padShow(0,1,1,0,'Poner seguro')}else{sfx.bad();setMsg('Para cerca de la marca de <b>20 cm</b> para comprobar.')}}
+        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;mark('k4',true);sfx.ok();setMsg('Apoyo correcto. <b>Mantén pulsado ▲</b> hasta la <b>franja verde</b> y toca el <b>candado</b> para poner el seguro.');padShow(0,1,1,0,'Poner seguro')}else{sfx.bad();setMsg('Para cerca de la marca de <b>20 cm</b> para comprobar.')}}
         else{if(l.h>=1.55&&l.h<=1.85){l.locked=true;setHum(false);mark('k5',true);setMsg('Seguro puesto. A trabajar.');setTimeout(()=>{if(G.R&&G.R.step===2)next()},500)}else{R.k.k5=false;sfx.bad();setMsg('El seguro solo se pone a la altura de trabajo, la <b>franja verde</b>.')}}
       }}
   }
@@ -306,7 +306,7 @@ function repairUpdate(dt){
     }
   }
   else if(R.step===5){const l=R.lift,w=R.low;
-    if(act&&!w.unlocked){w.unlocked=true;sfx.click();padShow(0,0,1,0,'');setMsg(w.box?'Seguro quitado. Ojo: hay algo debajo del coche. <b>Tócalo</b> para apartarlo y <b>mantén pulsado Bajar</b>.':'Seguro quitado. <b>Mantén pulsado Bajar</b>.')}
+    if(act&&!w.unlocked){w.unlocked=true;sfx.click();padShow(0,0,1,0,'');setMsg(w.box?'Seguro quitado. Ojo: hay algo debajo del coche. <b>Tócalo</b> para apartarlo y <b>mantén pulsado ▼</b> en la botonera.':'Seguro quitado. <b>Mantén pulsado ▼</b> en la botonera.')}
     if(w.unlocked&&!w.done){const dir=D?1:0;l.h=clamp(l.h-dir*.36*dt,0,2);setHum(dir>0,58);
       if(w.box&&l.h<.75){w.box=false;w.crushed=true;bad('k9','Has bajado con la caja de herramientas debajo. Antes de bajar, zona despejada.');sfx.bump()}
       if(l.h<=0){w.done=true;setHum(false);mark('k9',true);setTimeout(()=>{if(G.R&&G.R.step===5)next()},350)}}
@@ -329,7 +329,7 @@ function repairClick(x,y){
       if(want>=0&&i!==want&&!r.done.includes(want)){if(R.k.k7!==false)setMsg('En estrella: salta uno cada vez.');R.k.k7=false;sfx.bad();if(G.first)return}
       r.cur=i;r.tq=0;sfx.click();padShow(0,0,0,0,'Apretar (mantén)');setMsg(`Mantén pulsado y suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`)}
   }
-  if(R.step===5){const w=R.low;if(w.box&&Math.abs(x-w.boxX)<70&&y>520&&y<615){w.box=false;sfx.click();setMsg('Zona despejada. <b>Mantén pulsado Bajar</b>.')}}
+  if(R.step===5){const w=R.low;if(w.box&&Math.abs(x-w.boxX)<70&&y>520&&y<615){w.box=false;sfx.click();setMsg('Zona despejada. <b>Mantén pulsado ▼</b> en la botonera.')}}
 }
 function boltPos(i){const a=-Math.PI/2+i*2*Math.PI/5;return [450+Math.cos(a)*125,380+Math.sin(a)*125]}
 function boltAt(x,y){for(let i=0;i<5;i++){const [bx,by]=boltPos(i);if(Math.hypot(bx-x,by-y)<34)return i}return -1}
@@ -509,7 +509,7 @@ function drawShop(){
 function drawPanel(){
   const R=G.R,x0=900;
   ctx.fillStyle=C.panel;ctx.fillRect(x0,0,W-x0,H);ctx.fillStyle=C.line;ctx.fillRect(x0,0,2,H);
-  txt('PASO '+(R.step+1)+' DE 6',x0+28,40,C.amber,18);txt(STEPS[Math.min(5,R.step)].toUpperCase(),x0+28,70,C.fg,30);
+  txt('PASO '+Math.min(6,R.step+1)+' DE 6',x0+28,40,C.amber,18);txt(STEPS[Math.min(5,R.step)].toUpperCase(),x0+28,70,C.fg,30);
   for(let i=0;i<6;i++){ctx.fillStyle=i<R.step?C.ok:i===R.step?C.amber:C.line;rr(x0+28+i*56,94,48,6,3);ctx.fill()}
   txt('EVALUACIÓN',x0+28,138,C.muted,16);
   CHECKS.forEach(([k,n,c],i)=>{const y=172+i*44,v=R.k[k];
@@ -581,7 +581,12 @@ function drawRepair(){
       ctx.fillStyle=r.bad.includes(i)?C.bad:r.done.includes(i)?C.ok:(loose||out)?'#20262b':'#a9b2b9';ctx.fill();
       if(r.cur===i){ctx.lineWidth=4;ctx.strokeStyle=C.amber;ctx.stroke()}
       if(G.first&&want===i&&r.cur<0&&r.phase!=='swap'){ctx.beginPath();ctx.arc(bx,by,34+3*Math.sin(T*6),0,7);ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.stroke()}}
-    if(r.phase==='swap'){pbar(250,640,400,16,r.hold/1.6,C.amber);txt('Cambiando: '+f.part,450,612,C.fg,18,BODY,'center')}
+    if(r.phase==='swap'){const p=clamp(r.hold/1.6,0,1),on=hold==='act'||keys.act;
+      ctx.lineWidth=14;ctx.strokeStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.arc(450,380,206,0,7);ctx.stroke();
+      ctx.strokeStyle=C.amber;ctx.lineCap='round';ctx.beginPath();ctx.arc(450,380,206,-Math.PI/2,-Math.PI/2+p*Math.PI*2);ctx.stroke();ctx.lineCap='butt';
+      if(!on){ctx.globalAlpha=.55+.45*Math.sin(T*5);ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.beginPath();ctx.arc(450,380,218+4*Math.sin(T*5),0,7);ctx.stroke();ctx.globalAlpha=1}
+      ctx.fillStyle='rgba(16,20,23,.85)';rr(320,345,260,70,12);ctx.fill();
+      txt(on?'CAMBIANDO… '+Math.round(p*100)+' %':'MANTÉN PULSADA LA RUEDA',450,370,on?C.amber:C.fg,22,DISP,'center');txt(f.part,450,396,C.muted,15,BODY,'center')}
     // llave dinamométrica
     if(r.phase==='tighten'){const cx0=780,cy0=470,rad=90,max=f.hi*1.35,ang=v=>Math.PI*.8+(v/max)*Math.PI*1.4;
       ctx.lineWidth=16;ctx.strokeStyle='#2a3238';ctx.beginPath();ctx.arc(cx0,cy0,rad,ang(0),ang(max));ctx.stroke();
@@ -594,19 +599,34 @@ function drawRepair(){
   drawButtons();
   drawPanel();
 }
+function lockIcon(x,y,closed,col){ctx.strokeStyle=col;ctx.lineWidth=4;ctx.beginPath();if(closed)ctx.arc(x,y-6,9,Math.PI,0);else ctx.arc(x+8,y-10,9,Math.PI,-.2);ctx.stroke();ctx.fillStyle=col;rr(x-12,y-4,24,18,3);ctx.fill()}
 function drawButtons(){
   const R=G.R,b=R.btn||{};UI.length=0;
-  if(R.step===0)UI.push({x:40,y:620,w:250,h:70,label:'FRENO DE MANO',tap:1});
-  if(R.step===2||R.step===5){
-    if(b.u)UI.push({x:40,y:626,w:150,h:68,label:'▲ SUBIR',key:'up'});
-    if(b.d)UI.push({x:206,y:626,w:150,h:68,label:'▼ BAJAR',key:'down'});
-    if(b.act)UI.push({x:372,y:626,w:250,h:68,label:b.act.toUpperCase(),tap:1});
+  if(R.step===0){const d=R.drive;
+    if(Math.abs(d.v)<25&&d.y<760){const ix=d.x+120,iy=d.y;UI.push({x:ix-40,y:iy-40,w:80,h:80,tap:1});
+      const pulse=Math.abs(d.y-360)<26?4*Math.sin(T*6):0;
+      ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(ix,iy,32+pulse,0,7);ctx.fill();ctx.lineWidth=4;ctx.strokeStyle=C.bad;ctx.stroke();
+      txt('P',ix,iy+2,C.fg,34,DISP,'center');txt('FRENO DE MANO',ix,iy+52,C.fg,14,DISP,'center')}
   }
-  UI.forEach(u=>{const on=(!u.tap&&hold===u.key)||(u.key==='up'&&keys.up)||(u.key==='down'&&keys.down);
-    ctx.fillStyle=u.tap?C.amber:on?'#3a4650':C.panel2;rr(u.x,u.y,u.w,u.h,12);ctx.fill();
-    ctx.lineWidth=2;ctx.strokeStyle=u.tap?C.amber:on?C.amber:C.line;ctx.stroke();
-    txt(u.label,u.x+u.w/2,u.y+u.h/2+1,u.tap?C.ink:C.fg,22,DISP,'center');
-    if(!u.tap)txt('mantén pulsado',u.x+u.w/2,u.y+u.h-11,C.muted,11,BODY,'center')});
+  if(R.step===2||R.step===5){const l=R.lift,py=600-l.h*170;
+    // botonera de la columna
+    ctx.fillStyle='#d9dde0';rr(26,300,92,180,10);ctx.fill();ctx.fillStyle='#2a3238';rr(34,308,76,164,8);ctx.fill();
+    txt('BOTONERA',72,292,C.muted,13,DISP,'center');
+    [['up',345,'#3fae6a','▲',b.u],['down',430,'#d0473c','▼',b.d]].forEach(([k,y,col,g,en])=>{
+      const on=hold===k||(k==='up'&&keys.up)||(k==='down'&&keys.down);
+      ctx.beginPath();ctx.arc(72,y,28,0,7);ctx.fillStyle=en?(on?shade(col,-.3):col):'#4a535a';ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=on?C.amber:'rgba(0,0,0,.5)';ctx.stroke();
+      txt(g,72,y+1,'#fff',22,BODY,'center');
+      if(en){UI.push({x:36,y:y-36,w:72,h:72,key:k});if(!on&&R.t<6&&Math.sin(T*5)>0){ctx.strokeStyle=C.amber;ctx.lineWidth=2;ctx.beginPath();ctx.arc(72,y,36,0,7);ctx.stroke()}}});
+    txt('mantén pulsado',72,496,C.muted,12,BODY,'center');
+    if(b.act==='Comprobar apoyo'){const pul=.5+.5*Math.sin(T*6);
+      [[150,260],[520,630]].forEach(([x0,x1])=>{ctx.strokeStyle=`rgba(242,179,61,${.4+.6*pul})`;ctx.lineWidth=3;rr(x0-6,py-22,x1-x0+12,34,8);ctx.stroke();UI.push({x:x0-10,y:py-40,w:x1-x0+20,h:70,tap:1})});
+      txt('Toca el brazo para comprobar',390,660,C.amber,16,DISP,'center')}
+    if(b.act==='Poner seguro'||b.act==='Quitar seguro'){const cx=643,cy=530,pul=3*Math.sin(T*6);
+      ctx.fillStyle=C.panel2;ctx.beginPath();ctx.arc(cx,cy,30+pul,0,7);ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=C.amber;ctx.stroke();
+      lockIcon(cx,cy+2,b.act==='Quitar seguro',C.amber);txt(b.act==='Poner seguro'?'PONER SEGURO':'QUITAR SEGURO',cx,cy-46,C.amber,14,DISP,'center');
+      UI.push({x:cx-40,y:cy-40,w:80,h:80,tap:1})}
+    else{lockIcon(643,532,R.lift.locked,R.lift.locked?C.ok:'#56636c')}
+  }
 }
 function drawFX(dt){
   G.floats=G.floats.filter(f=>(f.life-=dt)>0);G.floats.forEach(f=>{ctx.globalAlpha=Math.min(1,f.life);txt(f.t,f.x,f.y-(1.6-f.life)*60,f.col,34,DISP,'center');ctx.globalAlpha=1});
@@ -646,7 +666,7 @@ cv.addEventListener('pointerdown',e=>{
   if(b){if(b.tap){actEdge=true;sfx.click()}else hold=b.key;return}
   const R=G.R;repairClick(x,y);
   if(R.step===0&&x<900)hold='drive';
-  if(R.step===4){const r=R.rep;if(r.phase==='swap'&&Math.hypot(x-450,y-380)<200)hold='act';if(r.phase==='tighten'&&r.cur>=0&&boltAt(x,y)===r.cur)hold='act'}
+  if(R.step===4){const r=R.rep;if(r.phase==='swap'&&Math.hypot(x-450,y-380)<230)hold='act';if(r.phase==='tighten'&&r.cur>=0&&boltAt(x,y)===r.cur)hold='act'}
 });
 cv.addEventListener('pointermove',e=>{const [x,y]=ptrXY(e);ptr.x=x;ptr.y=y});
 ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>cv.addEventListener(ev,()=>{hold=null}));
@@ -658,7 +678,7 @@ newShift();
 openModal({eyebrow:'Simulador de taller · turno de mañana',title:'Tú llevas el taller y el elevador 1',
   body:`<p>Llegan clientes con averías. Decide quién repara cada coche y, en tu elevador, <b>hazlo tú con tus manos</b>: mételo, súbelo, diagnostica y aprieta. Igual que en un taller de verdad, se evalúa la seguridad.</p>
   <div class="how"><div><b>1 · Reparte</b>Toca un coche y luego un elevador.</div><div><b>2 · Repara</b>6 pasos guiados, con nota y estrellas.</div><div><b>3 · No hagas esperar</b>Si se acaba la paciencia, el cliente se va.</div></div>
-  <p style="color:var(--muted);font-size:13.5px">Todo se hace con el ratón o el dedo: <b>mantén pulsado</b> para conducir, subir, bajar y apretar. También vale el teclado: flechas y <kbd>Espacio</kbd>. El turno dura unos 6 minutos.</p>`,
+  <p style="color:var(--muted);font-size:13.5px">Todo se hace tocando las cosas del taller con el ratón o el dedo: la pista, la botonera del elevador, el candado, la rueda, los tornillos. También vale el teclado: flechas y <kbd>Espacio</kbd>. El turno dura unos 6 minutos.</p>`,
   buttons:[{label:'Empezar turno',primary:true,fn:()=>{audio();sfx.ok()}}]});
 resize();hud();requestAnimationFrame(frame);
 })();
