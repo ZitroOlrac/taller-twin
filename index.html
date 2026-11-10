@@ -3,835 +3,579 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Gemelo digital jugable de un taller mecánico: una semana para liberar el sábado. Por Carlo Prado Ortiz.">
+<meta name="description" content="Juego de taller: reparte coches y repara con tus manos, con pasos de seguridad evaluados. Por Carlo Prado Ortiz.">
 <title>Taller Twin · Simulador de taller</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%23f2b33d%22/%3E%3Cpath d=%22M9 23l8-8m2-6a4 4 0 104 4l-3 1-2-2z%22 stroke=%22%231b1404%22 stroke-width=%222.6%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: vista cenital del taller (canvas) + panel lateral de mando, con la pizarra de estados a lo ancho debajo. Estética de nave: hormigón, señalización ámbar de seguridad. */
+/* Layout: una sola pantalla de juego (canvas 16:9) con el HUD encima y la instructora + mandos táctiles debajo. Aspecto de nave de taller: hormigón oscuro y ámbar de seguridad. Un único look oscuro, a propósito. */
 :root{
-  --bg:#13171b; --floor:#1b2126; --panel:#1e252b; --panel2:#262f36; --line:#36424c;
-  --fg:#e6ebee; --muted:#9aa8b2; --amber:#f2b33d; --amber-text:#f2b33d; --amber-ink:#1b1404;
-  --ok:#5cc28a; --warn:#ff9a4d; --bad:#ff6b5e; --info:#6fb6ff; --violet:#c49bff;
+  --bg:#101417; --panel:#1b2227; --panel2:#242d34; --line:#36424c;
+  --fg:#e8edf0; --muted:#9fadb7; --amber:#f2b33d; --ink:#1b1404;
+  --ok:#5cc28a; --bad:#ff6b5e; --info:#6fb6ff;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
   color-scheme:dark;
 }
-@media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
-  --bg:#e6e9eb; --floor:#d7dce0; --panel:#f6f7f8; --panel2:#eceff1; --line:#c3cbd1;
-  --fg:#162027; --muted:#53616b; --amber:#f2b33d; --amber-text:#8a5a00; --amber-ink:#1b1404;
-  --ok:#1e7f4c; --warn:#b4540f; --bad:#c3352a; --info:#2a64a8; --violet:#6b44b8; color-scheme:light } }
-:root[data-theme="light"]{
-  --bg:#e6e9eb; --floor:#d7dce0; --panel:#f6f7f8; --panel2:#eceff1; --line:#c3cbd1;
-  --fg:#162027; --muted:#53616b; --amber:#f2b33d; --amber-text:#8a5a00; --amber-ink:#1b1404;
-  --ok:#1e7f4c; --warn:#b4540f; --bad:#c3352a; --info:#2a64a8; --violet:#6b44b8; color-scheme:light }
-
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 img{max-width:100%}
-[hidden]{display:none!important}
 html,body{background:var(--bg)}
-body{color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45;
+body{color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.app{max-width:1440px;margin:0 auto;padding-block:16px 48px;display:flex;flex-direction:column;gap:14px}
+.app{max-width:1280px;margin:0 auto;padding-block:14px 40px;display:flex;flex-direction:column;gap:10px}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,select:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
-.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button:focus-visible,a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
-/* barra superior */
-.top{display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;padding:12px 16px;background:var(--panel);border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden}
-.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,transparent 10px 20px);opacity:.8}
-.brand{display:flex;flex-direction:column;min-width:0}
-.brand h1{margin:0;font-family:var(--display);font-weight:700;font-size:34px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
-.brand h1 span{color:var(--amber-text)}
-.brand small{color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase}
-.clock{display:flex;flex-direction:column;align-items:flex-start;padding-left:20px;border-left:1px solid var(--line)}
-.clock .day{font-family:var(--display);font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.clock .time{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1}
-.speed{display:flex;gap:4px;background:var(--panel2);padding:4px;border-radius:8px;border:1px solid var(--line)}
-.speed button{border:0;background:transparent;padding:6px 10px;border-radius:6px;font-family:var(--mono);font-size:13px;min-width:40px;min-height:36px}
-.speed button[aria-pressed="true"]{background:var(--amber);color:var(--amber-ink);font-weight:700}
-.kpis{display:flex;flex-wrap:wrap;gap:10px 22px;margin-left:auto}
-.kpi{display:flex;flex-direction:column}
-.kpi b{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums}
-.kpi span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.hud{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;position:relative;overflow:hidden}
+.hud::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,transparent 10px 20px)}
+.brand{font-family:var(--display);font-weight:700;font-size:28px;letter-spacing:.05em;text-transform:uppercase;line-height:1;margin:0}
+.brand span{color:var(--amber)}
+.stat{display:flex;flex-direction:column;min-width:0}
+.stat b{font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.stat.warn b{color:var(--bad)}
+.hud .grow{flex:1}
+.icon-btn{border:1px solid var(--line);background:var(--panel2);border-radius:8px;min-width:44px;min-height:40px;padding:6px 12px;font-size:13px}
+.icon-btn:hover{border-color:var(--amber)}
 
-.grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:14px;align-items:start}
-@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}.kpis{margin-left:0}.clock{padding-left:0;border-left:0}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
-.ph{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
-.ph h2{margin:0;font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-.ph .note{font-size:12px;color:var(--muted)}
+.stage{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#161b1f}
+#game{display:block;width:100%;max-width:100%;aspect-ratio:16/9;touch-action:none;cursor:pointer}
 
-.floor{position:relative}
-#floor{display:block;width:100%;aspect-ratio:960/460;max-width:100%;cursor:pointer;border-radius:0 0 0 0}
-.coach{display:flex;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line);background:var(--panel2);border-radius:0 0 10px 10px;flex-wrap:wrap}
-.avatar{width:38px;height:38px;border-radius:50%;background:var(--amber);color:var(--amber-ink);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:16px;flex:none}
-.coach .msg{flex:1 1 240px;min-width:0}
-.coach .who{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.coach p{margin:0}
-.btn{border:1px solid var(--line);background:var(--panel2);padding:8px 12px;border-radius:7px;min-height:40px;font-weight:500}
-.btn:hover{border-color:var(--amber)}
-.btn.primary{background:var(--amber);border-color:var(--amber);color:var(--amber-ink);font-weight:600}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn.sm{min-height:34px;padding:6px 10px;font-size:13px}
+.coach{display:flex;gap:12px;align-items:center;padding:10px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:64px}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:17px;flex:none}
+.coach .who{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.coach p{margin:0;font-size:16px;text-wrap:pretty}
+.coach .msg{flex:1;min-width:0}
+kbd{font-family:var(--mono);font-size:12px;background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap}
 
-.side{display:flex;flex-direction:column;gap:14px;min-width:0}
-.detail{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
-.detail .empty{color:var(--muted);margin:6px 0}
-.dhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.plate{font-family:var(--mono);font-weight:700;letter-spacing:.06em;background:var(--fg);color:var(--bg);padding:2px 7px 2px 16px;border-radius:4px;position:relative;font-size:14px;white-space:nowrap}
-.plate::before{content:"E";position:absolute;left:0;top:0;bottom:0;width:11px;background:var(--info);color:#fff;font-size:8px;display:grid;place-items:center;border-radius:4px 0 0 4px;font-weight:700;line-height:1;padding-top:7px}
-.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:13px}
-.dl dt{color:var(--muted)}
-.dl dd{margin:0;min-width:0}
-.actions{display:flex;flex-wrap:wrap;gap:6px}
-.bar{height:6px;background:var(--panel2);border-radius:3px;overflow:hidden;border:1px solid var(--line)}
-.bar i{display:block;height:100%;background:var(--amber)}
+.pad{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;user-select:none;-webkit-user-select:none}
+.pad button{min-width:64px;min-height:56px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);font-size:20px;font-weight:600;touch-action:none}
+.pad button.act{background:var(--amber);color:var(--ink);border-color:var(--amber);font-size:16px;min-width:180px;padding:0 18px}
+.pad button.on{border-color:var(--amber);box-shadow:inset 0 0 0 2px var(--amber)}
 
-.crit{list-style:none;margin:0;padding:8px 14px 12px;display:flex;flex-direction:column;gap:7px}
-.crit li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;font-size:13px;align-items:start}
-.crit .mk{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;border:1.5px solid var(--line);color:var(--muted);margin-top:1px}
-.crit .ok .mk{border-color:var(--ok);color:var(--ok)}
-.crit .fail .mk{border-color:var(--bad);color:var(--bad)}
-.tag{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--warn);font-weight:600;margin-left:4px}
-.crit .sub{display:block;font-size:11.5px;color:var(--muted)}
-
-.log{list-style:none;margin:0;padding:8px 14px 12px;max-height:210px;overflow:auto;display:flex;flex-direction:column;gap:4px;font-size:12.5px}
-.log li{display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px}
-.log time{font-family:var(--mono);color:var(--muted);font-size:11.5px}
-.log .bad{color:var(--bad)} .log .ok{color:var(--ok)} .log .warn{color:var(--warn)}
-
-/* pizarra */
-.boardwrap{overflow-x:auto;padding:12px}
-.board{display:grid;grid-template-columns:repeat(8,minmax(176px,1fr));gap:10px;min-width:1460px}
-.col{background:var(--panel2);border:1px solid var(--line);border-radius:8px;display:flex;flex-direction:column;min-height:180px}
-.col h3{margin:0;padding:8px 10px;font-family:var(--display);font-size:15px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;gap:6px;border-bottom:2px solid var(--line)}
-.col h3 em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--muted)}
-.col .cards{display:flex;flex-direction:column;gap:6px;padding:8px}
-.card{display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px;width:100%}
-.card:hover{border-color:var(--muted)}
-.card.sel{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
-.card.dim{opacity:.6}
-.card .row{display:flex;align-items:center;gap:6px;justify-content:space-between;flex-wrap:wrap}
-.card .m{font-size:12.5px}
-.card .f{font-size:11.5px;color:var(--muted);line-height:1.3}
-.chips{display:flex;flex-wrap:wrap;gap:4px}
-.chip{font-size:10.5px;font-family:var(--mono);padding:1px 6px;border-radius:10px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.chip.bad{color:var(--bad);border-color:var(--bad)} .chip.warn{color:var(--warn);border-color:var(--warn)}
-.chip.ok{color:var(--ok);border-color:var(--ok)} .chip.info{color:var(--info);border-color:var(--info)}
-.chip.amber{color:var(--amber-text);border-color:var(--amber)} .chip.vio{color:var(--violet);border-color:var(--violet)}
-.chip.urg{background:var(--bad);border-color:var(--bad);color:#fff;font-weight:700}
-.more{font-size:12px;color:var(--muted);padding:0 2px}
-
-/* modales */
-.overlay{position:fixed;inset:0;background:rgba(8,10,12,.62);display:grid;place-items:center;z-index:50;
+.overlay{position:fixed;inset:0;background:rgba(6,8,10,.7);display:grid;place-items:center;z-index:40;
   padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
-.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;max-width:760px;width:100%;max-height:100%;overflow:auto;display:flex;flex-direction:column}
-.modal header{padding:16px 20px 10px;border-bottom:1px solid var(--line);position:relative}
-.modal header::before{content:"";position:absolute;left:0;top:0;right:0;height:5px;background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,transparent 10px 20px);border-radius:12px 12px 0 0}
-.modal h2{margin:6px 0 0;font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;text-wrap:balance;line-height:1.05}
-.modal .eyebrow{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber-text);font-weight:600}
-.modal .mb{padding:14px 20px;display:flex;flex-direction:column;gap:12px}
-.modal .mb p{margin:0;max-width:65ch}
-.modal footer{padding:12px 20px 18px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;border-top:1px solid var(--line)}
-.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-.rule{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-.rule b{display:block;font-family:var(--display);font-size:16px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px}
-.rule span{font-size:12.5px;color:var(--muted)}
-.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
-.tbl table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
-.tbl th,.tbl td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
-.tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600;background:var(--panel2)}
-.tbl tr:last-child td{border-bottom:0}
-.tbl select{font:inherit;background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-height:36px}
-.tbl input[type=checkbox]{width:20px;height:20px;accent-color:var(--amber)}
-.grade{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-.grade .big{font-family:var(--display);font-size:72px;font-weight:700;line-height:.9;color:var(--amber-text)}
-.grade .lbl{font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:.04em}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
-.stat b{display:block;font-family:var(--mono);font-size:18px}
-.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.foot{color:var(--muted);font-size:12px;text-align:center}
-.foot a{color:var(--amber-text)}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:620px;width:100%;max-height:100%;overflow:auto}
+.modal header{padding:22px 24px 8px;position:relative}
+.modal header::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:repeating-linear-gradient(-45deg,var(--amber) 0 10px,transparent 10px 20px)}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.modal h2{margin:6px 0 0;font-family:var(--display);font-size:38px;font-weight:700;text-transform:uppercase;letter-spacing:.02em;line-height:1;text-wrap:balance}
+.mb{padding:10px 24px 6px;display:flex;flex-direction:column;gap:12px}
+.mb p{margin:0}
+.modal footer{padding:14px 24px 22px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:10px 16px;min-height:46px;font-weight:600}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:var(--ink)}
+.btn:hover{border-color:var(--amber)}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.how div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13.5px;color:var(--muted)}
+.how b{display:block;color:var(--fg);font-family:var(--display);font-size:18px;letter-spacing:.03em;text-transform:uppercase}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.checks li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:start;font-size:14px}
+.checks .mk{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ok);color:var(--ok);display:grid;place-items:center;font-size:12px;font-weight:700}
+.checks .fail .mk{border-color:var(--bad);color:var(--bad)}
+.tag{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--amber);font-weight:700;margin-left:6px}
+.stars{font-size:34px;letter-spacing:4px;color:var(--amber);line-height:1}
+.stars .off{color:var(--line)}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.sum div{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.sum b{display:block;font-family:var(--mono);font-size:20px}
+.sum small{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.foot{color:var(--muted);font-size:12.5px;text-align:center}
+.foot a{color:var(--amber)}
+@media (max-width:640px){.brand{font-size:22px}.stat b{font-size:17px}.coach p{font-size:14.5px}.modal h2{font-size:30px}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 
 <div class="app">
-  <header class="top">
-    <div class="brand"><h1>Taller <span>Twin</span></h1><small>Gemelo digital de un taller · semana 46</small></div>
-    <div class="clock" aria-live="off"><span class="day" id="cDay">Lunes</span><span class="time" id="cTime">08:00</span></div>
-    <div class="speed" role="group" aria-label="Velocidad de la simulación">
-      <button id="sp0" data-s="0" aria-pressed="false">II</button>
-      <button id="sp1" data-s="1" aria-pressed="false">1×</button>
-      <button id="sp2" data-s="2" aria-pressed="true">2×</button>
-      <button id="sp4" data-s="4" aria-pressed="false">4×</button>
-      <button id="sp8" data-s="8" aria-pressed="false">8×</button>
-    </div>
-    <div class="kpis">
-      <div class="kpi"><b id="kRev">0 €</b><span>Facturado</span></div>
-      <div class="kpi"><b id="kOcc">0 %</b><span>Ocupación elevadores</span></div>
-      <div class="kpi"><b id="kSat">100</b><span>Satisfacción</span></div>
-      <div class="kpi"><b id="kStuck">0</b><span>Atascados +2 días</span></div>
-    </div>
+  <header class="hud">
+    <h1 class="brand">Taller <span>Twin</span></h1>
+    <div class="stat"><b id="hClock">09:00</b><small>Turno de mañana</small></div>
+    <div class="stat"><b id="hMoney">0 €</b><small>Caja</small></div>
+    <div class="stat"><b id="hStars">–</b><small>Valoración</small></div>
+    <div class="stat" id="hWaitBox"><b id="hWait">0</b><small>Esperando</small></div>
+    <div class="grow"></div>
+    <button class="icon-btn" id="bPause" aria-pressed="false">Pausa</button>
+    <button class="icon-btn" id="bSound" aria-pressed="true">Sonido: sí</button>
   </header>
 
-  <div class="grid">
-    <section class="panel floor" aria-label="Vista del taller">
-      <div class="ph"><h2>Nave</h2><span class="note">Toca un coche y después un elevador libre</span></div>
-      <canvas id="floor" width="960" height="460" role="img" aria-label="Vista cenital del taller con la campa, tres elevadores, recepción y zona de entrega"></canvas>
-      <div class="coach">
-        <div class="avatar" aria-hidden="true">AN</div>
-        <div class="msg"><div class="who">Ana · encargada</div><p id="coachMsg">Abre el taller para empezar la semana.</p></div>
-        <button class="btn primary sm" id="coachDo" hidden>Hazlo</button>
-      </div>
-    </section>
+  <div class="stage"><canvas id="game" width="1280" height="720" role="img" aria-label="Juego del taller: cola de clientes, tres elevadores y la reparación en tu elevador"></canvas></div>
 
-    <div class="side">
-      <section class="panel" aria-label="Coche seleccionado">
-        <div class="ph"><h2>Orden de reparación</h2><span class="note" id="selNote"></span></div>
-        <div class="detail" id="detail"></div>
-      </section>
-      <section class="panel" aria-label="Criterios de evaluación">
-        <div class="ph"><h2>Reglas de la semana</h2><span class="note">Evaluación</span></div>
-        <ul class="crit" id="crit"></ul>
-      </section>
-      <section class="panel" aria-label="Registro">
-        <div class="ph"><h2>Parte del día</h2></div>
-        <ul class="log" id="log"></ul>
-      </section>
-    </div>
+  <div class="coach" aria-live="polite">
+    <div class="avatar" aria-hidden="true">AN</div>
+    <div class="msg"><div class="who">Ana · encargada</div><p id="msg">Bienvenido al taller.</p></div>
   </div>
 
-  <section class="panel" aria-label="Pizarra de estados">
-    <div class="ph"><h2>Pizarra</h2><span class="note">Cada coche es una ficha. Rojo: más de 2 días en la misma columna</span></div>
-    <div class="boardwrap"><div class="board" id="board"></div></div>
-  </section>
+  <div class="pad" id="pad" hidden>
+    <button id="pL" data-k="left" aria-label="Izquierda">◀</button>
+    <button id="pU" data-k="up" aria-label="Arriba o avanzar">▲</button>
+    <button id="pD" data-k="down" aria-label="Abajo o atrás">▼</button>
+    <button id="pR" data-k="right" aria-label="Derecha">▶</button>
+    <button id="pA" data-k="act" class="act">Acción</button>
+  </div>
 
-  <p class="foot">Simulación por eventos discretos basada en las reglas de un taller real · Hecho por Carlo Prado Ortiz · <a href="https://zitroolrac.github.io/Portfolio/" target="_blank" rel="noopener">Volver al portafolio</a></p>
+  <p class="foot">Simulador hecho por Carlo Prado Ortiz con las reglas de un taller real · <a href="https://zitroolrac.github.io/Portfolio/" target="_blank" rel="noopener">Volver al portafolio</a></p>
 </div>
 
-<div class="overlay" id="ov" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="modal"></div></div>
+<div class="overlay" id="ov" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mT" id="modal"></div></div>
 
 <script>
 (function(){
 "use strict";
-/* ---------- constantes del mundo ---------- */
-const W=960,H=460, MIN_PER_SEC=4, RATE=52;
-const OPEN=480, CLOSE=1080, SAT_OPEN=540, SAT_CLOSE=780, NOON=780;
-const DAYS=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const DS=['Lun','Mar','Mié','Jue','Vie','Sáb'];
-const STATES=[['recibido','Recibido'],['diagnostico','Diagnóstico'],['presupuesto','Pendiente presupuesto'],['aprobacion','Esperando aprobación'],['recambio','Esperando recambio'],['reparacion','En reparación'],['terminado','Terminado'],['entregado','Entregado']];
-const SNAME=Object.fromEntries(STATES);
-const FAULTS={
- frenos:{n:'Pastillas y discos delanteros',s:'Chirría al frenar',diag:.5,rep:1.5,part:'pedido',parts:140},
- revision:{n:'Revisión 30.000 km',s:'Le toca la revisión',diag:.4,rep:1,part:'stock',parts:75},
- distribucion:{n:'Kit de distribución y bomba de agua',s:'Le toca la distribución por kilómetros',diag:.6,rep:4.5,part:'pedido',parts:310},
- embrague:{n:'Embrague desgastado',s:'Sube de vueltas y no anda',diag:.8,rep:5,part:'pedido',parts:420},
- electrico:{n:'Masa suelta en el cuadro',s:'Se le apaga el cuadro a veces',diag:2.2,rep:1.2,part:'none',parts:0},
- amortiguadores:{n:'Amortiguadores traseros',s:'Bota mucho de atrás',diag:.5,rep:2,part:'pedido',parts:190},
- aire:{n:'Recarga de gas del aire acondicionado',s:'El aire no enfría',diag:.4,rep:.8,part:'stock',parts:40},
- lambda:{n:'Sonda lambda',s:'Luz de motor encendida',diag:1,rep:1,part:'pedido',parts:95},
- direccion:{n:'Rótulas de dirección',s:'Ruido al girar',diag:.7,rep:2,part:'pedido',parts:110},
- alternador:{n:'Alternador',s:'Se queda sin batería',diag:.6,rep:1.6,part:'pedido',parts:230},
- preitv:{n:'Pre-ITV y lámparas',s:'Pasa la ITV la semana que viene',diag:.5,rep:.7,part:'stock',parts:20},
- variador:{n:'Correa de variador',s:'No tira en las cuestas',diag:.5,rep:2,part:'pedido',parts:85}
-};
-const CARS=['Seat León','VW Golf','Renault Clio','Peugeot 308','Toyota Corolla','Dacia Sandero','Ford Focus','Kia Ceed','Citroën C4','Opel Corsa','Hyundai i30','Seat Ibiza'];
-const MICRO=['Ligier JS50','Aixam City','Ligier Myli'];
-const CLIENTS=['Marta Gil','Javier Ruiz','Lucía Navarro','Antonio Sanz','Carmen Ortega','Pablo Herrero','Elena Prieto','Raúl Medina','Sofía Cano','Miguel Á. Vidal','Nuria Pastor','Diego Moreno','Isabel Rey','Fernando León','Patricia Vega','Óscar Molina','Rosa Cabrera','Álvaro Santos','Inés Lozano','Hugo Rubio'];
-const PAINT=['#c9cdd1','#2c3c58','#8e2323','#ecebe6','#44513f','#24272b','#7d5f30','#55769a','#a8452f','#606c75','#d9b44a','#3f6e6a'];
-const BAYS=[{mech:'Luis',eff:1.15,note:'el más rápido'},{mech:'Andrés',eff:1,note:''},{mech:'Rubén',eff:.8,note:'aprendiz'}];
-
-/* ---------- utilidades ---------- */
-function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-let R=Math.random;
-const rand=(a,b)=>a+R()*(b-a), ri=(a,b)=>Math.floor(rand(a,b+1)), pick=a=>a[Math.floor(R()*a.length)];
-const A=(d,m)=>d*600+(m-OPEN);
 const $=id=>document.getElementById(id);
+const W=1280,H=720;
+const cv=$('game'),ctx=cv.getContext('2d');
+const C={bg:'#161b1f',floor:'#1c2328',floor2:'#20282e',line:'#36424c',fg:'#e8edf0',muted:'#9fadb7',amber:'#f2b33d',ink:'#1b1404',ok:'#5cc28a',bad:'#ff6b5e',info:'#6fb6ff',panel:'#1b2227',panel2:'#242d34'};
+const DISP='"Barlow Condensed","Arial Narrow",Arial,sans-serif', MONO='"JetBrains Mono",ui-monospace,monospace', BODY='"IBM Plex Sans",system-ui,sans-serif';
+const PAINT=['#d23c2f','#2f5fa8','#e8e6df','#2b2f33','#d9b03c','#3c7a63','#8a8f95','#7a3fa0','#c96a2b','#5aa0c8'];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function hhmm(m){m=Math.max(0,Math.round(m));return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
-function fmtAbs(a){const d=Math.floor(a/600);if(d>=5)return 'Lun próx.';return DS[d]+' '+hhmm(a-d*600+OPEN)}
-function eur(n){return Math.round(n).toLocaleString('es-ES')+' €'}
-function plate(){const L='BCDFGHJKLMNPRSTVWXYZ';const c=()=>L[Math.floor(R()*L.length)];return ri(1000,9999)+' '+pick(['K','L','M','N'])+c()+c()}
+const rand=(a,b)=>a+Math.random()*(b-a), pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const eur=n=>Math.round(n).toLocaleString('es-ES')+' €';
+const hhmm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(Math.floor(m%60)).padStart(2,'0');
+function plate(){const L='BCDFGHJKLMNPRSTVWXYZ',c=()=>L[Math.floor(Math.random()*L.length)];return Math.floor(rand(1000,9999))+' '+pick(['K','L','M','N'])+c()+c()}
+
+/* ---------- averías: lo que se aprende ---------- */
+const FAULTS={
+ frenos:{sym:'Chirría al frenar',part:'Pinza de freno',tool:'Inspección visual',read:'Pastillas: 2 mm',ref:'Mínimo seguro: 3 mm',opts:['Cambiar pastillas y discos','Cambiar amortiguador','Recargar el aire'],ok:0,lo:100,hi:120,pay:180},
+ alternador:{sym:'Se queda sin batería',part:'Alternador',tool:'Multímetro',read:'11,8 V con el motor en marcha',ref:'Debe dar entre 13,8 y 14,4 V',opts:['Cambiar la batería','Cambiar el alternador','Cambiar la sonda lambda'],ok:1,lo:40,hi:50,pay:260},
+ lambda:{sym:'Luz de motor encendida',part:'Sonda lambda',tool:'Escáner OBD',read:'P0133 · Sonda lambda B1S1 lenta',ref:'Código de avería guardado en la centralita',opts:['Cambiar la sonda lambda','Cambiar las bujías','Cambiar el alternador'],ok:0,lo:40,hi:50,pay:150},
+ amortiguador:{sym:'Bota mucho de atrás',part:'Amortiguador trasero',tool:'Prueba de rebote',read:'4 oscilaciones al soltar',ref:'Uno sano se para en 1',opts:['Cambiar la rótula','Cambiar el amortiguador','Cambiar pastillas'],ok:1,lo:80,hi:100,pay:220},
+ rotula:{sym:'Ruido al girar',part:'Rótula de dirección',tool:'Prueba de holgura',read:'La rueda tiene juego lateral',ref:'No debe moverse nada',opts:['Cambiar la rótula','Cambiar el amortiguador','Equilibrar las ruedas'],ok:0,lo:50,hi:60,pay:170},
+ aire:{sym:'El aire no enfría',part:'Racores del aire',tool:'Manómetro',read:'1,2 bar en el circuito de baja',ref:'En marcha debe marcar 2 a 3 bar',opts:['Cambiar el filtro de habitáculo','Cambiar el compresor','Recargar el gas'],ok:2,lo:15,hi:20,pay:120}
+};
+const FKEYS=Object.keys(FAULTS);
+const CHECKS=[
+ ['k1','Entra recto sin golpear',true],['k2','Freno de mano dentro de la zona',false],
+ ['k3','Brazos en puntos de apoyo',true],['k4','Parada de comprobación a 20 cm',true],
+ ['k5','Altura de trabajo y seguro puesto',false],['k6','Diagnóstico correcto',true],
+ ['k7','Afloja y aprieta en estrella',false],['k8','Par de apriete correcto',true],
+ ['k9','Zona despejada antes de bajar',true]];
+const STEPS=['Entrar al elevador','Brazos del elevador','Subir el coche','Diagnóstico','Reparación','Bajar y entregar'];
+const NPC=[null,{name:'Luis',min:110,cut:.7},{name:'Andrés',min:140,cut:.7}];
+
+/* ---------- sonido ---------- */
+let AC=null,soundOn=true,hum=null;
+function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume()}
+function beep(f,d,type,v,slide){if(!soundOn||!AC)return;const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(v||.06,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(AC.destination);o.start(t);o.stop(t+d+.02)}
+const sfx={ok:()=>{beep(660,.09,'square',.05);setTimeout(()=>beep(990,.12,'square',.05),70)},bad:()=>beep(160,.3,'sawtooth',.07,90),click:()=>beep(420,.04,'square',.04),coin:()=>{beep(880,.06,'square',.05);setTimeout(()=>beep(1320,.12,'square',.05),60)},bump:()=>beep(90,.25,'triangle',.18,50),ratchet:()=>beep(1800,.015,'square',.025)};
+function setHum(on,f){if(!AC)return;if(on&&soundOn){if(!hum){const o=AC.createOscillator(),g=AC.createGain();o.type='sawtooth';o.frequency.value=f||70;g.gain.value=.025;o.connect(g).connect(AC.destination);o.start();hum={o,g}}hum.o.frequency.value=f||70}else if(hum){hum.o.stop();hum=null}}
+
+/* ---------- entrada ---------- */
+const keys={up:0,down:0,left:0,right:0,act:0};let actEdge=false;
+const KM={ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',Space:'act',KeyE:'act'};
+window.addEventListener('keydown',e=>{const k=KM[e.code];if(!k||!$('ov').hidden)return;e.preventDefault();audio();if(k==='act'&&!keys.act)actEdge=true;keys[k]=1});
+window.addEventListener('keyup',e=>{const k=KM[e.code];if(k)keys[k]=0});
+window.addEventListener('blur',()=>{for(const k in keys)keys[k]=0});
+document.querySelectorAll('#pad button').forEach(b=>{const k=b.dataset.k;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();audio();if(k==='act')actEdge=true;keys[k]=1;b.classList.add('on');try{b.setPointerCapture(e.pointerId)}catch(_){}});
+  const up=()=>{keys[k]=0;b.classList.remove('on')};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('lostpointercapture',up)});
+function takeAct(){const a=actEdge;actEdge=false;return a}
 
 /* ---------- estado ---------- */
-let S;
-function abs(){return S.day<5?A(S.day,S.min):3000+(S.min-SAT_OPEN)}
-function fault(c){return FAULTS[c.fault]}
-function car(id){return S.cars.find(c=>c.id===id)}
+let G;
+let played=false;
+function newShift(){
+  const tut=!played;played=true;
+  G={phase:'shop',min:540,end:840,clockOn:false,money:0,mine:0,theirs:0,lost:0,stars:[],queue:[],bays:[null,null,null],sel:null,
+     nid:1,nextArrive:560,tut:0,first:true,floats:[],shake:0,paused:false,R:null,toast:null};
+  addCar(pick(['frenos','alternador']));
+  if(tut)setMsg('Llega tu primer cliente. <b>Toca su coche</b> en la entrada.');
+  else{G.first=false;G.clockOn=true;G.tut=2;addCar();setMsg('Nuevo turno. Reparte los coches antes de que se acabe la paciencia.')}
+}
+function addCar(fk){
+  if(G.queue.length>=4){G.lost++;toast('Cola llena: un cliente se va a otro taller','bad');return}
+  G.queue.push({id:G.nid++,plate:plate(),color:pick(PAINT),fault:fk||pick(FKEYS),pat:1,x:-160,y:QY[G.queue.length]});
+}
+let msgHTML='',msgAt=-9;
+function setMsg(h){if(h!==msgHTML){msgHTML=h;msgAt=T;$('msg').innerHTML=h}}
+function toast(t,cls){G.toast={t,cls,life:3}}
+function float(x,y,t,col){G.floats.push({x,y,t,col:col||C.amber,life:1.6})}
 
-function newGame(seed){
-  R=mulberry(seed);
-  S={seed,day:0,min:OPEN,speed:2,running:false,phase:'intro',cars:[],bays:[null,null,null],events:[],log:[],sel:null,nid:1,
-     urg:[0,0,0,0,0],crit:{c1:null,c2:null,c3:null,c4:null,c5:null},stuckSeen:[],
-     st:{rev:0,busy:0,cap:0,finished:0,onTime:0,delivered:0,sinAvisar:0,sinCita:0,overtime:0,arrived:0,urgAcc:0,lateBudgets:0},
-     sat:{end:SAT_CLOSE,queue:[],slots:[]},trans:0,transText:'',tut:0};
-  // trabajo que viene de la semana pasada
-  const a=mk({fault:'embrague',promised:0,day:-1}); a.state='recambio';a.stateDay=-1;a.partStatus='ordered';a.supplier='reynasa';a.partAt=A(0,ri(600,660));a.approved=true;a.diagDone=a.diagMin;a.diagnosed=true;S.events.push({at:a.partAt,t:'part',id:a.id});
-  const b=mk({fault:'frenos',promised:0,day:-1}); b.state='terminado';b.stateDay=-1;b.diagDone=b.diagMin;b.repDone=b.repMin;b.diagnosed=true;b.approved=true;b.finishedDay=-1;b.partStatus='ready';
-  const c=mk({fault:'amortiguadores',promised:1,day:-1}); c.state='aprobacion';c.stateDay=-1;c.diagDone=c.diagMin;c.diagnosed=true;c.budgetSent=true;c.noReply=true;
-  [a,b,c].forEach(x=>{x.x=x.tx;x.y=x.ty;x.inside=true});
-  // citas de la semana
-  const plan=[[480,480,480,560,650,760,900],[490,600,720,840],[485,610,760,880],[490,640,800],[500,700]];
-  plan.forEach((list,d)=>list.forEach(m=>S.events.push({at:A(d,m+ri(0,15)),t:'arrive',spec:{}})));
-  // urgencias de José
-  for(let d=0;d<5;d++){ if(d===4&&R()<.5)continue; S.events.push({at:A(d,ri(560,900)),t:'urg'}); if(d===1||d===2&&R()<.6) S.events.push({at:A(d,ri(920,1000)),t:'urg'}); }
-  S.events.push({at:A(3,960),t:'corte'});
-  S.events.push({at:A(4,900),t:'llamadas'});
-  S.events.sort((x,y)=>x.at-y.at);
-  log('Semana 46. Hay 3 coches de la semana pasada en la pizarra.','');
+/* ---------- taller (vista general) ---------- */
+const QY=[205,325,445,565], QX=160;
+const BX=[520,800,1080], BY=150, BW=230, BH=430;
+function shopUpdate(dt){
+  const run=G.clockOn&&!G.paused;
+  const gm=run?dt/1.2:0; // 1 minuto de juego = 1,2 s
+  G.min+=gm;
+  if(run&&G.min>=G.nextArrive&&G.min<G.end-25){addCar();G.nextArrive=G.min+rand(24,42)}
+  G.queue.forEach((c,i)=>{c.pat-=gm/85;const ty=QY[i];c.y+=(ty-c.y)*Math.min(1,dt*6);c.x+=(QX-c.x)*Math.min(1,dt*4)});
+  for(let i=G.queue.length-1;i>=0;i--){const c=G.queue[i];if(c.pat<=0){G.queue.splice(i,1);G.lost++;if(G.sel===c.id)G.sel=null;toast(`${c.plate}: el cliente se ha cansado de esperar`,'bad');sfx.bad()}}
+  for(let b=1;b<3;b++){const j=G.bays[b];if(!j)continue;j.x+=(BX[b]-j.x)*Math.min(1,dt*4);j.y+=(BY+BH/2-j.y)*Math.min(1,dt*4);
+    j.prog+=gm/NPC[b].min;if(j.prog>=1){const f=FAULTS[j.fault];const p=f.pay*NPC[b].cut;G.money+=p;G.theirs++;float(BX[b],BY+80,'+'+eur(p),C.ok);sfx.coin();G.bays[b]=null}}
+  if(G.min>=G.end&&G.phase==='shop'&&G.clockOn){G.min=G.end;endShift()}
 }
-function mk(o){
-  let micro=R()<.18; let fk=o.fault||pick(Object.keys(FAULTS).filter(k=>k!=='variador'));
-  if(micro&&!o.fault&&R()<.6) fk='variador'; if(fk==='variador') micro=true;
-  const f=FAULTS[fk], day=o.day!=null?o.day:S.day;
-  const work=f.diag+f.rep+(f.part==='pedido'?7:0)+2;
-  const promised=o.promised!=null?o.promised:Math.min(4,day+Math.max(1,Math.ceil(work/9)));
-  const c={id:S.nid++,plate:plate(),model:micro?pick(MICRO):pick(CARS),client:pick(CLIENTS),fault:fk,color:pick(PAINT),
-    state:'recibido',stateDay:day,stateAt:abs(),arrivedDay:day,promised,urgent:!!o.urgent,
-    diagMin:f.diag*60,repMin:f.rep*60,diagDone:0,repDone:0,diagnosed:false,budgetSent:false,approved:false,noReply:false,rejected:false,
-    partStatus:f.part==='pedido'?'na':'ready',partAt:null,supplier:null,nextWeek:false,called:false,slot:-1,bay:null,
-    finishedDay:null,satis:100,x:-90,y:265,tx:-90,ty:265,leaving:false,inside:false,callCool:-999,satSlot:null};
-  S.cars.push(c);S.st.arrived++;
-  return c;
+function shopClick(x,y){
+  const qi=G.queue.findIndex((c,i)=>Math.abs(x-QX)<110&&y>QY[i]-74&&y<QY[i]+54);
+  if(qi>=0){G.sel=G.queue[qi].id;sfx.click();if(G.tut===0){G.tut=1;setMsg('Bien. Ahora <b>toca tu elevador</b>, el número 1, marcado como <b>TÚ</b>.')}return}
+  for(let b=0;b<3;b++){if(x>BX[b]-BW/2&&x<BX[b]+BW/2&&y>BY&&y<BY+BH){assign(b);return}}
 }
-function setState(c,s){c.state=s;c.stateDay=S.day;c.stateAt=abs()}
-function log(t,cls){S.log.unshift({t:S.day<6?DS[Math.min(S.day,5)]+' '+hhmm(S.min):'',m:t,c:cls||''});if(S.log.length>80)S.log.pop()}
-function schedule(at,t,id){S.events.push({at,t,id});S.events.sort((x,y)=>x.at-y.at)}
-function unschedule(t,id){S.events=S.events.filter(e=>!(e.t===t&&e.id===id))}
+function assign(b){
+  const i=G.queue.findIndex(c=>c.id===G.sel);if(i<0){if(G.tut>=2)setMsg('Primero toca un coche de la entrada.');return}
+  if(G.first&&b!==0){setMsg('Este primero lo haces tú: <b>toca el elevador 1</b>.');sfx.bad();return}
+  if(G.bays[b]){sfx.bad();setMsg(`El elevador ${b+1} está ocupado.`);return}
+  const c=G.queue.splice(i,1)[0];G.sel=null;
+  if(b===0){startRepair(c)}
+  else{c.prog=0;G.bays[b]=c;sfx.ok();setMsg(`${NPC[b].name} se encarga del ${c.plate}. Tarda más y cobra su parte, pero te libera.`)}
+}
+function shopHint(){
+  if(G.tut<2||T-msgAt<3.5)return;
+  const w=G.queue.length, low=G.queue.reduce((m,c)=>Math.min(m,c.pat),1);
+  if(!w)setMsg('No hay nadie esperando. Llegarán más clientes; el turno acaba a las 14:00.');
+  else if(low<.35)setMsg(`¡Hay un cliente a punto de irse! Tócalo y dáselo a un elevador libre.`);
+  else setMsg(`Hay ${w} coche${w>1?'s':''} esperando. Hazlos tú en el elevador 1 (más dinero y estrellas) o pásalos a Luis y Andrés.`);
+}
 
-/* ---------- acciones del jugador ---------- */
-function canBay(c){
-  if(c.bay!=null||c.state==='entregado'||c.leaving||!c.inside)return false;
-  if(c.nextWeek&&S.day<5)return false;
-  if(c.state==='recibido'||c.state==='diagnostico')return true;
-  if(c.state==='reparacion'&&c.partStatus==='ready')return true;
-  return false;
+/* ---------- reparación: 6 pasos ---------- */
+function startRepair(c){
+  const f=FAULTS[c.fault];
+  G.phase='repair';
+  G.R={car:c,f,step:0,k:{},t:0,
+    drive:{y:900,x:450+rand(-55,55),v:0,hit:0},
+    sup:{pts:makePoints(),placed:[]},
+    lift:{h:0,checked:false,locked:false,warned:false},
+    diag:{wrong:-1},
+    rep:{phase:'loosen',order:[],last:-1,cur:-1,tq:0,done:[],hold:0,bad:[]},
+    low:{unlocked:false,box:Math.random()<.65,boxX:450,done:false}};
+  $('pad').hidden=false;stepEnter();sfx.ok();
 }
-function toBay(c,b){
-  if(S.bays[b]!=null||!canBay(c))return false;
-  if(c.state==='recibido')setState(c,'diagnostico');
-  S.bays[b]=c.id;c.bay=b;
-  log(`${c.plate} sube al elevador ${b+1} (${BAYS[b].mech}) para ${c.state==='diagnostico'?'diagnóstico':'reparación'}.`);
-  if(S.tut===1)S.tut=2;
-  refresh();return true;
+function makePoints(){
+  const ok=[[-82,-118],[82,-118],[-82,118],[82,118]].map(p=>({x:p[0],y:p[1],ok:true}));
+  const no=[[0,-196,'Paragolpes'],[0,196,'Paragolpes'],[-92,0,'Chapa del umbral'],[92,0,'Chapa del umbral']].map(p=>({x:p[0],y:p[1],ok:false,n:p[2]}));
+  return ok.concat(no);
 }
-function lower(c){if(c.bay==null)return;S.bays[c.bay]=null;log(`${c.plate} baja del elevador ${c.bay+1}.`);c.bay=null;refresh()}
-function quote(c){const f=fault(c);return Math.round((f.diag+f.rep)*RATE+f.parts*1.3)}
-function sendBudget(c){
-  if(c.state!=='presupuesto')return;
-  c.budgetSent=true;setState(c,'aprobacion');
-  const late=S.min>=NOON;
-  if(late)S.st.lateBudgets++;
-  if(R()<.22){c.noReply=true;}
-  else{const at=late?A(S.day+1,ri(510,660)):abs()+ri(30,150);schedule(at,'reply',c.id)}
-  log(`Presupuesto de ${eur(quote(c))} enviado a ${c.client}${late?' (después de las 13:00: contestará mañana)':''}.`,late?'warn':'');
-  refresh();
+function mark(k,v){const R=G.R;if(R.k[k]===false)return;if(v===false){R.k[k]=false;return}if(R.k[k]==null)R.k[k]=true}
+function bad(k,txt){const R=G.R;const was=R.k[k];R.k[k]=false;sfx.bad();G.shake=.35;if(txt)setMsg('<b>Cuidado.</b> '+txt);return was!==false}
+function next(){G.R.step++;G.R.t=0;sfx.ok();if(G.R.step>=6)finishRepair();else stepEnter()}
+function padShow(l,u,d,r,act){$('pL').hidden=!l;$('pR').hidden=!r;$('pU').hidden=!u;$('pD').hidden=!d;$('pA').hidden=!act;if(act)$('pA').textContent=act}
+function stepEnter(){
+  const R=G.R,f=R.f;
+  if(R.step===0){padShow(1,1,1,1,'Freno de mano');setMsg('Mantén <kbd>▲</kbd> para avanzar y <kbd>◀</kbd> <kbd>▶</kbd> para centrarte. Para dentro de la <b>zona verde</b> y pon el freno de mano con <kbd>Espacio</kbd>.')}
+  if(R.step===1){padShow(0,0,0,0,'');setMsg('Coloca los 4 brazos solo en los <b>puntos reforzados ▲</b> del chasis. Tócalos.')}
+  if(R.step===2){padShow(0,1,1,0,'Comprobar apoyo');setMsg('Sube con <kbd>▲</kbd> hasta <b>20 cm</b> y para. Comprueba que apoya bien con <kbd>Espacio</kbd>.')}
+  if(R.step===3){padShow(0,0,0,0,'');setMsg(`El cliente dice: «${f.sym}». Lee la medida, compárala con el valor bueno y elige qué hacer.`)}
+  if(R.step===4){padShow(0,0,0,0,'');setMsg(G.first?'Afloja los 5 tornillos <b>en estrella</b>: salta uno cada vez. Empieza por el marcado.':'Afloja los 5 tornillos <b>en estrella</b>: salta uno cada vez.')}
+  if(R.step===5){padShow(0,0,1,0,'Quitar seguro');setMsg('Quita el seguro con <kbd>Espacio</kbd>. Antes de bajar, <b>mira que no haya nada debajo</b>.')}
 }
-function callClient(c){
-  if(c.state==='aprobacion'){
-    unschedule('reply',c.id);c.noReply=false;c.callCool=abs();
-    schedule(abs()+ri(10,40),'reply',c.id);
-    log(`Llamas a ${c.client} por el presupuesto del ${c.plate}.`);
-  }else if(c.state==='terminado'&&!c.called){
-    c.called=true;
-    unschedule('pickup',c.id);
-    const at=S.min<1020?abs()+ri(40,150):A(S.day+1,ri(540,720));
-    schedule(at,'pickup',c.id);
-    log(`Llamas a ${c.client}: pasará a recoger ${S.min<1020?'hoy':'mañana'}.`);
+function repairUpdate(dt){
+  const R=G.R;R.t+=dt;const act=takeAct();
+  if(R.step===0){const d=R.drive;
+    if(keys.up)d.v=Math.min(170,d.v+420*dt);else if(keys.down)d.v=Math.max(-110,d.v-420*dt);else d.v*=Math.pow(.015,dt);
+    d.y-=d.v*dt;d.y=clamp(d.y,120,940);
+    d.x+=((keys.right?1:0)-(keys.left?1:0))*130*dt*(Math.abs(d.v)>10?1:.4)+Math.sin(R.t*1.7)*10*dt;
+    d.x=clamp(d.x,330,570);
+    const top=d.y-125,bot=d.y+125,inPosts=[[228,282],[438,492]].some(([a,b])=>bot>a&&top<b);
+    if(inPosts&&Math.abs(d.x-450)>58){d.x+=(450-d.x)*.5;d.v=-40;d.hit=.5;if(bad('k1','Has golpeado una columna del elevador. Céntrate antes de entrar.'))sfx.bump()}
+    d.hit=Math.max(0,d.hit-dt);
+    if(act){
+      if(Math.abs(d.v)>25)setMsg('Primero para del todo: suelta <kbd>▲</kbd>.');
+      else if(Math.abs(d.y-360)<26){mark('k1',true);mark('k2',true);setMsg('Bien colocado. Freno de mano puesto.');next()}
+      else{R.k.k2=false;sfx.bad();setMsg('Estás fuera de la zona verde. Ajusta con <kbd>▲</kbd> o <kbd>▼</kbd> y vuelve a frenar.')}
+    }
   }
-  refresh();
-}
-function orderPart(c,sup){
-  if(c.state!=='recambio'||c.partStatus!=='need')return;
-  let at;
-  if(sup==='reynasa'){at=S.min<NOON?A(S.day+1,ri(540,660)):A(S.day+2,ri(540,660)); if(R()<.12)at+=600;}
-  else at=abs()+ri(180,330);
-  c.partStatus='ordered';c.supplier=sup;c.partAt=at;
-  schedule(at,'part',c.id);
-  log(`Recambio del ${c.plate} pedido a ${sup==='reynasa'?'Reynasa':'Repuestos Miguel'}. Llega ${fmtAbs(at)}.`);
-  refresh();
-}
-function toMonday(c){
-  if(c.state!=='recibido'||c.bay!=null)return;
-  c.nextWeek=true;c.promised=6;log(`${c.plate}: recibido con fotos y hoja de entrada. Diagnóstico el lunes.`);refresh();
-}
-
-/* ---------- eventos de la simulación ---------- */
-function arrive(spec){
-  const c=mk(spec||{});c.inside=false;
-  log(`Entra ${c.model} ${c.plate} de ${c.client}${c.urgent?' (urgencia)':''}: «${fault(c).s}». Promesa: ${DAYS[c.promised]}.`,c.urgent?'warn':'');
-  return c;
-}
-function handle(e){
-  const c=e.id!=null?car(e.id):null;
-  if(e.t==='arrive'){arrive(e.spec)}
-  else if(e.t==='reply'&&c&&c.state==='aprobacion'){
-    if(R()<.08){c.rejected=true;c.approved=false;setState(c,'terminado');c.finishedDay=S.day;c.satis=85;
-      log(`${c.client} no acepta el presupuesto. Se cobra el diagnóstico y se entrega el ${c.plate}.`,'warn');schedulePickupSelf(c)}
-    else{c.approved=true;
-      if(c.partStatus==='na'){c.partStatus='need';setState(c,'recambio');log(`${c.client} aprueba el presupuesto. Falta pedir el recambio del ${c.plate}.`,'ok')}
-      else{setState(c,'reparacion');log(`${c.client} aprueba. El recambio está en stock: ${c.plate} listo para elevador.`,'ok')}}
+  else if(R.step===2){const l=R.lift;
+    if(!l.locked){const dir=(keys.up?1:0)-(keys.down?1:0);l.h=clamp(l.h+dir*.32*dt,0,2);setHum(dir!==0,dir>0?75:60);
+      if(!l.checked&&l.h>.42&&!l.warned){l.warned=true;l.checked=true;bad('k4','Te has pasado la parada de 20 cm. Siempre se para a comprobar que el coche apoya bien.');padShow(0,1,1,0,'Poner seguro')}
+      if(act){
+        if(!l.checked){if(l.h>.1&&l.h<.36){l.checked=true;mark('k4',true);sfx.ok();setMsg('Apoyo correcto. Sigue subiendo hasta la <b>franja verde</b> y pon el seguro.');padShow(0,1,1,0,'Poner seguro')}else{sfx.bad();setMsg('Para cerca de la marca de <b>20 cm</b> para comprobar.')}}
+        else{if(l.h>=1.55&&l.h<=1.85){l.locked=true;setHum(false);mark('k5',true);setMsg('Seguro puesto. A trabajar.');setTimeout(()=>{if(G.R&&G.R.step===2)next()},500)}else{R.k.k5=false;sfx.bad();setMsg('El seguro solo se pone a la altura de trabajo, la <b>franja verde</b>.')}}
+      }}
   }
-  else if(e.t==='part'&&c&&c.state==='recambio'){c.partStatus='ready';setState(c,'reparacion');log(`Llega el recambio del ${c.plate} (${c.supplier==='miguel'?'Repuestos Miguel':'Reynasa'}).`,'ok')}
-  else if(e.t==='pickup'&&c&&c.state==='terminado'){deliver(c)}
-  else if(e.t==='urg'){urgency()}
-  else if(e.t==='corte'){corte()}
-  else if(e.t==='llamadas'){llamadas()}
-}
-function schedulePickupSelf(c){
-  const d=Math.max(S.day,Math.min(4,c.promised));
-  const at=A(d,ri(930,1060)); if(at>abs()) schedule(at,'pickup',c.id); else schedule(abs()+ri(60,120),'pickup',c.id);
-}
-function deliver(c){
-  const f=fault(c);
-  let bill=c.rejected?f.diag*RATE:(f.diag+f.rep)*RATE+f.parts*1.3-(c.supplier==='miguel'?f.parts*.15:0);
-  S.st.rev+=bill;S.st.delivered++;c.bill=bill;
-  setState(c,'entregado');c.leaving=true;c.tx=-120;c.ty=265;
-  if(S.bays.includes(c.id)){S.bays[c.bay]=null;c.bay=null}
-  log(`${c.client} recoge el ${c.plate}. Factura: ${eur(bill)}.`,'ok');
-}
-function finishDiag(c){
-  S.bays[c.bay]=null;c.bay=null;c.diagnosed=true;setState(c,'presupuesto');
-  log(`Diagnóstico del ${c.plate}: ${fault(c).n}. Baja a la campa a espera de presupuesto.`);
-  if(S.tut===2)S.tut=3;
-}
-function finishRep(c){
-  S.bays[c.bay]=null;c.bay=null;setState(c,'terminado');c.finishedDay=S.day;S.st.finished++;
-  const late=Math.max(0,S.day-c.promised);
-  if(late===0)S.st.onTime++;else c.satis-=12*late;
-  log(`${c.plate} terminado${late?` con ${late} día${late>1?'s':''} de retraso`:' a tiempo'}.`,late?'warn':'ok');
-  if(S.day<5)schedulePickupSelf(c);
-}
-
-/* ---------- urgencia de José ---------- */
-function urgency(){
-  const fk=pick(['frenos','alternador','lambda','direccion','aire','electrico']);
-  const who=pick(['su cuñado','un vecino','el del bar de abajo','su primo','un cliente de toda la vida']);
-  const n=S.urg[S.day];
-  openModal({eyebrow:'Urgencia · '+DS[S.day]+' '+hhmm(S.min),title:'José te pide un hueco',
-    body:`<p>«Oye, es el coche de ${esc(who)}. ${esc(FAULTS[fk].s)}. ¿Me lo metes hoy?»</p>
-    <p>Regla del taller: <b>un hueco de urgencia al día como máximo</b>. Hoy ya has aceptado <b>${n}</b>. Cada coche que se cuela retrasa a otro.</p>`,
-    buttons:[{label:'A la cola normal',fn:()=>{arrive({fault:fk});log('José lo deja en la cola normal. No le hace gracia, pero entiende.','')}},
-             {label:n>=1?'Aceptar igualmente':'Aceptar urgencia',primary:true,fn:()=>{
-               S.urg[S.day]++;S.st.urgAcc++;const pr=S.min<720?S.day:Math.min(4,S.day+1);arrive({fault:fk,urgent:true,promised:pr});
-               if(S.urg[S.day]>1){S.crit.c2=false;log('Segunda urgencia en el mismo día: se incumple la regla.','bad')}}}]});
-}
-
-/* ---------- corte del jueves ---------- */
-function forecast(c){
-  const now=abs(), fri=A(4,CLOSE);
-  let start=now, blk=[];
-  let rem=(c.diagnosed?0:Math.max(0,c.diagMin-c.diagDone))+Math.max(0,c.repMin-c.repDone);
-  if(!c.diagnosed){blk.push('Sin diagnosticar');start+=60+150}
-  else if(c.state==='presupuesto'){blk.push('Presupuesto sin enviar');start+=150}
-  else if(c.state==='aprobacion'){blk.push(c.noReply?'El cliente no contesta':'Esperando respuesta');start+=c.noReply?90:120}
-  if(fault(c).part==='pedido'&&c.partStatus!=='ready'){
-    if(c.partStatus==='ordered'){blk.push('Recambio llega '+fmtAbs(c.partAt));start=Math.max(start,c.partAt)}
-    else{blk.push('Recambio sin pedir');start=Math.max(start,now+300)}
+  else if(R.step===4){const r=R.rep;
+    if(r.phase==='swap'){if(keys.act){r.hold+=dt;if(Math.random()<.3)sfx.ratchet()}if(r.hold>=1.6){r.phase='tighten';r.last=-1;r.cur=-1;setMsg(`Pieza nueva puesta. Ahora aprieta en estrella: toca un tornillo y mantén <kbd>Espacio</kbd>. Suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`);padShow(0,0,0,0,'');sfx.ok()}}
+    if(r.phase==='tighten'&&r.cur>=0){
+      if(keys.act){r.tq+=R.f.hi*.5*dt;if(Math.random()<.35)sfx.ratchet();if(r.tq>R.f.hi*1.35)r.tq=R.f.hi*1.35}
+      else if(r.tq>0){const t=r.tq;
+        if(t<R.f.lo){if(r.tq>R.f.lo*.15)setMsg(`Flojo: ${Math.round(t)} Nm. Sigue apretando hasta ${R.f.lo}–${R.f.hi} Nm.`)}
+        else{if(t>R.f.hi){r.bad.push(r.cur);bad('k8',`Sobreapriete: ${Math.round(t)} Nm. Pasarse puede romper la rosca.`)}else{mark('k8',true);sfx.ok()}
+          r.done.push(r.cur);r.last=r.cur;r.cur=-1;r.tq=0;padShow(0,0,0,0,'');
+          if(r.done.length===5){setMsg('Pieza montada.');setTimeout(()=>{if(G.R&&G.R.step===4)next()},450)}
+          else setMsg(`Bien. Siguiente tornillo, en estrella. Objetivo: ${R.f.lo}–${R.f.hi} Nm.`)}
+      }
+    }
   }
-  const end=start+rem/1.0;
-  const cls=end<=A(4,960)?'ok':end<=fri?'warn':'bad';
-  return {blk:blk.length?blk.join(' · '):'Listo para elevador',cls,label:cls==='ok'?'Llega':cls==='warn'?'Justo':'No llega',end};
-}
-function corte(){
-  const list=S.cars.filter(c=>!['terminado','entregado'].includes(c.state)&&!c.nextWeek);
-  const rows=list.map(c=>{const f=forecast(c);return `<tr><td><span class="plate">${esc(c.plate)}</span></td><td>${esc(SNAME[c.state])}</td><td>${esc(f.blk)}</td><td><span class="chip ${f.cls}">${f.label}</span></td>
-   <td><select id="cut-${c.id}" aria-label="Decisión para ${esc(c.plate)}"><option value="t"${f.cls!=='bad'?' selected':''}>Terminar esta semana</option><option value="l"${f.cls==='bad'?' selected':''}>Avisar: el lunes</option></select></td></tr>`}).join('');
-  openModal({eyebrow:'Jueves 16:00 · reunión de 10 minutos',title:'El corte del jueves',
-    body:`<p>Con la pizarra delante decidís qué coches se terminan el viernes. Los que dependen de piezas que no llegan se avisan <b>ahora</b> y se entregan la semana que viene. Lo que prometas y no termines el viernes se hace el sábado, en horas extra.</p>
-    ${list.length?`<div class="tbl"><table><thead><tr><th>Coche</th><th>Estado</th><th>Bloqueos</th><th>Previsión</th><th>Decisión</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p>No hay coches pendientes. Buen trabajo.</p>'}
-    <p class="sub" style="color:var(--muted);font-size:12.5px">A partir de ahora, los coches con reparaciones largas que entren se reciben y se diagnostican el lunes.</p>`,
-    buttons:[{label:'Cerrar el corte y avisar',primary:true,fn:()=>{
-      let n=0;list.forEach(c=>{const v=$('cut-'+c.id)?.value;if(v==='l'){c.nextWeek=true;c.promised=6;c.satis-=4;n++}});
-      S.crit.c4=true;log(`Corte del jueves hecho. ${n} cliente${n===1?'':'s'} avisado${n===1?'':'s'} para el lunes.`,'ok')}}]});
-}
-
-/* ---------- llamadas del viernes ---------- */
-function llamadas(){
-  const left=CLOSE-S.min;
-  const list=S.cars.filter(c=>(c.state==='terminado')||(c.state==='reparacion'&&c.bay!=null&&!c.nextWeek&&(c.repMin-c.repDone)/BAYS[c.bay].eff<left-20));
-  let slot=SAT_OPEN;
-  const rows=list.map(c=>{const s=slot;slot+=30;return `<tr><td><input type="checkbox" id="call-${c.id}" checked aria-label="Llamar a ${esc(c.client)}"></td><td><span class="plate">${esc(c.plate)}</span></td><td>${esc(c.client)}</td><td>${c.state==='terminado'?'Terminado':'Termina hoy'}</td><td class="mono">${hhmm(s)}–${hhmm(s+30)}</td></tr>`}).join('');
-  openModal({eyebrow:'Viernes 15:00',title:'Facturas y llamadas de recogida',
-    body:`<p>Facturas preparadas en GDTaller. Llama a los clientes para darles hora de recogida el sábado en franjas de 30 minutos, de 9:00 a 13:00. Quien no tenga cita se presentará cuando quiera.</p>
-    ${list.length?`<div class="tbl"><table><thead><tr><th>Llamar</th><th>Coche</th><th>Cliente</th><th>Estado</th><th>Franja sábado</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p>No hay coches para entregar el sábado.</p>'}`,
-    buttons:[{label:'Hacer las llamadas',primary:true,fn:()=>{
-      let s=SAT_OPEN,n=0;list.forEach(c=>{if($('call-'+c.id)?.checked){c.satSlot=s;c.called=true;unschedule('pickup',c.id);s+=30;n++}});
-      log(`${n} cliente${n===1?'':'s'} con cita para recoger el sábado.`,'ok')}}]});
-}
-
-/* ---------- cierre de día y sábado ---------- */
-function endDay(){
-  const d=S.day;
-  const pend=S.cars.filter(c=>c.state==='presupuesto');
-  if(pend.length){S.crit.c3=false;log(`${pend.length} presupuesto${pend.length>1?'s':''} sin enviar al cerrar el día.`,'bad')}
-  S.cars.forEach(c=>{if(c.state!=='entregado'&&d-c.stateDay>=2&&!S.stuckSeen.includes(c.id)){S.stuckSeen.push(c.id);S.crit.c1=false;log(`${c.plate} lleva más de 2 días en «${SNAME[c.state]}».`,'bad')}});
-  if(d===4){startSaturday();return}
-  S.day++;S.min=OPEN;S.trans=1.6;S.transText=DAYS[S.day]+' · 08:00';
-  log(`Abre el taller. ${DAYS[S.day]}.`,'');
-}
-function startSaturday(){
-  // lo que no se avisó y no se puede hacer
-  const ot=[];
-  S.cars.forEach(c=>{
-    if(['terminado','entregado'].includes(c.state)||c.nextWeek)return;
-    if(c.state==='reparacion'&&c.partStatus==='ready')ot.push(c);
-    else{S.st.sinAvisar++;c.satis-=25;c.nextWeek=true;log(`${c.client} esperaba su ${c.plate} y nadie le avisó.`,'bad')}
-  });
-  S.bays.forEach((id,i)=>{if(id!=null){const c=car(id);if(c.state!=='reparacion'){S.bays[i]=null;c.bay=null}}});
-  S.sat.queue=ot.filter(c=>c.bay==null).map(c=>c.id);
-  if(ot.length)log(`${ot.length} coche${ot.length>1?'s':''} prometido${ot.length>1?'s':''} sin terminar: toca horas extra el sábado.`,'bad');
-  // clientes sin cita
-  S.cars.filter(c=>c.state==='terminado'&&c.satSlot==null).forEach(c=>{if(R()<.6)c.walkIn=ri(600,760)});
-  S.events=S.events.filter(e=>e.at>=3000);
-  S.day=5;S.min=SAT_OPEN;S.trans=1.8;S.transText='Sábado · 09:00';S.satRecv=false;
-  log('Sábado: solo recepción con cita y entregas.','');
-}
-function satTick(step){
-  // franjas y clientes sin cita
-  S.cars.forEach(c=>{
-    if(c.state!=='terminado')return;
-    if(c.satSlot!=null&&S.min>=c.satSlot){deliver(c)}
-    else if(c.walkIn&&S.min>=c.walkIn){S.st.sinCita++;log(`${c.client} se presenta sin cita a por el ${c.plate}.`,'warn');deliver(c)}
-  });
-  if(!S.satRecv&&S.min>=600){S.satRecv=true;const c=arrive({});c.nextWeek=true;c.promised=6;log(`Recepción con cita: ${c.plate}. Fotos, hoja de entrada y diagnóstico el lunes.`,'')}
-  // horas extra
-  for(let b=0;b<3;b++){ if(S.bays[b]==null&&S.sat.queue.length){const id=S.sat.queue.shift();const c=car(id);S.bays[b]=id;c.bay=b} }
-  const busy=S.bays.filter(x=>x!=null).length;
-  S.st.overtime+=busy*step;
-  const working=busy>0||S.sat.queue.length>0;
-  const pendSlots=S.cars.some(c=>c.state==='terminado'&&c.satSlot!=null&&c.satSlot>S.min);
-  if(S.min>=SAT_CLOSE&&!working&&!pendSlots){endWeek();return true}
-  return false;
-}
-
-/* ---------- bucle de simulación ---------- */
-function advance(dm){
-  while(dm>0&&S.running&&!S.modal){
-    const step=Math.min(1,dm);dm-=step;S.min+=step;
-    let busy=0;
-    for(let b=0;b<3;b++){const id=S.bays[b];if(id==null)continue;const c=car(id);busy++;
-      const w=step*BAYS[b].eff;
-      if(c.state==='diagnostico'){c.diagDone+=w;if(c.diagDone>=c.diagMin)finishDiag(c)}
-      else if(c.state==='reparacion'){c.repDone+=w;if(c.repDone>=c.repMin)finishRep(c)}}
-    if(S.day<5){
-      S.st.busy+=busy*step;S.st.cap+=3*step;
-      while(S.events.length&&S.events[0].at<=abs()){const e=S.events.shift();handle(e);if(S.modal)break}
-      if(S.min>=CLOSE&&!S.modal){endDay();break}
-    }else{ if(satTick(step))break; }
+  else if(R.step===5){const l=R.lift,w=R.low;
+    if(act&&!w.unlocked){w.unlocked=true;sfx.click();padShow(0,0,1,0,'');setMsg(w.box?'Seguro quitado. Ojo: hay algo debajo del coche. <b>Tócalo</b> para apartarlo y baja con <kbd>▼</kbd>.':'Seguro quitado. Baja con <kbd>▼</kbd>.')}
+    if(w.unlocked&&!w.done){const dir=keys.down?1:0;l.h=clamp(l.h-dir*.36*dt,0,2);setHum(dir>0,58);
+      if(w.box&&l.h<.75){w.box=false;w.crushed=true;bad('k9','Has bajado con la caja de herramientas debajo. Antes de bajar, zona despejada.');sfx.bump()}
+      if(l.h<=0){w.done=true;setHum(false);mark('k9',true);setTimeout(()=>{if(G.R&&G.R.step===5)next()},350)}}
   }
 }
-let last=performance.now(), uiT=0;
-function frame(now){
-  const dt=Math.min(.1,(now-last)/1000);last=now;
-  if(S.trans>0){S.trans-=dt}
-  else if(S.running&&!S.modal&&S.phase==='run'){advance(dt*MIN_PER_SEC*S.speed)}
-  animate(dt);draw();
-  uiT+=dt;if(uiT>.25){uiT=0;refresh(true)}
-  requestAnimationFrame(frame);
+function repairClick(x,y){
+  const R=G.R;
+  if(R.step===1){const s=R.sup;const p=s.pts.find(p=>Math.hypot(450+p.x*1.15-x,370+p.y*1.15-y)<30);if(!p||s.placed.includes(p))return;
+    if(p.ok){s.placed.push(p);sfx.click();const n=s.placed.filter(q=>q.ok).length;setMsg(`Brazo ${n} de 4 colocado.`);if(n===4){mark('k3',true);setTimeout(()=>{if(G.R&&G.R.step===1)next()},350)}}
+    else{p.wrong=1;bad('k3',`Ahí no: ${p.n.toLowerCase()}. No aguanta el peso. Busca los ▲.`)}}
+  if(R.step===3){for(let i=0;i<3;i++){const bx=110+i*235,by=520;if(x>bx&&x<bx+220&&y>by&&y<by+86){
+    if(i===R.f.ok){mark('k6',true);setMsg('Diagnóstico correcto.');next()}else{R.diag.wrong=i;bad('k6','No es eso. Vuelve a mirar la medida y el valor correcto.')}}}}
+  if(R.step===4){const r=R.rep;const i=boltAt(x,y);if(i<0||r.done.includes(i)&&r.phase==='tighten'||r.order.includes(i)&&r.phase==='loosen')return;
+    const want=r.last<0?(G.first?0:-1):(r.last+2)%5;
+    if(r.phase==='loosen'){
+      if(want>=0&&i!==want){if(R.k.k7!==false)setMsg('Así no: en estrella se salta un tornillo cada vez.');R.k.k7=false;sfx.bad();if(G.first)return}
+      r.order.push(i);r.last=i;sfx.ratchet();sfx.click();
+      if(r.order.length===5){mark('k7',true);r.phase='swap';r.hold=0;padShow(0,0,0,0,'Cambiar pieza (mantén)');setMsg(`Tornillos fuera. Mantén <kbd>Espacio</kbd> para cambiar: ${R.f.part}.`)}
+    }else if(r.phase==='tighten'&&r.cur<0){
+      if(want>=0&&i!==want&&!r.done.includes(want)){if(R.k.k7!==false)setMsg('En estrella: salta uno cada vez.');R.k.k7=false;sfx.bad();if(G.first)return}
+      r.cur=i;r.tq=0;sfx.click();padShow(0,0,0,0,'Apretar (mantén)');setMsg(`Mantén <kbd>Espacio</kbd> y suelta entre <b>${R.f.lo} y ${R.f.hi} Nm</b>.`)}
+  }
+  if(R.step===5){const w=R.low;if(w.box&&Math.abs(x-w.boxX)<70&&y>520&&y<640){w.box=false;sfx.click();setMsg('Zona despejada. Ya puedes bajar con <kbd>▼</kbd>.')}}
+}
+function boltPos(i){const a=-Math.PI/2+i*2*Math.PI/5;return [450+Math.cos(a)*125,380+Math.sin(a)*125]}
+function boltAt(x,y){for(let i=0;i<5;i++){const [bx,by]=boltPos(i);if(Math.hypot(bx-x,by-y)<34)return i}return -1}
+function finishRepair(){
+  const R=G.R;setHum(false);
+  CHECKS.forEach(([k])=>{if(R.k[k]==null)R.k[k]=true});
+  const crit=CHECKS.filter(([k,,c])=>c&&R.k[k]===false).length, minor=CHECKS.filter(([k,,c])=>!c&&R.k[k]===false).length;
+  const stars=crit===0&&minor===0?3:crit===0?2:crit===1?1:0;
+  const mult=[.5,.8,1.1,1.35][stars], pay=R.f.pay*mult;
+  G.money+=pay;G.mine++;G.stars.push(stars);
+  $('pad').hidden=true;
+  const tips={k1:'Entra despacio y centrado entre las columnas.',k3:'El coche solo se apoya en los puntos reforzados del chasis.',k4:'A 20 cm se para siempre: si un brazo resbala, se ve ahí.',k6:'Compara siempre la medida con el valor de referencia.',k8:'El par de apriete viene del fabricante: ni más ni menos.',k9:'Antes de bajar, mira debajo: herramientas, cajas, personas.',k7:'En estrella la pieza asienta plana y no se deforma.',k2:'Freno de mano dentro de la zona marcada.',k5:'El seguro mecánico se pone a la altura de trabajo.'};
+  const firstFail=CHECKS.find(([k])=>R.k[k]===false);
+  openModal({eyebrow:`${R.car.plate} · ${R.f.part}`,title:stars===3?'Reparación perfecta':stars>=2?'Bien hecho':stars===1?'Reparado, con un fallo grave':'Reparado, pero inseguro',
+    body:`<div class="stars" aria-label="${stars} de 3 estrellas">${'★'.repeat(stars)}<span class="off">${'★'.repeat(3-stars)}</span></div>
+    <ul class="checks">${CHECKS.map(([k,n,c])=>`<li class="${R.k[k]===false?'fail':''}"><span class="mk" aria-hidden="true">${R.k[k]===false?'✕':'✓'}</span><span>${esc(n)}${c?'<span class="tag">crítico</span>':''}</span></li>`).join('')}</ul>
+    <p>Cobras <b>${eur(pay)}</b>${stars===3?', con propina por trabajo impecable':''}.${firstFail?' <br><span style="color:var(--muted)">Consejo: '+esc(tips[firstFail[0]])+'</span>':''}</p>`,
+    buttons:[{label:'Volver al taller',primary:true,fn:()=>{
+      G.phase='shop';G.R=null;float(BX[0],BY+80,'+'+eur(pay),C.amber);sfx.coin();
+      if(G.first){G.first=false;G.clockOn=true;G.tut=2;G.nextArrive=G.min+4;addCar();setMsg('Ahora el reloj corre y llegan más clientes. Cada uno tiene una <b>barra de paciencia</b>. Hazlos tú o pásalos a <b>Luis</b> y <b>Andrés</b>.')}
+      else shopHint();
+      if(G.min>=G.end)endShift();
+    }}]});
+}
+
+/* ---------- final de turno ---------- */
+function endShift(){
+  if(G.phase==='end')return;
+  G.phase='end';
+  const avg=G.stars.length?G.stars.reduce((a,b)=>a+b,0)/G.stars.length:0;
+  const score=Math.round(G.money+avg*150-G.lost*80);
+  let best=0;try{best=+localStorage.getItem('tallerTwinBest')||0;if(score>best)localStorage.setItem('tallerTwinBest',String(score))}catch(e){}
+  const rank=score>=1800?'Jefe de taller':score>=1200?'Oficial de primera':score>=700?'Oficial de segunda':'Aprendiz';
+  openModal({eyebrow:'14:00 · fin del turno',title:rank,
+    body:`<div class="sum">
+      <div><b>${eur(G.money)}</b><small>Caja del turno</small></div>
+      <div><b>${G.mine}</b><small>Reparados por ti</small></div>
+      <div><b>${G.theirs}</b><small>Por Luis y Andrés</small></div>
+      <div><b>${G.lost}</b><small>Clientes perdidos</small></div>
+      <div><b>${avg?avg.toFixed(1).replace('.',','):'–'} ★</b><small>Calidad media</small></div>
+      <div><b>${score}</b><small>Puntos${best&&score<=best?' · récord '+best:score>best?' · ¡récord!':''}</small></div></div>
+    <p>${G.lost?'Cada cliente que se va es dinero perdido: reparte el trabajo antes de que se agote su paciencia.':'No se te ha ido ningún cliente.'} ${avg>=2.5?'Y tus reparaciones son seguras.':'Revisa los pasos críticos: son los que en un taller real evitan accidentes.'}</p>`,
+    buttons:[{label:'Otro turno',primary:true,fn:()=>{newShift()}}]});
 }
 
 /* ---------- modal ---------- */
-let modalFns=[];
+let mfn=[];
 function openModal(o){
-  S.modal=true;
-  modalFns=o.buttons.map(b=>b.fn);
-  $('modal').innerHTML=`<header>${o.eyebrow?`<div class="eyebrow">${esc(o.eyebrow)}</div>`:''}<h2 id="mTitle">${esc(o.title)}</h2></header><div class="mb">${o.body}</div>
-   <footer>${o.buttons.map((b,i)=>`<button class="btn${b.primary?' primary':''}" data-mi="${i}">${esc(b.label)}</button>`).join('')}</footer>`;
-  $('ov').hidden=false;
-  const p=$('modal').querySelector('.btn.primary')||$('modal').querySelector('.btn');p&&p.focus();
+  mfn=o.buttons.map(b=>b.fn);
+  $('modal').innerHTML=`<header>${o.eyebrow?`<div class="eyebrow">${esc(o.eyebrow)}</div>`:''}<h2 id="mT">${esc(o.title)}</h2></header><div class="mb">${o.body}</div><footer>${o.buttons.map((b,i)=>`<button class="btn${b.primary?' primary':''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</footer>`;
+  $('ov').hidden=false;for(const k in keys)keys[k]=0;
+  setTimeout(()=>{const p=$('modal').querySelector('.btn.primary');p&&p.focus()},30);
 }
-$('modal').addEventListener('click',e=>{const b=e.target.closest('[data-mi]');if(!b)return;const fn=modalFns[+b.dataset.mi];$('ov').hidden=true;S.modal=false;fn&&fn();refresh()});
+$('modal').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;audio();$('ov').hidden=true;const f=mfn[+b.dataset.i];f&&f()});
 
-/* ---------- consejos de Ana ---------- */
-function hint(){
-  if(S.phase==='end')return {m:'Semana cerrada. Revisa la pizarra o juega otra semana con otros coches.'};
-  if(S.phase!=='run')return {m:'Abre el taller para empezar la semana.'};
-  if(S.day===5)return {m:S.st.overtime>0?'Los mecánicos están haciendo horas extra con lo que se prometió y no se terminó.':'Sábado tranquilo: solo entregas con cita. A la una, a casa.'};
-  const inside=S.cars.filter(c=>c.inside&&c.state!=='entregado');
-  const freeBay=S.bays.findIndex(x=>x==null);
-  const p=inside.find(c=>c.state==='presupuesto');
-  if(p)return {m:`Envía el presupuesto del ${p.plate} (${eur(quote(p))}). ${S.min<NOON?'Si sale antes de las 13:00, el cliente contesta hoy.':'Ya son más de las 13:00: contestará mañana.'}`,id:p.id,act:()=>sendBudget(p),btn:'Enviar presupuesto'};
-  const n=inside.find(c=>c.state==='recambio'&&c.partStatus==='need');
-  if(n)return {m:`Pide el recambio del ${n.plate}. Reynasa es más barato pero tarda 1–2 días. Repuestos Miguel llega hoy, un 15 % más caro.`,id:n.id,act:()=>orderPart(n,n.promised<=S.day+1?'miguel':'reynasa'),btn:n.promised<=S.day+1?'Pedir a Miguel':'Pedir a Reynasa'};
-  const q=inside.find(c=>c.state==='aprobacion'&&(c.noReply||abs()-c.stateAt>200)&&abs()-c.callCool>60);
-  if(q)return {m:`${q.client} no contesta al presupuesto del ${q.plate}. Llámale: un coche sin aprobar no avanza.`,id:q.id,act:()=>callClient(q),btn:'Llamar'};
-  if(freeBay>=0){
-    const ready=inside.filter(c=>c.state==='reparacion'&&c.bay==null&&c.partStatus==='ready').sort((a,b)=>(b.urgent-a.urgent)||(a.promised-b.promised))[0];
-    if(ready)return {m:`Elevador ${freeBay+1} libre (${BAYS[freeBay].mech}). Sube el ${ready.plate} a reparar: se promete para el ${DAYS[ready.promised]||'lunes'}.`,id:ready.id,act:()=>toBay(ready,freeBay),btn:'Subirlo'};
-    const rec=inside.filter(c=>(c.state==='recibido'||c.state==='diagnostico')&&c.bay==null&&!c.nextWeek).sort((a,b)=>(b.urgent-a.urgent)||(a.promised-b.promised))[0];
-    if(rec)return {m:`Elevador ${freeBay+1} libre (${BAYS[freeBay].mech}). Diagnostica el ${rec.plate}: «${fault(rec).s}».`,id:rec.id,act:()=>toBay(rec,freeBay),btn:'Diagnosticar'};
-  }
-  const t=inside.find(c=>c.state==='terminado'&&!c.called&&!(S.day===4&&S.min>=900));
-  if(t&&S.min<1020)return {m:`El ${t.plate} está terminado. Llama a ${t.client} para que lo recoja y deja la campa libre.`,id:t.id,act:()=>callClient(t),btn:'Llamar'};
-  if(S.day>=3&&S.min>=960){const l=inside.find(c=>c.state==='recibido'&&!c.nextWeek&&fault(c).rep>=2&&c.bay==null);if(l)return {m:`El ${l.plate} entra tarde en la semana. Recíbelo con fotos y diagnostícalo el lunes.`,id:l.id,act:()=>toMonday(l),btn:'Dejar para el lunes'}}
-  return {m:'Todo en marcha. Puedes acelerar el tiempo con 4× u 8×.'};
+/* ---------- dibujo ---------- */
+let scale=1,T=0;
+function resize(){const r=cv.getBoundingClientRect();if(!r.width)return;const d=window.devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.width*H/W*d);scale=cv.width/W}
+window.addEventListener('resize',resize);try{new ResizeObserver(resize).observe(cv)}catch(e){}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function txt(t,x,y,col,size,font,al,bl){ctx.fillStyle=col;ctx.font=`${size}px ${font||DISP}`;ctx.textAlign=al||'left';ctx.textBaseline=bl||'middle';ctx.fillText(t,x,y)}
+function wrap(t,x,y,maxW,lh,col,size,font,al){ctx.font=`${size}px ${font||BODY}`;const words=t.split(' ');let line='',yy=y;for(const w of words){const test=line?line+' '+w:w;if(ctx.measureText(test).width>maxW&&line){txt(line,x,yy,col,size,font||BODY,al);line=w;yy+=lh}else line=test}txt(line,x,yy,col,size,font||BODY,al);return yy}
+function hatch(x,y,w,h,col,lw){ctx.save();rr(x,y,w,h,0);ctx.clip();ctx.strokeStyle=col;ctx.lineWidth=lw||8;for(let i=-h;i<w+h;i+=22){ctx.beginPath();ctx.moveTo(x+i,y+h);ctx.lineTo(x+i+h,y);ctx.stroke()}ctx.restore()}
+function floorGrid(x0,y0,w,h){ctx.fillStyle=C.floor;ctx.fillRect(x0,y0,w,h);ctx.strokeStyle='rgba(255,255,255,.035)';ctx.lineWidth=1;for(let x=x0;x<x0+w;x+=48){ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y0+h);ctx.stroke()}for(let y=y0;y<y0+h;y+=48){ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x0+w,y);ctx.stroke()}}
+function carTop(x,y,len,wid,color,rot,glow){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot||0);
+  ctx.fillStyle='#0c0f11';[[.3,.5],[.3,-.5],[-.3,.5],[-.3,-.5]].forEach(([a,b])=>{rr(len*a-len*.08,wid*b-wid*.09,len*.16,wid*.18,3);ctx.fill()});
+  if(glow){ctx.shadowColor=C.amber;ctx.shadowBlur=24}
+  rr(-len/2,-wid/2,len,wid,wid*.3);ctx.fillStyle=color;ctx.fill();ctx.shadowBlur=0;
+  ctx.lineWidth=glow?3:1.5;ctx.strokeStyle=glow?C.amber:'rgba(0,0,0,.5)';ctx.stroke();
+  ctx.fillStyle='rgba(12,20,28,.62)';rr(len*.1,-wid*.38,len*.17,wid*.76,7);ctx.fill();rr(-len*.37,-wid*.35,len*.12,wid*.7,6);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.13)';rr(-len*.23,-wid*.37,len*.31,wid*.74,8);ctx.fill();
+  ctx.fillStyle='rgba(255,240,200,.85)';ctx.fillRect(len*.47,-wid*.36,len*.03,wid*.18);ctx.fillRect(len*.47,wid*.18,len*.03,wid*.18);
+  ctx.restore();
 }
+function carSide(x,yb,len,color){
+  const h=len*.22;ctx.fillStyle='#0c0f11';
+  ctx.beginPath();ctx.arc(x-len*.3,yb-h*.05,len*.1,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+len*.3,yb-h*.05,len*.1,0,7);ctx.fill();
+  ctx.fillStyle='#8a939a';ctx.beginPath();ctx.arc(x-len*.3,yb-h*.05,len*.045,0,7);ctx.fill();ctx.beginPath();ctx.arc(x+len*.3,yb-h*.05,len*.045,0,7);ctx.fill();
+  ctx.fillStyle=color;rr(x-len/2,yb-h*1.05,len,h*.75,12);ctx.fill();
+  ctx.beginPath();ctx.moveTo(x-len*.32,yb-h*1.0);ctx.lineTo(x-len*.2,yb-h*1.7);ctx.lineTo(x+len*.14,yb-h*1.7);ctx.lineTo(x+len*.3,yb-h*1.0);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(12,20,28,.6)';ctx.beginPath();ctx.moveTo(x-len*.27,yb-h*1.05);ctx.lineTo(x-len*.18,yb-h*1.6);ctx.lineTo(x+len*.12,yb-h*1.6);ctx.lineTo(x+len*.25,yb-h*1.05);ctx.closePath();ctx.fill();
+}
+function pbar(x,y,w,h,p,col){ctx.fillStyle='rgba(0,0,0,.45)';rr(x,y,w,h,h/2);ctx.fill();ctx.fillStyle=col;rr(x,y,Math.max(h,w*clamp(p,0,1)),h,h/2);ctx.fill()}
+function arrow(x,y){const b=Math.sin(T*6)*8;ctx.fillStyle=C.amber;ctx.beginPath();ctx.moveTo(x,y+b);ctx.lineTo(x-16,y-22+b);ctx.lineTo(x+16,y-22+b);ctx.closePath();ctx.fill()}
 
-/* ---------- interfaz ---------- */
-function chipsFor(c){
-  const ch=[];const d=Math.min(S.day,5)-c.stateDay;
-  if(c.state!=='entregado'&&!c.nextWeek)ch.push(`<span class="chip ${d>=2?'bad':d>=1?'warn':''}">${d}d aquí</span>`);
-  if(c.urgent)ch.push('<span class="chip urg">URG</span>');
-  if(c.nextWeek&&c.state!=='entregado')ch.push('<span class="chip info">Lunes</span>');
-  else if(c.state!=='entregado'&&c.state!=='terminado')ch.push(`<span class="chip ${c.promised<Math.min(S.day,5)?'bad':c.promised===S.day?'amber':''}">Promesa ${DS[c.promised]||'Lun'}</span>`);
-  if(c.bay!=null){const done=c.state==='diagnostico'?c.diagDone/c.diagMin:c.repDone/c.repMin;ch.push(`<span class="chip amber">Elev. ${c.bay+1} · ${Math.floor(done*100)}%</span>`)}
-  else if(c.state==='diagnostico')ch.push('<span class="chip warn">Pausado</span>');
-  if(c.state==='reparacion'&&c.bay==null)ch.push('<span class="chip vio">En cola</span>');
-  if(c.state==='aprobacion')ch.push(c.noReply?'<span class="chip bad">No contesta</span>':'<span class="chip">Esperando</span>');
-  if(c.state==='recambio')ch.push(c.partStatus==='need'?'<span class="chip bad">Sin pedir</span>':`<span class="chip info">Llega ${fmtAbs(c.partAt)}</span>`);
-  if(c.state==='terminado')ch.push(c.satSlot!=null?`<span class="chip ok">Cita ${hhmm(c.satSlot)}</span>`:c.called?'<span class="chip ok">Avisado</span>':'<span class="chip">Sin avisar</span>');
-  if(c.rejected)ch.push('<span class="chip">No aceptado</span>');
-  return ch.join('');
-}
-function renderBoard(){
-  $('board').innerHTML=STATES.map(([k,n])=>{
-    let list=S.cars.filter(c=>c.state===k&&(c.inside||k==='entregado'));
-    const total=list.length;let more='';
-    if(k==='entregado'){list=list.slice(-4).reverse();if(total>4)more=`<div class="more">y ${total-4} más esta semana</div>`}
-    return `<div class="col"><h3>${n}<em>${total}</em></h3><div class="cards">${list.map(c=>`<button class="card${S.sel===c.id?' sel':''}${c.nextWeek&&k!=='entregado'?' dim':''}" data-id="${c.id}">
-      <div class="row"><span class="plate">${esc(c.plate)}</span></div>
-      <div class="m">${esc(c.model)} · ${esc(c.client)}</div>
-      <div class="f">${esc(c.diagnosed?fault(c).n:'«'+fault(c).s+'»')}</div>
-      <div class="chips">${chipsFor(c)}</div></button>`).join('')}${more}</div></div>`}).join('');
-}
-function renderDetail(){
-  const c=S.sel!=null?car(S.sel):null;
-  if(!c){$('detail').innerHTML='<p class="empty">Toca un coche en la nave o en la pizarra para ver su orden y qué puedes hacer.</p>';$('selNote').textContent='';return}
-  const f=fault(c);
-  let prog='';
-  if(c.state==='diagnostico'||c.bay!=null&&c.state==='diagnostico')prog=`<div class="bar" aria-label="Progreso del diagnóstico"><i style="width:${Math.min(100,c.diagDone/c.diagMin*100)}%"></i></div>`;
-  if(c.state==='reparacion'&&c.repDone>0)prog=`<div class="bar" aria-label="Progreso de la reparación"><i style="width:${Math.min(100,c.repDone/c.repMin*100)}%"></i></div>`;
-  const acts=[];
-  if(canBay(c)){for(let b=0;b<3;b++)acts.push(`<button class="btn sm" data-a="bay" data-b="${b}" ${S.bays[b]!=null?'disabled':''}>Elevador ${b+1} · ${BAYS[b].mech}</button>`)}
-  if(c.bay!=null)acts.push('<button class="btn sm" data-a="lower">Bajar del elevador</button>');
-  if(c.state==='presupuesto')acts.push(`<button class="btn sm primary" data-a="budget">Enviar presupuesto · ${eur(quote(c))}</button>`);
-  if(c.state==='aprobacion')acts.push(`<button class="btn sm" data-a="call" ${abs()-c.callCool<60?'disabled':''}>Llamar a ${esc(c.client.split(' ')[0])}</button>`);
-  if(c.state==='recambio'&&c.partStatus==='need'){acts.push(`<button class="btn sm" data-a="rey">Reynasa · ${eur(f.parts)} · 1–2 días</button>`);acts.push(`<button class="btn sm" data-a="mig">Repuestos Miguel · ${eur(f.parts*1.15)} · hoy</button>`)}
-  if(c.state==='terminado'&&!c.called&&S.day<5)acts.push('<button class="btn sm primary" data-a="call">Llamar para recogida</button>');
-  if(c.state==='recibido'&&c.bay==null&&!c.nextWeek&&S.day>=3)acts.push('<button class="btn sm" data-a="monday">Recibir y diagnosticar el lunes</button>');
-  $('selNote').textContent=SNAME[c.state];
-  $('detail').innerHTML=`<div class="dhead"><span class="plate">${esc(c.plate)}</span><b>${esc(c.model)}</b>${c.urgent?'<span class="chip urg">URG</span>':''}</div>
-  <dl class="dl"><dt>Cliente</dt><dd>${esc(c.client)}</dd>
-   <dt>Síntoma</dt><dd>«${esc(f.s)}»</dd>
-   <dt>Avería</dt><dd>${c.diagnosed?esc(f.n):'Por diagnosticar ('+f.diag.toFixed(1).replace('.',',')+' h aprox.)'}</dd>
-   ${c.diagnosed?`<dt>Trabajo</dt><dd>${f.rep.toString().replace('.',',')} h · recambio ${f.part==='pedido'?'a pedir':f.part==='stock'?'en stock':'no necesita'}</dd><dt>Presupuesto</dt><dd class="mono">${eur(quote(c))}</dd>`:''}
-   <dt>Promesa</dt><dd>${c.nextWeek?'Semana que viene (avisado)':DAYS[c.promised]}</dd>
-   ${c.bill?`<dt>Facturado</dt><dd class="mono">${eur(c.bill)}</dd>`:''}</dl>
-  ${prog}<div class="actions">${acts.join('')||'<span class="empty" style="color:var(--muted);font-size:13px">Nada que hacer ahora con este coche.</span>'}</div>`;
-}
-$('detail').addEventListener('click',e=>{
-  const b=e.target.closest('[data-a]');if(!b)return;const c=car(S.sel);if(!c)return;
-  ({bay:()=>toBay(c,+b.dataset.b),lower:()=>lower(c),budget:()=>sendBudget(c),call:()=>callClient(c),rey:()=>orderPart(c,'reynasa'),mig:()=>orderPart(c,'miguel'),monday:()=>toMonday(c)})[b.dataset.a]();
-  refresh();
-});
-$('board').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;S.sel=+b.dataset.id;if(S.tut===0)S.tut=1;refresh()});
-
-function critList(){
-  const fin=S.st.finished, ot=fin?Math.round(S.st.onTime/fin*100):null;
-  const st=v=>v===true?'ok':v===false?'fail':'';
-  const c6=fin<3?null:ot>=80;
-  return [
-    ['c1','Ningún coche más de 2 días en la misma columna',true,S.crit.c1===false?false:(S.phase==='end'?true:null),S.stuckSeen.length?`${S.stuckSeen.length} coche${S.stuckSeen.length>1?'s':''} atascado${S.stuckSeen.length>1?'s':''}`:'Se revisa al cerrar cada día'],
-    ['c2','Máximo una urgencia aceptada al día',false,S.crit.c2===false?false:(S.phase==='end'?true:null),`${S.st.urgAcc} aceptada${S.st.urgAcc===1?'':'s'} esta semana`],
-    ['c3','Presupuestos enviados el mismo día del diagnóstico',false,S.crit.c3===false?false:(S.phase==='end'?true:null),S.st.lateBudgets?`${S.st.lateBudgets} enviado${S.st.lateBudgets>1?'s':''} después de las 13:00`:'Antes de las 13:00, el cliente contesta hoy'],
-    ['c4','Corte del jueves hecho y clientes avisados',true,S.crit.c4===true&&S.phase==='end'?S.st.sinAvisar===0:S.crit.c4,S.st.sinAvisar?`${S.st.sinAvisar} cliente${S.st.sinAvisar>1?'s':''} sin avisar`:'Jueves a las 16:00'],
-    ['c5','Sábado: solo entregas y a casa a la 13:00',true,S.phase==='end'?S.st.overtime===0:(S.day===5&&S.st.overtime>0?false:null),S.day===5||S.phase==='end'?`${(S.st.overtime/60).toFixed(1).replace('.',',')} h extra de mecánicos`:'Se evalúa el sábado'],
-    ['c6','Coches terminados a tiempo: 80 % o más',false,S.phase==='end'?(fin?ot>=80:true):c6,ot==null?'Aún no hay coches terminados':`${ot} % a tiempo (${S.st.onTime} de ${fin})`]
-  ].map(([k,t,crit,v,sub])=>({k,t,crit,v,sub,cls:st(v)}));
-}
-function renderCrit(){
-  $('crit').innerHTML=critList().map(c=>`<li class="${c.cls}"><span class="mk" aria-hidden="true">${c.v===true?'✓':c.v===false?'✕':'–'}</span><span>${esc(c.t)}${c.crit?'<span class="tag">crítico</span>':''}<span class="sub">${esc(c.sub)}</span></span></li>`).join('');
-}
-function satisfaction(){const l=S.cars.filter(c=>c.arrivedDay>=0||c.state!=='recibido');if(!l.length)return 100;return Math.round(l.reduce((s,c)=>s+Math.max(0,c.satis),0)/l.length)}
-let lastLog='';
-function refresh(light){
-  $('cDay').textContent=S.day<6?DAYS[Math.min(S.day,5)]:'';
-  $('cTime').textContent=hhmm(S.min);
-  $('kRev').textContent=eur(S.st.rev);
-  $('kOcc').textContent=(S.st.cap?Math.round(S.st.busy/S.st.cap*100):0)+' %';
-  $('kSat').textContent=satisfaction();
-  const stuck=S.cars.filter(c=>c.state!=='entregado'&&!c.nextWeek&&Math.min(S.day,5)-c.stateDay>=2).length;
-  $('kStuck').textContent=stuck;$('kStuck').style.color=stuck?'var(--bad)':'';
-  document.querySelectorAll('.speed button').forEach(b=>b.setAttribute('aria-pressed',String((S.running?S.speed:0)===+b.dataset.s)));
-  if(!light||!$('board').contains(document.activeElement))renderBoard();renderCrit();
-  if(!light||document.activeElement==null||!$('detail').contains(document.activeElement))renderDetail();
-  const key=S.log.length+'|'+(S.log[0]&&S.log[0].m);
-  if(key!==lastLog){lastLog=key;$('log').innerHTML=S.log.slice(0,40).map(l=>`<li><time>${esc(l.t)}</time><span class="${l.c}">${esc(l.m)}</span></li>`).join('')}
-  const h=hint();curHint=h;$('coachMsg').textContent=h.m;
-  const cd=$('coachDo');cd.hidden=!h.act;if(h.act)cd.textContent=h.btn||'Hazlo';
-}
-let curHint=null;
-$('coachDo').addEventListener('click',()=>{if(curHint&&curHint.act){if(curHint.id)S.sel=curHint.id;curHint.act();refresh()}});
-document.querySelector('.speed').addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b||S.phase!=='run')return;const s=+b.dataset.s;if(s===0)S.running=false;else{S.running=true;S.speed=s}refresh()});
-
-/* ---------- nave (canvas) ---------- */
-const cv=$('floor'),cx=cv.getContext('2d');let T={},scale=1,ready=false;
-function readTheme(){const cs=getComputedStyle(document.documentElement);['floor','panel','panel2','line','fg','muted','amber','ok','bad','warn','info','violet','bg'].forEach(k=>T[k]=cs.getPropertyValue('--'+k).trim())}
-function resize(){const r=cv.getBoundingClientRect();if(!r.width)return;const dpr=window.devicePixelRatio||1;cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.width*H/W*dpr);scale=cv.width/W}
-window.addEventListener('resize',resize);
-try{new ResizeObserver(resize).observe(cv)}catch(e){}
-try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readTheme)}catch(e){}
-new MutationObserver(readTheme).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-
-const SLOTS=[];for(let r=0;r<2;r++)for(let i=0;i<7;i++)SLOTS.push([88+i*70,78+r*96]);
-const BAYY=[92,230,368], BAYX=770;
-function animate(dt){
-  const used=new Set();
-  S.cars.forEach(c=>{if(c.inside&&c.bay==null&&!c.leaving&&c.state!=='entregado'&&c.slot>=0&&!used.has(c.slot))used.add(c.slot);else if(!(c.inside&&c.bay==null&&!c.leaving&&c.state!=='entregado'))c.slot=-1;else c.slot=-1});
-  S.cars.forEach(c=>{
-    if(c.state==='entregado'&&!c.leaving)return;
-    if(!c.inside&&c.state!=='entregado'){c.inside=true;c.x=-90;c.y=265}
-    if(c.bay!=null){c.tx=BAYX;c.ty=BAYY[c.bay]}
-    else if(c.leaving){c.tx=-140;c.ty=265}
-    else{ if(c.slot<0){let k=0;while(used.has(k))k++;c.slot=k;used.add(k)}
-      if(c.slot<SLOTS.length){[c.tx,c.ty]=SLOTS[c.slot]}else{c.tx=90+(c.slot-SLOTS.length)*70;c.ty=265} }
-    const k=1-Math.pow(.004,dt);c.x+=(c.tx-c.x)*k;c.y+=(c.ty-c.y)*k;
-    if(c.leaving&&c.x<-120)c.leaving=false;
-  });
-}
-function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
-function hatch(x,y,w,h,col){cx.save();rr(x,y,w,h,0);cx.clip();cx.strokeStyle=col;cx.lineWidth=6;for(let i=-h;i<w+h;i+=16){cx.beginPath();cx.moveTo(x+i,y+h);cx.lineTo(x+i+h,y);cx.stroke()}cx.restore()}
-function label(t,x,y,col,size,font,align){cx.fillStyle=col;cx.font=`${size||12}px ${font||'"Barlow Condensed",Arial'}`;cx.textAlign=align||'left';cx.textBaseline='middle';cx.fillText(t,x,y)}
-function drawCar(c,t){
-  cx.save();cx.translate(c.x,c.y);
-  const sel=S.sel===c.id;
-  if(sel){cx.shadowColor=T.amber;cx.shadowBlur=14}
-  rr(-32,-16,64,32,8);cx.fillStyle=c.color;cx.fill();cx.shadowBlur=0;
-  cx.lineWidth=sel?2.5:1;cx.strokeStyle=sel?T.amber:'rgba(0,0,0,.45)';cx.stroke();
-  cx.fillStyle='rgba(10,20,30,.55)';rr(4,-12,14,24,4);cx.fill();rr(-24,-11,10,22,3);cx.fill();
-  cx.fillStyle='rgba(255,255,255,.18)';rr(-12,-12,14,24,3);cx.fill();
-  // estado
-  const col={recibido:T.info,diagnostico:T.amber,presupuesto:T.warn,aprobacion:T.warn,recambio:T.violet,reparacion:T.amber,terminado:T.ok}[c.state]||T.muted;
-  cx.beginPath();cx.arc(26,-18,5,0,7);cx.fillStyle=col;cx.fill();cx.strokeStyle=T.floor;cx.lineWidth=2;cx.stroke();
-  if(c.urgent){cx.fillStyle=T.bad;rr(-34,-26,26,12,3);cx.fill();label('URG',-21,-20,'#fff',10,'"JetBrains Mono",monospace','center')}
-  // matrícula
-  cx.fillStyle=T.fg;rr(-30,19,60,14,3);cx.fill();
-  label(c.plate,0,26.5,T.bg,10,'"JetBrains Mono",monospace','center');
-  if(c.nextWeek&&c.state!=='entregado'){cx.globalAlpha=.55;cx.fillStyle=T.floor;rr(-32,-16,64,32,8);cx.fill();cx.globalAlpha=1;label('LUNES',0,0,T.fg,12,null,'center')}
-  cx.restore();
-}
-function draw(){
-  if(!T.floor)readTheme();
-  const t=performance.now()/1000;
-  cx.setTransform(scale,0,0,scale,0,0);
-  cx.fillStyle=T.floor;cx.fillRect(0,0,W,H);
-  cx.strokeStyle=T.line;cx.globalAlpha=.35;cx.lineWidth=1;
-  for(let x=0;x<W;x+=40){cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke()}
-  for(let y=0;y<H;y+=40){cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke()}
-  cx.globalAlpha=1;
-  // muros y puerta
-  cx.fillStyle=T.line;cx.fillRect(0,0,6,236);cx.fillRect(0,296,6,H-296);
-  hatch(0,236,10,60,T.amber);
-  label('ENTRADA',16,306,T.muted,12);
-  // campa
-  cx.setLineDash([8,6]);cx.strokeStyle=T.amber;cx.lineWidth=1.5;rr(36,24,516,206,6);cx.stroke();cx.setLineDash([]);
-  label('CAMPA',46,38,T.amber,14);
-  cx.strokeStyle=T.muted;cx.globalAlpha=.45;
-  SLOTS.forEach(([x,y])=>{cx.beginPath();cx.moveTo(x-35,y-24);cx.lineTo(x-35,y+24);cx.moveTo(x+35,y-24);cx.lineTo(x+35,y+24);cx.stroke()});
-  cx.globalAlpha=1;
-  label('ACERA · coches sin sitio en la campa',120,246,T.muted,11);
-  // recepción y entrega
-  cx.fillStyle=T.panel2;rr(36,306,240,140,6);cx.fill();cx.strokeStyle=T.line;cx.stroke();
-  label('RECEPCIÓN · OFICINA',48,322,T.muted,13);
-  cx.fillStyle=T.panel;rr(56,345,120,36,4);cx.fill();cx.strokeStyle=T.line;cx.stroke();label('Mostrador',116,363,T.muted,12,null,'center');
-  cx.fillStyle=T.fg;cx.globalAlpha=.9;rr(190,340,70,48,3);cx.fill();cx.globalAlpha=1;
-  for(let i=0;i<4;i++){cx.fillStyle=[T.info,T.warn,T.violet,T.ok][i];cx.fillRect(196+i*16,348,10,6);cx.fillRect(196+i*16,360,10,6)}
-  label('Pizarra',225,400,T.muted,11,null,'center');
-  label('GDTaller',116,404,T.muted,11,null,'center');
-  hatch(300,306,252,140,T.line);cx.fillStyle=T.floor;rr(318,350,216,52,4);cx.fill();
-  label('ZONA DE ENTREGA',426,376,T.muted,14,null,'center');
-  // separador
-  cx.strokeStyle=T.amber;cx.lineWidth=3;cx.setLineDash([14,10]);cx.beginPath();cx.moveTo(578,14);cx.lineTo(578,H-14);cx.stroke();cx.setLineDash([]);
+function drawShop(){
+  floorGrid(0,0,W,H);
+  // entrada
+  ctx.fillStyle='rgba(0,0,0,.22)';rr(30,70,260,590,14);ctx.fill();
+  hatch(0,70,14,590,C.amber,6);
+  txt('ENTRADA · CLIENTES',50,98,C.muted,18);
+  for(let i=0;i<4;i++){ctx.strokeStyle='rgba(255,255,255,.07)';ctx.setLineDash([8,8]);rr(48,QY[i]-74,224,128,10);ctx.stroke();ctx.setLineDash([])}
   // elevadores
   for(let b=0;b<3;b++){
-    const y=BAYY[b]-62, id=S.bays[b], c=id!=null?car(id):null, free=id==null;
-    const target=S.sel!=null&&free&&canBay(car(S.sel)||{});
-    cx.fillStyle=T.panel2;rr(600,y,344,124,6);cx.fill();
-    cx.lineWidth=target?2:1;cx.strokeStyle=target?T.amber:T.line;cx.stroke();
-    if(target){cx.globalAlpha=.08+.06*Math.sin(t*4);cx.fillStyle=T.amber;rr(600,y,344,124,6);cx.fill();cx.globalAlpha=1}
-    // brazos del elevador
-    cx.fillStyle=T.line;[[704,y+22],[836,y+22],[704,y+102],[836,y+102]].forEach(([px,py])=>{cx.fillRect(px-5,py-5,10,10)});
-    label('ELEVADOR '+(b+1),612,y+14,T.fg,14);
-    label(BAYS[b].mech+(BAYS[b].note?' · '+BAYS[b].note:''),612,y+30,T.muted,12);
-    // mecánico
-    const working=!!c;const bob=working?Math.sin(t*6+b)*2:0;
-    cx.beginPath();cx.arc(650,BAYY[b]+6+bob,12,0,7);cx.fillStyle=working?T.amber:T.muted;cx.fill();
-    label(BAYS[b].mech[0],650,BAYY[b]+6+bob,T.bg,13,null,'center');
-    if(c){
-      const p=c.state==='diagnostico'?c.diagDone/c.diagMin:c.repDone/c.repMin;
-      cx.fillStyle=T.floor;rr(700,y+108,140,8,3);cx.fill();cx.fillStyle=T.amber;rr(700,y+108,140*Math.min(1,p),8,3);cx.fill();
-      label((c.state==='diagnostico'?'Diagnóstico ':'Reparación ')+Math.floor(p*100)+'%',940,y+14,T.amber,13,null,'right');
-    }else label(target?'Toca para subir':'Libre',940,y+14,target?T.amber:T.muted,13,null,'right');
+    const x=BX[b]-BW/2, mine=b===0, j=G.bays[b];
+    const sel=G.sel!=null&&!j&&!(G.first&&!mine);
+    ctx.fillStyle=mine?'rgba(242,179,61,.08)':'rgba(0,0,0,.18)';rr(x,BY,BW,BH,14);ctx.fill();
+    ctx.lineWidth=sel?3:1.5;ctx.strokeStyle=sel?C.amber:mine?'rgba(242,179,61,.5)':C.line;rr(x,BY,BW,BH,14);ctx.stroke();
+    if(sel){ctx.globalAlpha=.08+.06*Math.sin(T*5);ctx.fillStyle=C.amber;rr(x,BY,BW,BH,14);ctx.fill();ctx.globalAlpha=1}
+    ctx.fillStyle='#3a464f';[[x+22,BY+110],[x+BW-22,BY+110],[x+22,BY+BH-110],[x+BW-22,BY+BH-110]].forEach(([px,py])=>{ctx.fillRect(px-9,py-9,18,18)});
+    txt('ELEVADOR '+(b+1),BX[b],BY-46,C.fg,24,DISP,'center');
+    if(mine){ctx.fillStyle=C.amber;rr(BX[b]-26,BY-28,52,22,6);ctx.fill();txt('TÚ',BX[b],BY-17,C.ink,17,DISP,'center')}
+    else txt('Mecánico: '+NPC[b].name,BX[b],BY-17,C.muted,16,BODY,'center');
+    if(j){carTop(j.x,j.y,250,124,j.color,-Math.PI/2);pbar(x+20,BY+BH-30,BW-40,12,j.prog,C.ok);txt(`${Math.ceil((1-j.prog)*NPC[b].min)} min`,BX[b],BY+BH-52,C.muted,15,MONO,'center');
+      ctx.beginPath();ctx.arc(x+30,BY+30,18,0,7);ctx.fillStyle=C.amber;ctx.fill();txt(NPC[b].name[0],x+30,BY+31,C.ink,18,DISP,'center')}
+    else{txt(mine?'Repáralo tú':'Libre',BX[b],BY+BH/2-10,mine?C.amber:C.muted,mine?30:26,DISP,'center');
+      txt(mine?'más dinero · estrellas':`tarda ${NPC[b].min} min · cobra el 70 %`,BX[b],BY+BH/2+22,C.muted,15,BODY,'center')}
   }
-  // coches
-  S.cars.forEach(c=>{if(c.state==='entregado'&&!c.leaving)return;if(c.x<-110)return;drawCar(c,t)});
-  // transición de día
-  if(S.trans>0){const a=Math.min(1,S.trans)*0.85;cx.fillStyle=T.bg;cx.globalAlpha=a;cx.fillRect(0,0,W,H);cx.globalAlpha=Math.min(1,S.trans);label(S.transText,W/2,H/2,T.amber,44,null,'center');cx.globalAlpha=1}
-  if(S.running===false&&S.phase==='run'&&!S.modal&&S.trans<=0){cx.fillStyle=T.bg;cx.globalAlpha=.55;rr(W/2-70,14,140,30,6);cx.fill();cx.globalAlpha=1;label('EN PAUSA',W/2,29,T.fg,15,null,'center')}
+  // salida
+  hatch(380,640,880,60,'rgba(255,255,255,.05)',10);txt('SALIDA',W-40,670,C.muted,16,DISP,'right');
+  // cola
+  G.queue.forEach((c,i)=>{const s=G.sel===c.id||(G.tut===0&&i===0&&Math.sin(T*5)>0);carTop(c.x,c.y,150,72,c.color,0,s);
+    ctx.fillStyle=s?C.amber:C.panel2;rr(c.x-104,c.y-70,208,26,7);ctx.fill();txt('«'+FAULTS[c.fault].sym+'»',c.x,c.y-57,s?C.ink:C.fg,15,BODY,'center');
+    const col=c.pat>.5?C.ok:c.pat>.25?C.amber:C.bad;pbar(c.x-75,c.y+42,150,9,c.pat,col);
+    ctx.fillStyle=C.fg;rr(c.x-38,c.y-10,76,20,4);ctx.fill();txt(c.plate,c.x,c.y+.5,'#101417',12,MONO,'center')});
+  if(G.tut===1)arrow(BX[0],BY+110);
+  if(!G.clockOn&&G.tut<2){ctx.fillStyle='rgba(0,0,0,.4)';rr(W/2-150,40,300,40,8);ctx.fill();txt('Reloj parado: primer coche de prueba',W/2,60,C.fg,17,DISP,'center')}
 }
-cv.addEventListener('click',e=>{
-  if(S.phase!=='run')return;
-  const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;
-  const hit=[...S.cars].reverse().find(c=>c.inside&&c.state!=='entregado'&&Math.abs(c.x-x)<34&&Math.abs(c.y-y)<22);
-  if(hit){S.sel=hit.id;if(S.tut===0)S.tut=1;refresh();return}
-  if(x>600){const b=BAYY.findIndex(by=>Math.abs(by-y)<62);if(b>=0){const id=S.bays[b];if(id!=null){S.sel=id;refresh()}else if(S.sel!=null){toBay(car(S.sel),b)}}}
+function drawPanel(){
+  const R=G.R,x0=900;
+  ctx.fillStyle=C.panel;ctx.fillRect(x0,0,W-x0,H);ctx.fillStyle=C.line;ctx.fillRect(x0,0,2,H);
+  txt('PASO '+(R.step+1)+' DE 6',x0+28,40,C.amber,18);txt(STEPS[Math.min(5,R.step)].toUpperCase(),x0+28,70,C.fg,30);
+  for(let i=0;i<6;i++){ctx.fillStyle=i<R.step?C.ok:i===R.step?C.amber:C.line;rr(x0+28+i*56,94,48,6,3);ctx.fill()}
+  txt('EVALUACIÓN',x0+28,138,C.muted,16);
+  CHECKS.forEach(([k,n,c],i)=>{const y=172+i*44,v=R.k[k];
+    ctx.beginPath();ctx.arc(x0+40,y,11,0,7);ctx.lineWidth=2;ctx.strokeStyle=v===true?C.ok:v===false?C.bad:C.line;ctx.stroke();
+    txt(v===true?'✓':v===false?'✕':'–',x0+40,y+1,v===true?C.ok:v===false?C.bad:C.muted,14,BODY,'center');
+    txt(n,x0+62,y-2,v==null?C.muted:C.fg,15.5,BODY);if(c)txt('CRÍTICO',x0+62,y+16,C.amber,11,BODY)});
+  txt(R.car.plate+' · '+R.f.part,x0+28,H-28,C.muted,15,MONO);
+}
+function drawRepair(){
+  const R=G.R,f=R.f;
+  ctx.save();if(G.shake>0){ctx.translate(rand(-6,6)*G.shake*2,rand(-6,6)*G.shake*2)}
+  floorGrid(0,0,900,H);
+  if(R.step===0){const d=R.drive;
+    ctx.fillStyle='rgba(0,0,0,.2)';rr(250,150,400,420,10);ctx.fill();
+    const ok=Math.abs(d.y-360)<26;
+    ctx.setLineDash([10,8]);ctx.strokeStyle=ok?C.ok:'rgba(92,194,138,.6)';ctx.lineWidth=3;rr(330,360-26-125,240,52+250,10);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(92,194,138,.07)';rr(330,360-26-125,240,52+250,10);ctx.fill();
+    txt('ZONA DE PARADA',450,190,C.ok,16,DISP,'center');
+    [[228,282],[438,492]].forEach(([a,b])=>{[372,528].forEach(px=>{ctx.fillStyle=d.hit>0?C.bad:'#56636c';rr(px-14+(px<450?-22:22),a,28,b-a,4);ctx.fill();hatch(px-14+(px<450?-22:22),a,28,b-a,'rgba(242,179,61,.6)',4)})});
+    carTop(d.x,d.y,250,120,R.car.color,-Math.PI/2);
+    txt(`${Math.abs(Math.round(d.v/10))} km/h`,40,40,C.fg,22,MONO);
+    txt(ok?'EN ZONA':'FUERA DE ZONA',40,72,ok?C.ok:C.muted,18);
+  }
+  if(R.step===1){const s=R.sup;
+    carTop(450,370,480,250,R.car.color,-Math.PI/2);ctx.fillStyle='rgba(16,20,23,.55)';rr(450-125,370-240,250,480,60);ctx.fill();
+    txt('BAJOS DEL COCHE',450,90,C.muted,18,DISP,'center');
+    s.pts.forEach(p=>{const px=450+p.x*1.15,py=370+p.y*1.15,placed=s.placed.includes(p);
+      if(placed){ctx.strokeStyle=C.amber;ctx.lineWidth=14;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(px<450?170:730,py);ctx.lineTo(px,py);ctx.stroke();ctx.lineCap='butt';ctx.fillStyle=C.amber;ctx.beginPath();ctx.arc(px,py,16,0,7);ctx.fill()}
+      else{const pulse=G.first&&p.ok?4*Math.sin(T*6):0;ctx.beginPath();ctx.arc(px,py,20+pulse,0,7);ctx.fillStyle=p.wrong?'rgba(255,107,94,.35)':'rgba(255,255,255,.1)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=p.wrong?C.bad:C.muted;ctx.stroke();
+        if(p.ok){ctx.fillStyle=C.amber;ctx.beginPath();ctx.moveTo(px,py-10);ctx.lineTo(px-10,py+8);ctx.lineTo(px+10,py+8);ctx.closePath();ctx.fill()}}});
+    ctx.fillStyle=C.amber;ctx.beginPath();ctx.moveTo(60,650);ctx.lineTo(50,668);ctx.lineTo(70,668);ctx.closePath();ctx.fill();txt('= punto de elevación reforzado',82,660,C.fg,17,BODY);
+  }
+  if(R.step===2||R.step===5){const l=R.lift,ground=600,py=ground-l.h*170;
+    ctx.fillStyle='#2b343b';ctx.fillRect(0,ground,900,H-ground);hatch(0,ground,900,8,C.amber,4);
+    ctx.fillStyle='#4b5760';ctx.fillRect(120,240,34,ground-240);ctx.fillRect(626,240,34,ground-240);
+    ctx.fillStyle=C.amber;ctx.fillRect(150,py-6,110,10);ctx.fillRect(520,py-6,110,10);ctx.fillRect(136,py-16,22,26);ctx.fillRect(622,py-16,22,26);
+    carSide(390,py-10,460,R.car.color);
+    if(R.step===5&&R.low.box){ctx.fillStyle='#b8322a';rr(R.low.boxX-55,ground-58,110,58,6);ctx.fill();ctx.fillStyle='#7d1f19';ctx.fillRect(R.low.boxX-55,ground-40,110,6);ctx.fillStyle='#d7d7d7';ctx.fillRect(R.low.boxX-14,ground-68,28,10);
+      if(R.low.unlocked){ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.setLineDash([6,5]);rr(R.low.boxX-66,ground-80,132,86,8);ctx.stroke();ctx.setLineDash([])}}
+    if(R.low&&R.low.crushed&&R.step===5){ctx.fillStyle='#7d1f19';rr(R.low.boxX-62,ground-14,124,14,3);ctx.fill()}
+    // medidor
+    const gx=780,gy=110,gh=470;ctx.fillStyle=C.panel2;rr(gx-30,gy-30,120,gh+70,10);ctx.fill();
+    const Y=h=>gy+gh-h/2*gh;
+    ctx.fillStyle='rgba(92,194,138,.3)';ctx.fillRect(gx,Y(1.85),40,Y(1.55)-Y(1.85));
+    ctx.fillStyle='rgba(242,179,61,.45)';ctx.fillRect(gx,Y(.36),40,Y(.1)-Y(.36));
+    ctx.strokeStyle=C.line;ctx.lineWidth=2;ctx.strokeRect(gx,gy,40,gh);
+    for(let h=0;h<=2.001;h+=.5){txt(h.toFixed(1).replace('.',',')+' m',gx+46,Y(h),C.muted,12,MONO)}
+    txt('20 cm',gx-6,Y(.23),C.amber,13,DISP,'right');txt('trabajo',gx-6,Y(1.7),C.ok,13,DISP,'right');
+    ctx.fillStyle=C.fg;ctx.beginPath();ctx.moveTo(gx-4,Y(l.h));ctx.lineTo(gx-16,Y(l.h)-8);ctx.lineTo(gx-16,Y(l.h)+8);ctx.closePath();ctx.fill();ctx.fillRect(gx,Y(l.h)-1.5,40,3);
+    txt((l.h).toFixed(2).replace('.',',')+' m',gx+20,gy-12,C.fg,16,MONO,'center');
+    txt(l.locked?'SEGURO PUESTO':'SEGURO QUITADO',40,40,l.locked?C.ok:C.amber,20);
+  }
+  if(R.step===3){
+    ctx.fillStyle='#0d1114';rr(110,70,690,400,18);ctx.fill();ctx.strokeStyle='#3d4a54';ctx.lineWidth=3;ctx.stroke();
+    ctx.fillStyle='#14231c';rr(140,100,630,340,8);ctx.fill();
+    txt(f.tool.toUpperCase(),170,135,'#7fe0a4',22,MONO);
+    txt('Síntoma: «'+f.sym+'»',170,180,'#b8f0cc',18,MONO);
+    wrap(f.read,170,250,590,44,'#e9fff0',32,MONO);
+    txt('Correcto: '+f.ref,170,395,'#7fe0a4',17,MONO);
+    for(let i=0;i<3;i++){const bx=110+i*235,by=520,wr=R.diag.wrong===i;ctx.fillStyle=wr?'rgba(255,107,94,.2)':C.panel2;rr(bx,by,220,86,10);ctx.fill();ctx.lineWidth=2;ctx.strokeStyle=wr?C.bad:C.line;ctx.stroke();wrap(f.opts[i],bx+110,by+(f.opts[i].length>20?30:43),190,24,C.fg,18,BODY,'center')}
+  }
+  if(R.step===4){const r=R.rep;
+    ctx.beginPath();ctx.arc(450,380,190,0,7);ctx.fillStyle='#3a444c';ctx.fill();ctx.beginPath();ctx.arc(450,380,70,0,7);ctx.fillStyle='#2a3238';ctx.fill();
+    txt(f.part.toUpperCase(),450,380,C.muted,18,DISP,'center');
+    const want=r.last<0?(G.first?0:-1):(r.last+2)%5;
+    for(let i=0;i<5;i++){const [bx,by]=boltPos(i);const out=r.phase!=='loosen'&&!r.done.includes(i)&&r.phase!=='done';
+      const loose=r.order.includes(i)&&r.phase==='loosen';
+      ctx.beginPath();for(let k=0;k<6;k++){const a=k*Math.PI/3;ctx.lineTo(bx+Math.cos(a)*24,by+Math.sin(a)*24)}ctx.closePath();
+      ctx.fillStyle=r.bad.includes(i)?C.bad:r.done.includes(i)?C.ok:(loose||out)?'#20262b':'#a9b2b9';ctx.fill();
+      if(r.cur===i){ctx.lineWidth=4;ctx.strokeStyle=C.amber;ctx.stroke()}
+      if(G.first&&want===i&&r.cur<0&&r.phase!=='swap'){ctx.beginPath();ctx.arc(bx,by,34+3*Math.sin(T*6),0,7);ctx.strokeStyle=C.amber;ctx.lineWidth=3;ctx.stroke()}}
+    if(r.phase==='swap'){pbar(250,640,400,16,r.hold/1.6,C.amber);txt('Cambiando: '+f.part,450,612,C.fg,18,BODY,'center')}
+    // llave dinamométrica
+    if(r.phase==='tighten'){const cx0=780,cy0=470,rad=90,max=f.hi*1.35,ang=v=>Math.PI*.8+(v/max)*Math.PI*1.4;
+      ctx.lineWidth=16;ctx.strokeStyle='#2a3238';ctx.beginPath();ctx.arc(cx0,cy0,rad,ang(0),ang(max));ctx.stroke();
+      ctx.strokeStyle=C.ok;ctx.beginPath();ctx.arc(cx0,cy0,rad,ang(f.lo),ang(f.hi));ctx.stroke();
+      ctx.strokeStyle=C.bad;ctx.beginPath();ctx.arc(cx0,cy0,rad,ang(f.hi),ang(max));ctx.stroke();
+      const a=ang(r.tq);ctx.strokeStyle=C.fg;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx0,cy0);ctx.lineTo(cx0+Math.cos(a)*(rad-4),cy0+Math.sin(a)*(rad-4));ctx.stroke();
+      txt(Math.round(r.tq)+' Nm',cx0,cy0+36,C.fg,24,MONO,'center');txt(f.lo+'–'+f.hi+' Nm',cx0,cy0+64,C.ok,15,MONO,'center');txt('LLAVE DINAMOMÉTRICA',cx0,cy0-rad-24,C.muted,14,DISP,'center')}
+  }
+  ctx.restore();
+  drawPanel();
+}
+function drawFX(dt){
+  G.floats=G.floats.filter(f=>(f.life-=dt)>0);G.floats.forEach(f=>{ctx.globalAlpha=Math.min(1,f.life);txt(f.t,f.x,f.y-(1.6-f.life)*60,f.col,34,DISP,'center');ctx.globalAlpha=1});
+  if(G.toast){G.toast.life-=dt;if(G.toast.life<=0)G.toast=null;else{ctx.globalAlpha=Math.min(1,G.toast.life);ctx.font=`17px ${BODY}`;const w=ctx.measureText(G.toast.t).width+36;ctx.fillStyle=G.toast.cls==='bad'?'#5a1f1b':C.panel2;rr(W/2-w/2,H-70,w,40,8);ctx.fill();txt(G.toast.t,W/2,H-50,C.fg,17,BODY,'center');ctx.globalAlpha=1}}
+  if(G.paused){ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(0,0,W,H);txt('EN PAUSA',W/2,H/2,C.fg,60,DISP,'center')}
+  if(G.phase==='repair'&&G.clockOn){const w=G.queue.length;if(w){const low=G.queue.reduce((m,c)=>Math.min(m,c.pat),1);ctx.fillStyle=low<.3?'rgba(255,107,94,.9)':'rgba(36,45,52,.92)';rr(20,H-56,300,38,8);ctx.fill();txt(`${w} esperando fuera${low<.3?' · ¡date prisa!':''}`,36,H-37,C.fg,16,BODY)}}
+}
+
+/* ---------- bucle ---------- */
+let last=performance.now(),hudT=0;
+function frame(now){
+  const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;G.shake=Math.max(0,G.shake-dt);
+  const modal=!$('ov').hidden;
+  if(!modal&&!G.paused){
+    if(G.phase==='shop'||G.phase==='repair')shopUpdate(dt);
+    if(G.phase==='repair'&&G.R)repairUpdate(dt);
+  } else takeAct();
+  ctx.setTransform(scale,0,0,scale,0,0);
+  if(G.phase==='repair'&&G.R)drawRepair();else drawShop();
+  drawFX(dt);
+  hudT+=dt;if(hudT>.2){hudT=0;hud();if(G.phase==='shop')shopHint()}
+  requestAnimationFrame(frame);
+}
+function hud(){
+  $('hClock').textContent=hhmm(G.min);$('hMoney').textContent=eur(G.money);
+  const avg=G.stars.length?G.stars.reduce((a,b)=>a+b,0)/G.stars.length:null;$('hStars').textContent=avg==null?'–':avg.toFixed(1).replace('.',',')+' ★';
+  $('hWait').textContent=G.queue.length;$('hWaitBox').classList.toggle('warn',G.queue.some(c=>c.pat<.3));
+}
+cv.addEventListener('pointerdown',e=>{
+  audio();const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;
+  if(G.paused||!$('ov').hidden)return;
+  if(G.phase==='shop')shopClick(x,y);else if(G.phase==='repair')repairClick(x,y);
 });
+$('bPause').addEventListener('click',()=>{G.paused=!G.paused;$('bPause').setAttribute('aria-pressed',String(G.paused));$('bPause').textContent=G.paused?'Seguir':'Pausa';setHum(false)});
+$('bSound').addEventListener('click',()=>{soundOn=!soundOn;$('bSound').setAttribute('aria-pressed',String(soundOn));$('bSound').textContent='Sonido: '+(soundOn?'sí':'no');if(!soundOn)setHum(false);else{audio();sfx.click()}});
 
-/* ---------- inicio y final ---------- */
-function intro(){
-  openModal({eyebrow:'Simulador · gemelo digital de un taller',title:'Una semana en el taller. El sábado, a casa a la una.',
-    body:`<p>Eres el jefe de taller. Entran coches con citas, urgencias de José y trabajo de la semana pasada. Tienes tres elevadores y tres mecánicos que no trabajan al mismo ritmo. Dos proveedores: Reynasa (barato, 1–2 días) y Repuestos Miguel (llega hoy, un 15 % más caro).</p>
-    <div class="rules">
-      <div class="rule"><b>Pizarra</b><span>Cada coche pasa por 8 columnas. Si lleva más de 2 días en una, se ve en rojo.</span></div>
-      <div class="rule"><b>Antes de las 13:00</b><span>Presupuesto enviado por la mañana, respuesta hoy. Por la tarde, mañana.</span></div>
-      <div class="rule"><b>Una urgencia al día</b><span>Cada coche que se cuela retrasa a otro. Colarlo es una decisión consciente.</span></div>
-      <div class="rule"><b>Corte del jueves</b><span>A las 16:00 decides qué se termina y a quién avisas para el lunes.</span></div>
-    </div>
-    <p>Cómo se juega: toca un coche en la nave o en la pizarra y después un elevador libre. Ana, la encargada, te sugiere el siguiente paso y puede hacerlo por ti. Una semana dura unos 4 minutos a 4×.</p>`,
-    buttons:[{label:'Abrir el taller · Lunes 08:00',primary:true,fn:()=>{S.phase='run';S.running=true;S.speed=2;S.trans=1.4;S.transText='Lunes · 08:00'}}]});
-}
-function endWeek(){
-  S.phase='end';S.running=false;
-  const cl=critList();
-  const pts={c1:15,c2:10,c3:10,c4:15,c5:15,c6:10};
-  let score=cl.reduce((s,c)=>s+(c.v!==false?pts[c.k]:0),0)+Math.round(satisfaction()*.25);
-  const grade=score>=85?['A','Taller bajo control']:score>=65?['B','Va por buen camino']:score>=45?['C','Sábado en riesgo']:['D','Semana de caos'];
-  const leave=SAT_OPEN+Math.max(240,0)+(S.st.overtime>0?Math.max(0,S.min-SAT_CLOSE):0);
-  const fin=S.st.finished;
-  openModal({eyebrow:'Sábado '+hhmm(S.min)+' · fin de la semana',title:S.st.overtime===0?'Sábado libre a la una':'Sábado con horas extra',
-    body:`<div class="grade"><div class="big">${grade[0]}</div><div><div class="lbl">${grade[1]}</div><div style="color:var(--muted)">${score} de 100 puntos</div></div></div>
-    <div class="stats">
-      <div class="stat"><b>${eur(S.st.rev)}</b><span>Facturado</span></div>
-      <div class="stat"><b>${S.st.delivered}</b><span>Coches entregados</span></div>
-      <div class="stat"><b>${fin?Math.round(S.st.onTime/fin*100):0} %</b><span>A tiempo</span></div>
-      <div class="stat"><b>${S.st.cap?Math.round(S.st.busy/S.st.cap*100):0} %</b><span>Ocupación</span></div>
-      <div class="stat"><b>${(S.st.overtime/60).toFixed(1).replace('.',',')} h</b><span>Horas extra</span></div>
-      <div class="stat"><b>${satisfaction()}</b><span>Satisfacción</span></div>
-    </div>
-    <ul class="crit" style="padding:0">${cl.map(c=>`<li class="${c.v===false?'fail':'ok'}"><span class="mk" aria-hidden="true">${c.v===false?'✕':'✓'}</span><span>${esc(c.t)}${c.crit?'<span class="tag">crítico</span>':''}<span class="sub">${esc(c.sub)}</span></span></li>`).join('')}</ul>
-    <p style="color:var(--muted);font-size:12.5px">${S.st.sinCita?`${S.st.sinCita} cliente${S.st.sinCita>1?'s':''} vino sin cita el sábado. `:''}${S.st.overtime>0?'Lo que se promete el jueves y no se termina el viernes acaba en sábado: avisa antes.':'El corte del jueves funcionó: lo que no llegaba se avisó a tiempo.'}</p>`,
-    buttons:[{label:'Revisar la pizarra',fn:()=>{}},{label:'Jugar otra semana',primary:true,fn:()=>{newGame((Math.random()*1e9)|0);S.sel=null;intro();refresh()}}]});
-  refresh();
-}
-
-/* ---------- arranque (con recarga en caliente) ---------- */
-function start(data){
-  if(data&&data.S){S=data.S;R=mulberry((S.seed+S.nid*7919)|0);S.modal=false;if(S.phase==='intro')intro()}
-  else{newGame((Math.random()*1e9)|0);intro()}
-  readTheme();resize();refresh();requestAnimationFrame(frame);
-}
-try{window.claude?.hot?.snapshot(()=>({S}))}catch(e){}
-window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+/* ---------- inicio ---------- */
+newShift();
+openModal({eyebrow:'Simulador de taller · turno de mañana',title:'Tú llevas el taller y el elevador 1',
+  body:`<p>Llegan clientes con averías. Decide quién repara cada coche y, en tu elevador, <b>hazlo tú con tus manos</b>: mételo, súbelo, diagnostica y aprieta. Igual que en un taller de verdad, se evalúa la seguridad.</p>
+  <div class="how"><div><b>1 · Reparte</b>Toca un coche y luego un elevador.</div><div><b>2 · Repara</b>6 pasos guiados, con nota y estrellas.</div><div><b>3 · No hagas esperar</b>Si se acaba la paciencia, el cliente se va.</div></div>
+  <p style="color:var(--muted);font-size:13.5px">Mandos: <kbd>▲</kbd><kbd>▼</kbd><kbd>◀</kbd><kbd>▶</kbd> o WASD y <kbd>Espacio</kbd>. En el móvil, botones en pantalla. El turno dura unos 6 minutos.</p>`,
+  buttons:[{label:'Empezar turno',primary:true,fn:()=>{audio();sfx.ok()}}]});
+resize();hud();requestAnimationFrame(frame);
 })();
 </script>
 </body>

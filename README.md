@@ -1,27 +1,25 @@
 # Taller Twin
 
-Gemelo digital jugable de un taller mecánico. Eres el jefe de taller durante una semana y el objetivo es claro: que el sábado solo haya entregas con cita y a la una, a casa.
+Juego de taller con dos capas. Fuera, llevas el taller: llegan clientes con averías y cada uno tiene una barra de paciencia; decides qué coche va a cada elevador. Dentro, en tu elevador, reparas el coche con tus manos, con pasos de seguridad evaluados como en un simulador de formación profesional.
 
 **Jugar:** https://zitroolrac.github.io/taller-twin/
 
-![Vista de la nave con la campa y los tres elevadores](preview.webp)
+![Subiendo un coche al elevador con la parada de comprobación](preview.webp)
 
-## Qué simula
+## Los 6 pasos de cada reparación
 
-- **Pizarra de 8 estados**: recibido, diagnóstico, pendiente de presupuesto, esperando aprobación, esperando recambio, en reparación, terminado y entregado. Un coche que pasa más de 2 días en la misma columna se marca en rojo.
-- **Tres elevadores y tres mecánicos** con distinto rendimiento.
-- **Presupuestos**: si salen antes de las 13:00 el cliente contesta ese día; si no, al día siguiente. Algunos clientes no contestan hasta que les llamas.
-- **Dos proveedores**: Reynasa (más barato, 1–2 días) y Repuestos Miguel (llega en el día, un 15 % más caro).
-- **Urgencias** que piden un hueco. La regla es una al día como máximo.
-- **Corte del jueves**: a las 16:00 decides qué se termina esta semana y a qué clientes avisas para el lunes.
-- **Llamadas del viernes** para dar franjas de recogida el sábado.
-- **Evaluación final** con criterios críticos, facturación, puntualidad, ocupación, horas extra y satisfacción.
+1. **Entrar al elevador**: conduces despacio y centrado, sin golpear las columnas, y frenas dentro de la zona.
+2. **Brazos del elevador**: solo en los puntos de elevación reforzados del chasis.
+3. **Subir el coche**: parada de comprobación a 20 cm, altura de trabajo y seguro mecánico.
+4. **Diagnóstico**: lees la medida (multímetro, escáner OBD, manómetro…) y la comparas con el valor correcto.
+5. **Reparación**: aflojas y aprietas en estrella con la llave dinamométrica, dentro del par del fabricante.
+6. **Bajar y entregar**: quitas el seguro y despejas la zona antes de bajar.
+
+Cada paso crítico mal hecho quita estrellas y dinero. Los coches que pasas a los mecánicos Luis y Andrés tardan más y cobran menos, pero te liberan.
 
 ## Cómo está hecho
 
-Simulación por eventos discretos en JavaScript puro, sin dependencias: un reloj de jornada laboral, una cola de eventos (llegadas, respuestas de clientes, recambios, recogidas) y un motor de reglas que evalúa la semana. La nave se dibuja en Canvas 2D y la pizarra se genera a partir del mismo estado. Las reglas salen de un plan real de organización de un taller.
-
-Todo está en un único `index.html`.
+JavaScript puro y Canvas 2D, sin dependencias, en un único `index.html`: bucle de juego con reloj de turno, cola de clientes con paciencia, mecánicos que trabajan en paralelo, máquina de estados para los 6 pasos, evaluación por criterios, sonido con Web Audio y mandos de teclado y táctiles.
 
 ## Autor
 
