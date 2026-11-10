@@ -1,37 +1,26 @@
 # Taller Twin
 
-Juego de taller con dos capas. Fuera, llevas el taller: llegan clientes y cada uno tiene una barra de paciencia; decides qué coche va a cada elevador. Dentro, en tu elevador, **investigas qué le pasa al coche** y lo reparas con tus manos, con pasos de seguridad evaluados como en un simulador de formación profesional.
+Simulador de diagnóstico de averías. Una jornada de 8 coches: el cliente solo cuenta lo que nota («hace un ruido raro», «le cuesta arrancar», «echa humo») y tú tienes que descubrir **todo** lo que tiene el coche, como en un taller de verdad.
 
 **Jugar:** https://zitroolrac.github.io/taller-twin/
 
-![Subiendo un coche al elevador con la parada de comprobación](preview.webp)
+![Cuadro de instrumentos con el testigo de temperatura encendido](preview.webp)
 
-## El coche no te dice lo que tiene
+## Las pruebas
 
-El cliente solo cuenta lo que nota («hace un ruido raro», «le cuesta arrancar»). Cada coche tiene una o varias averías ocultas y tienes que encontrarlas todas:
+- **En el suelo:** arrancar con la llave (arranque lento, solo «clic», ralentí que tiembla), acelerar (chillido de correa, escape como un tractor, tirones), frenar (chirrido, vibración, pedal esponjoso), girar el volante («clonc», «clac-clac», gemido de la dirección), cuadro de instrumentos con testigos, humo del escape (azul, blanco o negro), empujar la carrocería, presión y desgaste del neumático, faros y escáner OBD.
+- **Bajo el capó:** batería con multímetro (parado y en marcha), varilla del aceite (nivel y color), depósitos de refrigerante, líquido de frenos y de dirección, correa, filtro de aire, bujía, manguitos y olor.
+- **Por debajo:** pastillas y discos, amortiguador, escape, rótulas, fuelles de la transmisión y gotas en el suelo según su color.
 
-- **En el suelo:** acelerar y escuchar (la correa chilla), pisar el freno (las pastillas rechinan, el pedal esponjoso delata falta de líquido), girar el volante (la rótula hace clonc), empujar la carrocería (un amortiguador gastado rebota), abrir el capó (varilla del aceite, depósitos de refrigerante y de líquido de frenos, batería con multímetro, correa), oler y conectar el escáner OBD.
-- **Por debajo:** grosor de las pastillas, amortiguador que rezuma, holgura de la rueda y gotas en el suelo según su color.
+## 22 averías
 
-Cada prueba se apunta en una libreta. Al final firmas un informe con todas las averías: si te dejas una, el coche se va roto; si marcas algo que está bien, cambias una pieza sin necesidad.
+Frenos (pastillas, discos alabeados, falta de líquido), motor (bujía o bobina, filtro de aire, junta de culata, segmentos, fuga de aceite, correa), electricidad (batería, alternador, motor de arranque, sonda lambda), refrigeración (manguito con fuga), suspensión y dirección (amortiguador, rótula, homocinética, bomba de dirección), escape roto y ruedas y luces (pinchazo, alineación, faro fundido).
 
-## Los 7 pasos de cada coche
-
-1. **Entrar al elevador:** el coche entra solo y pones el freno de mano.
-2. **Inspección en el suelo.**
-3. **Brazos del elevador:** solo en los puntos de elevación reforzados del chasis.
-4. **Subir el coche:** parada de comprobación a 20 cm, altura de trabajo y seguro mecánico.
-5. **Mirar por debajo** y firmar el informe.
-6. **Reparación:** piezas con apriete en estrella y llave dinamométrica, y líquidos rellenados entre MIN y MAX.
-7. **Bajar y entregar:** quitar el seguro y despejar la zona antes de bajar.
-
-## Mandos
-
-Todo se juega tocando las cosas del taller con el ratón o el dedo: pedales y volante, capó, depósitos, botonera del elevador, candado, rueda, tornillos y botella. Con sonido: muchas averías se oyen.
+Desde el tercer coche puede haber dos averías a la vez, y hay falsas alarmas: las gotas transparentes sin olor son agua del aire acondicionado y no son avería. Al firmar el informe, el juego te explica qué pistas delataban cada avería.
 
 ## Cómo está hecho
 
-JavaScript puro y Canvas 2D, sin dependencias, en un único `index.html`: bucle de juego con reloj de turno, cola de clientes con paciencia, mecánicos que trabajan en paralelo, generador de averías con sus pistas, máquina de estados para los 7 pasos, evaluación por criterios, sonido sintetizado con Web Audio (motor, chillido de correa, chirrido de frenos) y mandos táctiles.
+JavaScript puro y Canvas 2D, sin dependencias, en un único `index.html`: modelo de averías con un resultado normal para cada prueba y modificadores por avería, combinación de varias averías, partículas (humo, vapor, gotas), sonido sintetizado con Web Audio (motor, arranque, correa, frenos, dirección, escape) y mandos táctiles de pulsación sostenida.
 
 ## Autor
 
