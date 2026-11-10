@@ -17,6 +17,10 @@ Juego de taller con dos capas. Fuera, llevas el taller: llegan clientes con aver
 
 Cada paso crítico mal hecho quita estrellas y dinero. Los coches que pasas a los mecánicos Luis y Andrés tardan más y cobran menos, pero te liberan.
 
+## Mandos
+
+Todo se juega con el ratón o el dedo, manteniendo pulsado: sobre la pista para conducir, en Subir y Bajar para mover el elevador, sobre la pieza para cambiarla y sobre cada tornillo para apretarlo con la llave dinamométrica. También funciona con teclado (flechas y Espacio).
+
 ## Cómo está hecho
 
 JavaScript puro y Canvas 2D, sin dependencias, en un único `index.html`: bucle de juego con reloj de turno, cola de clientes con paciencia, mecánicos que trabajan en paralelo, máquina de estados para los 6 pasos, evaluación por criterios, sonido con Web Audio y mandos de teclado y táctiles.
