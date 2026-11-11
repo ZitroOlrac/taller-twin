@@ -22,7 +22,7 @@ Simulador de diagnóstico de averías. Una jornada de 8 coches: el cliente solo 
 
 Frenos (pastillas, discos alabeados, falta de líquido), motor (bujía o bobina, filtro de aire, junta de culata, segmentos, fugas de aceite, correa, EGR, fuga de vacío, bomba de gasolina, caudalímetro, inyector, cuerpo de mariposa, turbo, calentadores, embrague), sensores (cigüeñal, árbol de levas, distribución variable, MAP, picado, temperatura del refrigerante, sonda lambda), escape (catalizador, filtro de partículas, escape roto), electricidad (batería, alternador, motor de arranque), refrigeración (manguito, termostato, ventilador), suspensión y dirección (amortiguador, muelle, bieleta, rótula, homocinética, rodamiento, bomba de dirección, EPS), ruedas (pinchazo, llanta, alineación, desgaste, pila del sensor TPMS), ABS y airbag, climatización (falta de gas, compresor, trampilla de mezcla, sensor de temperatura interior) y luces y fusibles.
 
-Desde el tercer coche puede haber dos averías a la vez, y hay falsas alarmas: las gotas transparentes sin olor son agua del aire acondicionado y no son avería. Al firmar el informe, el juego te explica qué pistas delataban cada avería.
+Cada coche tiene varias averías a la vez: 2 en los primeros, 2 o 3 en los del medio y 3 o 4 al final del día, y hay falsas alarmas: las gotas transparentes sin olor son agua del aire acondicionado y no son avería. Al firmar el informe, el juego te explica qué pistas delataban cada avería.
 
 ## Cómo está hecho
 

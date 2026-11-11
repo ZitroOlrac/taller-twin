@@ -272,8 +272,8 @@ function rollCase(n){
     engine:pick(fuel==='diésel'?['1.6 TDI','2.0 TDI','1.5 dCi','1.6 HDi']:turbo?['1.0 TSI','1.2 PureTech','1.5 TSI','1.4 T-Jet']:['1.2','1.4','1.6 16V','2.0'])};
   const ok=k=>!FAULTS[k].req||FAULTS[k].req(cfg),pool=FKEYS.filter(ok);
   const f=[pick(n<=2?['pastillas','correa','bateria','amortiguador','manguito','faro'].filter(ok):pool)];
-  const p2=n<=2?0:n<=5?.5:.8;
-  if(Math.random()<p2){const g=FAULTS[f[0]].g;f.push(pick(pool.filter(k=>FAULTS[k].g!==g)))}
+  const want=n<=2?2:n<=5?pick([2,3,3]):pick([3,4,4]);
+  while(f.length<want){const used=f.map(k=>FAULTS[k].g),cand=pool.filter(k=>!used.includes(FAULTS[k].g));if(!cand.length)break;f.push(pick(cand))}
   const loc={};f.forEach(k=>{const L=FAULTS[k].loc;if(L)loc[k]=pick(L==='front'?['DI','DD']:['DI','DD','TI','TD'])});
   const water=!f.some(k=>FAULTS[k].fx.drip)&&Math.random()<.4;
   let fuse=null;if(f.includes('fusible'))fuse=f.includes('luzfreno')?'F7':pick(['F7','F5']);
